@@ -38,4 +38,10 @@ public sealed class PromptTextTests
     {
         Assert.Equal("Undertake supply missions.", PromptText.Normalize(" Undertake\r\n supply\u200B  missions. "));
     }
+
+    [Fact]
+    public void NormalizeDropsTheGamesIconGlyphs()
+    {
+        Assert.Equal("Maple Lumber", PromptText.Normalize("\uE000Maple Lumber \uE03C\uF8FF"));
+    }
 }

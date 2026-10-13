@@ -13,8 +13,9 @@ internal static unsafe class HandInReads
 
     public static int Seals(byte grandCompany) => (int)InventoryManager.Instance()->GetCompanySeals(grandCompany);
 
-    public static string ItemName(uint itemId)
-        => Svc.Data.GetExcelSheet<Item>().GetRowOrDefault(itemId)?.Name.ExtractText() is { Length: > 0 } name ? name : $"item {itemId}";
+    public static string ItemName(uint itemId) => SheetItemName(itemId) is { Length: > 0 } name ? name : $"item {itemId}";
+
+    public static string SheetItemName(uint itemId) => Svc.Data.GetExcelSheet<Item>().GetRowOrDefault(itemId)?.Name.ExtractText() ?? string.Empty;
 
     public static string ClassName(byte classJobId)
         => Svc.Data.GetExcelSheet<ClassJob>().GetRowOrDefault(classJobId)?.Abbreviation.ExtractText() is { Length: > 0 } name ? name : $"class {classJobId}";

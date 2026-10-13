@@ -9,6 +9,7 @@ namespace AutoGcSupply.Core.HandIn;
 internal sealed partial class HandInDriver
 {
     private const int RewardOpenTimeoutMs = 10_000;
+    private const int RewardReadTimeoutMs = 2_000;
     private const int DeliverEnableTimeoutMs = 3_000;
     private const int VerifyTimeoutMs = 10_000;
     private const int RowCloseTimeoutMs = 10_000;
@@ -50,6 +51,11 @@ internal sealed partial class HandInDriver
         }
 
         var halt = await AwaitRewardWindow(target);
+        if (!Interrupted(halt))
+        {
+            halt = await ConfirmRewardWindow(target);
+        }
+
         if (!Interrupted(halt))
         {
             halt = await PressDeliver(target);
@@ -101,6 +107,30 @@ internal sealed partial class HandInDriver
         }
 
         return new Halt(HandInPauseReason.RewardWindowDidNotOpen, $"no reward window within {RewardOpenTimeoutMs / TimeUnits.MillisecondsPerSecond}s for {HandInReads.Describe(target)}");
+    }
+
+    private async Task<Halt> ConfirmRewardWindow(HandInTarget target)
+    {
+        if (!await WaitUntilTimed(RewardWindowReader.Readable, RewardReadTimeoutMs, "hand-in-reward-readable", 1) && CancelToken.IsCancellationRequested)
+        {
+            return Halt.None;
+        }
+
+        var shown = RewardWindowReader.Read();
+        var expectedName = HandInReads.SheetItemName(target.ItemId);
+        Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}");
+        var verdict = RewardWindowCheck.Judge(shown, expectedName, target);
+        if (verdict == RewardWindowVerdict.Matches)
+        {
+            return Halt.None;
+        }
+
+        var detail = verdict == RewardWindowVerdict.Unreadable
+            ? $"the reward window for {HandInReads.Describe(target)} could not be read"
+            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {target.SealReward} seals";
+        Warn($"Hand-in: {detail} ({verdict}); cancelling it");
+        await OfficerWindows.CloseReward(cancelled);
+        return new Halt(HandInPauseReason.RewardWindowMismatch, detail);
     }
 
     private async Task<Halt> PressDeliver(HandInTarget target)

@@ -16,6 +16,7 @@ internal enum HandInPauseReason : byte
     UnexpectedAddon,
     HighQualityPromptForNormalRow,
     RewardWindowDidNotOpen,
+    RewardWindowMismatch,
     DeliverButtonDisabled,
     DeliveryNotConfirmed,
     ListNotRefreshed,

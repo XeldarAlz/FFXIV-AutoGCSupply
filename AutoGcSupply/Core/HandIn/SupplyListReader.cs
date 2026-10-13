@@ -2,7 +2,6 @@ using AutoGcSupply.Core.HandIn.Model;
 using ECommons;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Text;
 
 namespace AutoGcSupply.Core.HandIn;
@@ -11,7 +10,6 @@ internal static unsafe class SupplyListReader
 {
     public const string AddonName = "GrandCompanySupplyList";
 
-    private const int UnreadableValue = -1;
     private const int LoadedMarkerIndex = 0;
     private const int LoadedMarker = 2;
     private const int TabIndex = 5;
@@ -44,17 +42,17 @@ internal static unsafe class SupplyListReader
         var unit = &list->AtkUnitBase;
         var values = unit->AtkValues;
         var valueCount = (int)unit->AtkValuesCount;
-        var rowCount = Math.Clamp(ReadInteger(values[RowCountIndex]), 0, MaxRows);
+        var rowCount = Math.Clamp(AtkValueReads.Integer(values[RowCountIndex]), 0, MaxRows);
         var readable = Math.Clamp(valueCount - ItemIdBase, 0, rowCount);
         var rows = new SupplyListRow[readable];
         for (var rowIndex = 0; rowIndex < readable; rowIndex++)
         {
             rows[rowIndex] = new SupplyListRow(
                 rowIndex,
-                (uint)Math.Max(0, ReadInteger(values[ItemIdBase + rowIndex])),
-                ClassJobFromIcon(ReadInteger(values[ClassIconBase + rowIndex])),
-                ReadInteger(values[RequestedBase + rowIndex]),
-                ReadInteger(values[StarredBase + rowIndex]) > 0);
+                (uint)Math.Max(0, AtkValueReads.Integer(values[ItemIdBase + rowIndex])),
+                ClassJobFromIcon(AtkValueReads.Integer(values[ClassIconBase + rowIndex])),
+                AtkValueReads.Integer(values[RequestedBase + rowIndex]),
+                AtkValueReads.Integer(values[StarredBase + rowIndex]) > 0);
         }
 
         return new SupplyListState(true, tab, rows, agentItems.ToArray());
@@ -104,12 +102,12 @@ internal static unsafe class SupplyListReader
             return false;
         }
 
-        if (ReadInteger(unit->AtkValues[LoadedMarkerIndex]) != LoadedMarker)
+        if (AtkValueReads.Integer(unit->AtkValues[LoadedMarkerIndex]) != LoadedMarker)
         {
             return false;
         }
 
-        var shownTab = ReadInteger(unit->AtkValues[TabIndex]);
+        var shownTab = AtkValueReads.Integer(unit->AtkValues[TabIndex]);
         if (shownTab is not ((int)SupplyListTab.Supply or (int)SupplyListTab.Provisioning) || list->SelectedTab != shownTab)
         {
             return false;
@@ -146,11 +144,4 @@ internal static unsafe class SupplyListReader
     private static byte ClassJobFromIcon(int icon)
         => icon is > ClassIconOffset and <= LastClassIcon ? (byte)(icon - ClassIconOffset) : (byte)0;
 
-    private static int ReadInteger(in AtkValue value) => value.Type switch
-    {
-        AtkValueType.Int => value.Int,
-        AtkValueType.UInt => (int)Math.Min(value.UInt, int.MaxValue),
-        AtkValueType.Bool => value.Byte,
-        _ => UnreadableValue,
-    };
 }
