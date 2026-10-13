@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Tasks.Model;
 using AutoGcSupply.Core.Value.Model;
 
 namespace AutoGcSupply;
@@ -7,7 +8,7 @@ public sealed partial class Configuration
 {
     public const int MinimumPriceTolerancePercent = 0;
     public const int MaximumPriceTolerancePercent = 200;
-    public const long MaximumRunSpendCap = 999_999_999;
+    public const long MaximumRunSpendCap = SpendCapRule.Maximum;
 
     public bool IncludeMaxLevelClasses { get; set; } = false;
 

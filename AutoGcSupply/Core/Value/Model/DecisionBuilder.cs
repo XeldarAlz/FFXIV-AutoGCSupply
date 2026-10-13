@@ -46,7 +46,7 @@ public static class DecisionBuilder
             return Delivered(request, owned);
         }
 
-        var priced = TryFindPrice(prices, request.ItemId, out var price);
+        var priced = ItemPrice.TryFind(prices, request.ItemId, out var price);
         var usable = settings.UseOwnedItems ? owned : default;
         var choice = QualityRule.Choose(request.Kind, settings.SupplyQuality, request.Requested, usable, priced, price);
         var maxUnitPrice = 0L;
@@ -111,19 +111,4 @@ public static class DecisionBuilder
 
     private static long GilPerThousand(long estimatedTotal, long experience)
         => estimatedTotal > 0 && RewardMath.TryGilPerThousandExperience(estimatedTotal, experience, out var gilPerThousand) ? gilPerThousand : 0;
-
-    private static bool TryFindPrice(ReadOnlySpan<ItemPrice> prices, uint itemId, out ItemPrice price)
-    {
-        for (var index = 0; index < prices.Length; index++)
-        {
-            if (prices[index].ItemId == itemId)
-            {
-                price = prices[index];
-                return true;
-            }
-        }
-
-        price = default;
-        return false;
-    }
 }

@@ -29,4 +29,19 @@ public readonly record struct ItemPrice(uint ItemId, int Quantity, QualityPrice 
 
         return Gil.TryMultiply(price.UnitPrice, shortfall, out total);
     }
+
+    public static bool TryFind(ReadOnlySpan<ItemPrice> prices, uint itemId, out ItemPrice price)
+    {
+        for (var index = 0; index < prices.Length; index++)
+        {
+            if (prices[index].ItemId == itemId)
+            {
+                price = prices[index];
+                return true;
+            }
+        }
+
+        price = default;
+        return false;
+    }
 }
