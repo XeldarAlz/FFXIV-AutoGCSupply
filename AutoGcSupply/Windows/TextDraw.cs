@@ -11,9 +11,10 @@ internal static class TextDraw
 
     private const string Ellipsis = "…";
     // Room for every line cut in one frame across the running panel, the dock and the header.
-    private const int TruncateCacheSize = 32;
+    private const int TruncateCacheSize = 96;
 
     private static readonly TruncatedText[] truncateCache = new TruncatedText[TruncateCacheSize];
+    private static readonly Dictionary<FontAwesomeIcon, string> glyphs = [];
 
     private static int truncateCacheNext;
 
@@ -49,11 +50,31 @@ internal static class TextDraw
         ImGui.Dummy(new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetTextLineHeight()));
     }
 
+    public static string Glyph(FontAwesomeIcon icon)
+    {
+        if (glyphs.TryGetValue(icon, out var glyph))
+        {
+            return glyph;
+        }
+
+        glyph = icon.ToIconString();
+        glyphs[icon] = glyph;
+        return glyph;
+    }
+
+    public static float CaptionLineHeight()
+    {
+        using (Fonts.PushCaption())
+        {
+            return ImGui.GetTextLineHeight();
+        }
+    }
+
     public static Vector2 IconSize(FontAwesomeIcon icon)
     {
         using (Fonts.PushIcon())
         {
-            return Measure(icon.ToIconString());
+            return Measure(Glyph(icon));
         }
     }
 
@@ -61,7 +82,7 @@ internal static class TextDraw
     {
         using (Fonts.PushIcon())
         {
-            At(icon.ToIconString(), pos, color);
+            At(Glyph(icon), pos, color);
         }
     }
 
@@ -69,7 +90,7 @@ internal static class TextDraw
     {
         using (Fonts.PushIcon())
         {
-            var glyph = icon.ToIconString();
+            var glyph = Glyph(icon);
             var size = Measure(glyph);
             At(glyph, center - size * 0.5f, color);
         }
@@ -80,7 +101,7 @@ internal static class TextDraw
     {
         using (Fonts.PushIcon())
         {
-            var glyph = icon.ToIconString();
+            var glyph = Glyph(icon);
             var size = Measure(glyph) * sizeScale;
             ImGui.GetWindowDrawList().AddText(ImGui.GetFont(), ImGui.GetFontSize() * sizeScale, center - size * 0.5f, Paint.Col(color), glyph, 0f);
         }
@@ -90,7 +111,7 @@ internal static class TextDraw
     {
         using (Fonts.PushIcon())
         {
-            var glyph = icon.ToIconString();
+            var glyph = Glyph(icon);
             var size = Measure(glyph);
             At(glyph, new Vector2(rightX - size.X, centerY - size.Y * 0.5f), color);
         }

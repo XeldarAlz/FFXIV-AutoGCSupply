@@ -1,116 +1,204 @@
-using AutoGcSupply.Core.Ipc;
-using clib.Services;
+using AutoGcSupply.Core.Localization;
+using AutoGcSupply.Core.Requests.Model;
+using AutoGcSupply.Core.Stats;
+using AutoGcSupply.Core.Tasks.Model;
+using ECommons.DalamudServices;
+using ClibServices = clib.Services.Svc;
 
 namespace AutoGcSupply.Core.Tasks;
 
-internal sealed class GcRunController
+internal sealed partial class GcRunController
 {
+    private const string AutoShopperCommand = "/ashop";
+
+    private readonly Configuration configuration;
+    private readonly RunHistory history;
+    private readonly QuoteTracker quotes = new();
+    private readonly TimersPasses timersPasses = new();
+    private readonly RowLabels labels = new();
+    private readonly RunTracker tracker = new();
+
+    public GcRunController(Configuration configuration, RunHistory history)
+    {
+        this.configuration = configuration;
+        this.history = history;
+        Svc.Framework.Update += OnUpdate;
+        Svc.GameInventory.InventoryChangedRaw += OnInventoryChanged;
+    }
+
     public PauseReason PauseReason { get; private set; } = PauseReason.None;
 
     public bool Paused => PauseReason != PauseReason.None;
 
-    public bool Running => Svc.Automation.Running || Paused;
+    public bool Running => session is not null;
+
+    public bool CanPause => !Paused && session is { End: RunEnd.None, Buying: false };
 
     public RunPhase Phase
     {
         get
         {
+            if (session is not { } active)
+            {
+                return RunPhase.Idle;
+            }
+
             if (Paused)
             {
                 return RunPhase.Paused;
             }
 
-            return Running ? RunPhase.Preparing : RunPhase.Idle;
-        }
-    }
-
-    public string Status => PauseReason switch
-    {
-        PauseReason.InContent => "Paused while you are in content",
-        PauseReason.Manual => "Paused",
-        _ => Svc.Automation.CurrentTask?.Status ?? "Idle",
-    };
-
-    public void Start()
-    {
-        if (Running)
-        {
-            RunLog.Info("Start ignored: a run is already running.");
-            return;
-        }
-
-        RunLog.Info("Not implemented yet.");
-    }
-
-    public void Stop()
-    {
-        if (!Running)
-        {
-            return;
-        }
-
-        PauseReason = PauseReason.None;
-        StopAutomation();
-        RunLog.Info("Stop requested; the run is cleared.");
-    }
-
-    public void StopForAlert() => Stop();
-
-    public void Shutdown() => Stop();
-
-    public void Pause(PauseReason reason)
-    {
-        if (reason == PauseReason.None || !Running)
-        {
-            return;
-        }
-
-        if (Paused)
-        {
-            if (reason == PauseReason.Manual && PauseReason == PauseReason.InContent)
+            if (active.StopRequested)
             {
-                PauseReason = PauseReason.Manual;
-                RunLog.Info("Auto-pause promoted to a manual pause; leaving content will no longer resume.");
+                return RunPhase.Stopping;
             }
 
+            return tracker.Step switch
+            {
+                RunStep.Buying => tracker.ShopperPaused ? RunPhase.Paused : RunPhase.Buying,
+                RunStep.Travelling => RunPhase.Travelling,
+                RunStep.HandingIn => RunPhase.HandingIn,
+                RunStep.Finishing or RunStep.Done => RunPhase.Finishing,
+                _ => RunPhase.Preparing,
+            };
+        }
+    }
+
+    public string Status => session is null ? Loc.T(L.Shell.StatusIdle) : tracker.Current.Status;
+
+    public TodayModel Today
+    {
+        get
+        {
+            viewedAtMs = Environment.TickCount64;
+            return today;
+        }
+    }
+
+    public RunModel Run => tracker.Current;
+
+    public IRowLabels Labels => labels;
+
+    public void Refresh()
+    {
+        if (session is not null)
+        {
+            RunLog.Info("Refresh ignored: a run is reading the requests itself.");
             return;
         }
 
-        PauseReason = reason;
-        StopAutomation();
-        RunLog.Info($"Run paused ({reason}).");
+        quotes.Clear();
+        refreshWanted = true;
+        lastPollMs = 0;
+        todayDirty = true;
+        RunLog.Info("Refresh: reading the requests and pricing them again.");
     }
 
-    public void Resume()
+    public void RetryPrices()
     {
-        if (!Paused)
+        if (session is not null)
         {
             return;
         }
 
-        PauseReason = PauseReason.None;
-        RunLog.Info("Resuming the run.");
+        quotes.Retry();
+        lastPollMs = 0;
+        todayDirty = true;
+        RunLog.Info("Retrying the prices of today's items.");
     }
 
-    public void TogglePause()
+    public void SetIncluded(byte classJobId, bool included)
     {
-        if (Paused)
-        {
-            Resume();
-            return;
-        }
-
-        Pause(PauseReason.Manual);
-    }
-
-    private static void StopAutomation()
-    {
-        if (!Svc.Automation.Running)
+        var contentId = Svc.PlayerState.ContentId;
+        if (contentId == 0 || !SupplyClasses.Contains(classJobId))
         {
             return;
         }
 
-        Svc.Automation.Stop();
-        NavmeshIPC.Instance.Stop();
+        StoreExcluded(contentId, ExcludedFor(contentId).With(classJobId, !included));
+    }
+
+    public void SetAllIncluded(SupplyMissionKind kind, bool included)
+    {
+        var contentId = Svc.PlayerState.ContentId;
+        if (contentId == 0)
+        {
+            return;
+        }
+
+        var mask = ExcludedFor(contentId);
+        var order = SupplyClasses.DisplayOrder;
+        for (var index = 0; index < order.Length; index++)
+        {
+            if (SupplyClasses.KindOf(order[index]) == kind)
+            {
+                mask = mask.With(order[index], !included);
+            }
+        }
+
+        StoreExcluded(contentId, mask);
+    }
+
+    public void SetSpendCap(long gil)
+    {
+        var clamped = SpendCapRule.Clamp(gil);
+        if (clamped == configuration.RunSpendCap)
+        {
+            return;
+        }
+
+        configuration.RunSpendCap = clamped;
+        configuration.SaveDebounced();
+        ReadSettings();
+    }
+
+    public void UseSuggestedSpendCap() => SetSpendCap(today.SuggestedSpendCap);
+
+    public void Dismiss()
+    {
+        if (session is not null || tracker.End == RunEnd.None)
+        {
+            return;
+        }
+
+        tracker.Reset();
+    }
+
+    public void OpenAutoShopper() => Plugin.CommandManager.ProcessCommand(AutoShopperCommand);
+
+    public void Shutdown()
+    {
+        Interrupt();
+        if (loader is not null)
+        {
+            loader = null;
+            ClibServices.Automation.Stop();
+        }
+
+        Svc.Framework.Update -= OnUpdate;
+        Svc.GameInventory.InventoryChangedRaw -= OnInventoryChanged;
+    }
+
+    private ClassMask ExcludedFor(ulong contentId)
+        => configuration.ExcludedClassesByCharacter.TryGetValue(contentId, out var bits) ? new ClassMask(bits) : ClassMask.None;
+
+    private void StoreExcluded(ulong contentId, ClassMask mask)
+    {
+        if (mask == ExcludedFor(contentId))
+        {
+            return;
+        }
+
+        if (mask.Bits == 0)
+        {
+            configuration.ExcludedClassesByCharacter.Remove(contentId);
+        }
+        else
+        {
+            configuration.ExcludedClassesByCharacter[contentId] = mask.Bits;
+        }
+
+        configuration.SaveDebounced();
+        ReadSettings();
     }
 }

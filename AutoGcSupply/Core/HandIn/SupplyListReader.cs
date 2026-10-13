@@ -1,0 +1,147 @@
+using AutoGcSupply.Core.HandIn.Model;
+using ECommons;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using System.Text;
+
+namespace AutoGcSupply.Core.HandIn;
+
+internal static unsafe class SupplyListReader
+{
+    public const string AddonName = "GrandCompanySupplyList";
+
+    private const int LoadedMarkerIndex = 0;
+    private const int LoadedMarker = 2;
+    private const int TabIndex = 5;
+    private const int RowCountIndex = 6;
+    private const int StarredBase = 25;
+    private const int ClassIconBase = 65;
+    private const int RequestedBase = 385;
+    private const int ItemIdBase = 425;
+    private const int MaxRows = 40;
+    private const int ClassIconOffset = 62000;
+    private const int LastClassIcon = ClassIconOffset + byte.MaxValue;
+    private const int SupplyAndProvisioningEntries = 11;
+    private const int MaxAgentEntries = 512;
+
+    public static bool IsOpen() => TryGetList(out _);
+
+    public static bool IsLoaded() => TryReadLoaded(out _, out _, stackalloc SupplyAgentItem[SupplyAndProvisioningEntries]);
+
+    public static bool ShowsTab(SupplyListTab tab)
+        => TryReadLoaded(out var shown, out _, stackalloc SupplyAgentItem[SupplyAndProvisioningEntries]) && shown == tab;
+
+    public static SupplyListState Read()
+    {
+        Span<SupplyAgentItem> agentItems = stackalloc SupplyAgentItem[SupplyAndProvisioningEntries];
+        if (!TryReadLoaded(out var tab, out var list, agentItems))
+        {
+            return SupplyListState.NotLoaded;
+        }
+
+        var unit = &list->AtkUnitBase;
+        var values = unit->AtkValues;
+        var valueCount = (int)unit->AtkValuesCount;
+        var rowCount = Math.Clamp(AtkValueReads.Integer(values[RowCountIndex]), 0, MaxRows);
+        var readable = Math.Clamp(valueCount - ItemIdBase, 0, rowCount);
+        var rows = new SupplyListRow[readable];
+        for (var rowIndex = 0; rowIndex < readable; rowIndex++)
+        {
+            rows[rowIndex] = new SupplyListRow(
+                rowIndex,
+                (uint)Math.Max(0, AtkValueReads.Integer(values[ItemIdBase + rowIndex])),
+                ClassJobFromIcon(AtkValueReads.Integer(values[ClassIconBase + rowIndex])),
+                AtkValueReads.Integer(values[RequestedBase + rowIndex]),
+                AtkValueReads.Integer(values[StarredBase + rowIndex]) > 0);
+        }
+
+        return new SupplyListState(true, tab, rows, agentItems.ToArray());
+    }
+
+    public static string DescribeLayout(in SupplyListState state)
+    {
+        var builder = new StringBuilder();
+        builder.Append($"{state.Tab} tab, {state.Rows.Length} rows");
+        if (TryGetList(out var list))
+        {
+            builder.Append($", sort {list->SelectedSortBy}, filter {list->SelectedFilter}");
+        }
+
+        for (var rowPosition = 0; rowPosition < state.Rows.Length; rowPosition++)
+        {
+            var row = state.Rows[rowPosition];
+            builder.Append($"; row {row.RowIndex}: {HandInReads.ItemName(row.ItemId)} ({row.ItemId}) {HandInReads.ClassName(row.ClassJobId)} x{row.Requested}{(row.Starred ? " starred" : string.Empty)}");
+        }
+
+        for (var itemPosition = 0; itemPosition < state.AgentItems.Length; itemPosition++)
+        {
+            var item = state.AgentItems[itemPosition];
+            builder.Append($"; agent {item.Position}: {item.ItemId} possessed {item.NumPossessed}/{item.NumRequested}{(item.TurnInAvailable ? string.Empty : " closed")}");
+        }
+
+        return builder.ToString();
+    }
+
+    private static bool TryGetList(out AddonGrandCompanySupplyList* list)
+        => GenericHelpers.TryGetAddonByName(AddonName, out list) && GenericHelpers.IsAddonReady(&list->AtkUnitBase);
+
+    private static bool TryReadLoaded(out SupplyListTab tab, out AddonGrandCompanySupplyList* list, Span<SupplyAgentItem> agentItems)
+        => TryReadHeader(out tab, out list) && CollectAgentItems(agentItems) == agentItems.Length;
+
+    private static bool TryReadHeader(out SupplyListTab tab, out AddonGrandCompanySupplyList* list)
+    {
+        tab = SupplyListTab.Supply;
+        if (!TryGetList(out list))
+        {
+            return false;
+        }
+
+        var unit = &list->AtkUnitBase;
+        if (unit->AtkValues == null || unit->AtkValuesCount <= RowCountIndex)
+        {
+            return false;
+        }
+
+        if (AtkValueReads.Integer(unit->AtkValues[LoadedMarkerIndex]) != LoadedMarker)
+        {
+            return false;
+        }
+
+        var shownTab = AtkValueReads.Integer(unit->AtkValues[TabIndex]);
+        if (shownTab is not ((int)SupplyListTab.Supply or (int)SupplyListTab.Provisioning) || list->SelectedTab != shownTab)
+        {
+            return false;
+        }
+
+        tab = (SupplyListTab)shownTab;
+        return true;
+    }
+
+    private static int CollectAgentItems(Span<SupplyAgentItem> found)
+    {
+        var agent = AgentGrandCompanySupply.Instance();
+        if (!agent->IsAgentActive() || agent->ItemArray == null)
+        {
+            return 0;
+        }
+
+        var foundCount = 0;
+        var entries = Math.Min(agent->NumItems, MaxAgentEntries);
+        for (var entryIndex = 0; entryIndex < entries && foundCount < found.Length; entryIndex++)
+        {
+            ref var entry = ref agent->ItemArray[entryIndex];
+            if (entry.Position is < 0 or >= SupplyAndProvisioningEntries)
+            {
+                continue;
+            }
+
+            found[foundCount++] = new SupplyAgentItem(entry.ItemId, entry.Position, entry.NumPossessed, entry.NumRequested, entry.IsTurnInAvailable);
+        }
+
+        return foundCount;
+    }
+
+    private static byte ClassJobFromIcon(int icon)
+        => icon is > ClassIconOffset and <= LastClassIcon ? (byte)(icon - ClassIconOffset) : (byte)0;
+
+}

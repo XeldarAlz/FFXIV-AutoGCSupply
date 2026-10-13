@@ -5,7 +5,6 @@ namespace AutoGcSupply.Core.External;
 public enum ExternalPlugin
 {
     Vnavmesh,
-    Lifestream,
     AutoShopper,
 }
 
@@ -24,7 +23,7 @@ public static class ExternalPlugins
 {
     private const long RefreshIntervalMs = 1_000;
 
-    private static readonly ExternalPlugin[] all = [ExternalPlugin.Vnavmesh, ExternalPlugin.Lifestream, ExternalPlugin.AutoShopper];
+    private static readonly ExternalPlugin[] all = [ExternalPlugin.Vnavmesh, ExternalPlugin.AutoShopper];
     private static readonly bool[] loaded = new bool[all.Length];
     private static long refreshedAtMs = long.MinValue;
 
@@ -36,12 +35,6 @@ public static class ExternalPlugins
             DisplayName: "vnavmesh",
             RepoUrl: "https://puni.sh/api/repository/veyn",
             Purpose: "Pathfinding and movement for walking to the Personnel Officer.",
-            Required: true),
-        [ExternalPlugin.Lifestream] = new(
-            InternalName: "Lifestream",
-            DisplayName: "Lifestream",
-            RepoUrl: "https://love.puni.sh/ment.json",
-            Purpose: "Travel to your Grand Company's headquarters.",
             Required: true),
         [ExternalPlugin.AutoShopper] = new(
             InternalName: "AutoShopper",

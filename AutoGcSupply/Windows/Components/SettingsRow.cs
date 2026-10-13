@@ -122,7 +122,7 @@ internal static class SettingsRow
         }
 
         var labelWidth = ImGui.CalcTextSize(label).X;
-        var iconString = FontAwesomeIcon.InfoCircle.ToIconString();
+        var iconString = TextDraw.Glyph(FontAwesomeIcon.InfoCircle);
         using (Fonts.PushIcon())
         {
             var iconSize = ImGui.CalcTextSize(iconString);

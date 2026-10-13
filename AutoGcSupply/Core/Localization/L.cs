@@ -35,8 +35,6 @@ internal static partial class L
 
     internal static class Today
     {
-        public static readonly LocString Title = new("today.title", "Today");
-        public static readonly LocString Subtitle = new("today.subtitle", "Your Grand Company supply and provisioning missions for the day.");
         public static readonly LocString Empty = new("today.empty", "Today's supply and provisioning requests will appear here.");
     }
 
@@ -54,7 +52,7 @@ internal static partial class L
         public static readonly LocString StatePaused = new("dock.state.paused", "paused");
     }
 
-    internal static class Run
+    internal static partial class Run
     {
         public static readonly LocString PhasePreparing = new("run.phase.preparing", "Getting ready");
         public static readonly LocString PhaseStandingBy = new("run.phase.standingBy", "Standing by");
@@ -87,7 +85,6 @@ internal static partial class L
         public static readonly LocString Footer = new("plugins.footer",
             "Install adds the plugin's source repository to Dalamud and queues an install. If one-click install fails (URL drift, network), right-click a plugin name to copy its repo URL and add it manually via /xlsettings -> Experimental -> Custom Plugin Repositories.");
         public static readonly LocString PurposeVnavmesh = new("plugins.purpose.vnavmesh", "Pathfinding and movement for walking to the Personnel Officer.");
-        public static readonly LocString PurposeLifestream = new("plugins.purpose.lifestream", "Travel to your Grand Company's headquarters.");
         public static readonly LocString PurposeAutoShopper = new("plugins.purpose.autoShopper", "Buys the missing items on the market board.");
     }
 
@@ -141,7 +138,17 @@ internal static partial class L
 
         public static readonly LocString[] Release1000 =
         [
-            new("changelog.r1000.1", "First release."),
+            new("changelog.r1000.1", "Today page: the day's 8 supply and 3 provisioning requests with item, quantity, owned stock, cost, XP, seals and gil per 1,000 XP"),
+            new("changelog.r1000.2", "Reads the requests by opening the Timers window for a moment, and again after the daily reset at 20:00 UTC"),
+            new("changelog.r1000.3", "Click a row to choose what to deliver, kept per character; max-level classes stay out unless you include them for seals in Settings"),
+            new("changelog.r1000.4", "Automatic quality buys HQ supply items when they cost at most twice NQ, since HQ supply pays double; provisioning stays NQ, and items in your bags go first"),
+            new("changelog.r1000.5", "Buys only what is missing through Auto Shopper 1.1.0.0 or later, within a run spend cap and per-item price caps, after you allow it there once"),
+            new("changelog.r1000.6", "Teleports to your Grand Company's city, walks to the Personnel Officer and hands in the requests you chose, one at a time"),
+            new("changelog.r1000.7", "Picks rows by item and class, checks the reward window before Deliver, and answers Yes only to the game's HQ trade prompt on an HQ row"),
+            new("changelog.r1000.8", "Confirms every delivery by your bags and seals, can skip a request whose seals would pass your cap, and stops to ask you whenever something is unclear"),
+            new("changelog.r1000.9", "A live step-by-step view with pause, resume and stop, auto-pause in duties, a summary at the end and a History of every run"),
+            new("changelog.r1000.10", "Follows Auto Shopper's dry run switch: while it is on, a run buys nothing and hands nothing in, and every step shows what it would do"),
+            new("changelog.r1000.11", "Works without Auto Shopper too: requests your bags already cover are still handed in"),
         ];
     }
 
@@ -251,6 +258,7 @@ internal static partial class L
     {
         public static readonly LocString CommandHelp = new("plugin.commandHelp", "Toggle the Auto GC Supply window. /gcsupply config | stats | deps | log | changelog | about | start (start the run) | stop (stop the run) | pause (pause or resume the run) | target (dump the current target's BaseId).");
         public static readonly LocString CommandHelpAlias = new("plugin.commandHelpAlias", "Alias for /gcsupply.");
+        public static readonly LocString StartRefused = new("plugin.startRefused", "Automate did not start: {0}.");
         public static readonly LocString ConfigReset = new("plugin.configReset", "Your settings could not be read, so Auto GC Supply started with default settings. The old file is kept as {0}.");
         public static readonly LocString ConfigResetUnsaved = new("plugin.configResetUnsaved", "Your settings could not be read, so Auto GC Supply started with default settings. The old file could not be kept; the log has the details.");
     }

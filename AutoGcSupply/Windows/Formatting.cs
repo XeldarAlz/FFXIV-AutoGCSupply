@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.Localization;
+using AutoGcSupply.Core.Requests.Model;
 
 namespace AutoGcSupply.Windows;
 
@@ -6,6 +7,8 @@ namespace AutoGcSupply.Windows;
 // durations identically. Previously each window carried its own copy and they could drift.
 internal static class Formatting
 {
+    private const string ResetTimeFormat = "t";
+
     public static string Exp(long exp)
     {
         if (exp >= 1_000_000) return $"{exp / 1_000_000.0:0.0}M";
@@ -18,6 +21,17 @@ internal static class Formatting
         if (t.TotalHours >= 1) return $"{(int)t.TotalHours}h {t.Minutes:D2}m";
         return $"{t.Minutes}m {t.Seconds:D2}s";
     }
+
+    public static DateTime NextReset(DateTime nextResetUtc)
+        => nextResetUtc == default ? DayKey.For(DateTime.UtcNow).NextResetUtc : nextResetUtc;
+
+    public static string ResetTime(DateTime nextResetUtc) => NextReset(nextResetUtc).ToLocalTime().ToString(ResetTimeFormat, Loc.Culture);
+
+    public static long MinutesUntilReset(DateTime nextResetUtc)
+        => Math.Max(0L, (long)Math.Ceiling((NextReset(nextResetUtc) - DateTime.UtcNow).TotalMinutes));
+
+    public static string Countdown(TimeSpan remaining)
+        => remaining.TotalHours >= 1 ? $"{(int)remaining.TotalHours}h {remaining.Minutes:D2}m" : $"{remaining.Minutes}m";
 
     public static string Gil(long amount) => Loc.Gil(amount);
 

@@ -4,7 +4,9 @@ using AutoGcSupply.Core.Game.Watchers;
 using AutoGcSupply.Core.Localization;
 using AutoGcSupply.Core.Stats;
 using AutoGcSupply.Core.Tasks;
+using AutoGcSupply.Core.Tasks.Model;
 using AutoGcSupply.Windows;
+using AutoGcSupply.Windows.Sections;
 using AutoGcSupply.Windows.Shell;
 using clib;
 using Dalamud.Game.Command;
@@ -64,8 +66,9 @@ public sealed class Plugin : IDalamudPlugin
 
             Configuration = LoadConfiguration();
 
-            History = new RunHistory();
-            Controller = new GcRunController();
+            History = new RunHistory(PluginInterface.ConfigDirectory.FullName);
+            Controller = new GcRunController(Configuration, History);
+            completed.Push(Controller.Shutdown);
             dutyWatcher = new DutyWatcher();
             completed.Push(dutyWatcher.Dispose);
             gmAlertWatcher = new GmAlertWatcher();
@@ -188,7 +191,7 @@ public sealed class Plugin : IDalamudPlugin
         }
         else if (trimmed.Equals(StartSubcommand, StringComparison.OrdinalIgnoreCase))
         {
-            Controller.Start();
+            StartFromCommand();
         }
         else if (trimmed.Equals(StopSubcommand, StringComparison.OrdinalIgnoreCase))
         {
@@ -206,6 +209,18 @@ public sealed class Plugin : IDalamudPlugin
         {
             ToggleMainUi();
         }
+    }
+
+    private void StartFromCommand()
+    {
+        appWindow.Show(AppWindow.Page.Today);
+        var block = Controller.Start();
+        if (block == StartBlock.None)
+        {
+            return;
+        }
+
+        Svc.Chat.PrintError($"{GcSupplyConstants.LogPrefix} {Loc.T(L.Plugin.StartRefused, RunLabels.BlockReason(block))}");
     }
 
     private void OnDraw()
@@ -263,7 +278,7 @@ public sealed class Plugin : IDalamudPlugin
         return Languages.IsKnown(osLanguage) ? Languages.Resolve(osLanguage).Code : Languages.English.Code;
     }
 
-    private void OnLogout(int type, int code) => Controller.Stop();
+    private void OnLogout(int type, int code) => Controller.Interrupt();
 
     private static void Undo(Stack<Action> completed)
     {
