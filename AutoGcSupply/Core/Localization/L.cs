@@ -139,7 +139,14 @@ internal static partial class L
 
         public static readonly LocString[] Release1000 =
         [
-            new("changelog.r1000.1", "First release."),
+            new("changelog.r1000.1", "Today page: the day's 8 supply and 3 provisioning requests with item, quantity, owned stock, cost, XP, seals and gil per 1,000 XP"),
+            new("changelog.r1000.2", "Click a row to choose what to deliver; delivered and max-level classes stay muted, and max-level ones can be included for seals"),
+            new("changelog.r1000.3", "Automatic quality picks HQ when it costs at most twice NQ, since HQ supply pays double, and items you own are used first"),
+            new("changelog.r1000.4", "Buys only what is missing through Auto Shopper, within a run spend cap and per-item price caps, and follows its dry run switch"),
+            new("changelog.r1000.5", "Travels to your Grand Company with Lifestream, talks to the Personnel Officer and hands each request in"),
+            new("changelog.r1000.6", "Confirms every delivery by your bags and seals, and stops to ask you whenever something is unclear"),
+            new("changelog.r1000.7", "A live step-by-step view with pause and stop, a summary at the end and a History of every run"),
+            new("changelog.r1000.8", "Works without Auto Shopper too: items you already own are still read, valued and handed in"),
         ];
     }
 
