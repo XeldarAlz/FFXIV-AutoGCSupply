@@ -74,13 +74,14 @@ internal static class ActionDock
     {
         var today = controller.Today;
         var block = today.StartBlock;
-        var enabled = block == StartBlock.None;
+        var settling = controller.Settling;
+        var enabled = block == StartBlock.None && !settling;
         var showTile = today.Shopper == ShopperState.Available;
         var gap = ButtonGap * ImGuiHelpers.GlobalScale;
         var tileWidth = showTile ? DryRunTile.Width(innerWidth) : 0f;
         var buttonWidth = showTile ? innerWidth - tileWidth - gap : innerWidth;
         var origin = ImGui.GetCursorScreenPos();
-        var reason = RunLabels.BlockReason(block);
+        var reason = settling ? Loc.T(L.Run.StatusClosingList) : RunLabels.BlockReason(block);
         if (StartButton.Draw(Sublabel(today), enabled, reason, buttonWidth))
         {
             controller.Start();

@@ -45,7 +45,7 @@ internal static class ReadyState
         };
     }
 
-    public static bool CanPause(GcRunController controller) => controller.Paused || controller.CanPause;
+    public static bool CanPause(GcRunController controller) => (controller.Paused && !controller.Settling) || controller.CanPause;
 
     public static string ShortLabel(Kind kind) => kind switch
     {
