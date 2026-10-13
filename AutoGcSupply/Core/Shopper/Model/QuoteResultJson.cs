@@ -31,6 +31,10 @@ internal readonly struct QuotePriceJson
     public int? Units { get; init; }
     public long? Total { get; init; }
     public long? UnitPrice { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public long? HighestUnitPrice { get; init; }
+
     public double? OldestListingHours { get; init; }
     public int? Worlds { get; init; }
 }

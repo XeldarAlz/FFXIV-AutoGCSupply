@@ -3,7 +3,7 @@ using AutoGcSupply.Core.Shared;
 
 namespace AutoGcSupply.Core.Value.Model;
 
-public readonly record struct QualityPrice(bool Available, int Units, long Total, long UnitPrice)
+public readonly record struct QualityPrice(bool Available, int Units, long Total, long UnitPrice, long HighestUnitPrice = 0)
 {
     public bool Usable => Available && Units > 0 && Total > 0 && UnitPrice > 0;
 }

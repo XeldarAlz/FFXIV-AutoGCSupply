@@ -121,6 +121,39 @@ public sealed class ShopperQuoteResultTests
     }
 
     [Fact]
+    public void HighestUnitPriceIsReadWhenTheProviderSendsIt()
+    {
+        var quote = ShopperReplies.ParseQuoteResult(ShopperFixtures.QuoteResultWithHighest);
+
+        Assert.Equal(ShopperReply.Valid, quote.Reply);
+        Assert.Equal(new ShopperQuotePrice(true, 3, 1890, 630, 700), quote.Items[0].Normal);
+        Assert.Equal(0, quote.Items[0].High.HighestUnitPrice);
+    }
+
+    [Fact]
+    public void HighestUnitPriceIsZeroFromAnOlderProvider()
+    {
+        var quote = ShopperReplies.ParseQuoteResult(ShopperFixtures.QuoteResult);
+
+        Assert.Equal(0, quote.Items[0].Normal.HighestUnitPrice);
+    }
+
+    [Fact]
+    public void NullHighestUnitPriceIsZero()
+    {
+        var quote = ShopperReplies.ParseQuoteResult(ShopperJsonEdit.Edit(ShopperFixtures.QuoteResult, root => root["items"]![0]!["normal"]!["highestUnitPrice"] = null));
+
+        Assert.Equal(ShopperReply.Valid, quote.Reply);
+        Assert.Equal(0, quote.Items[0].Normal.HighestUnitPrice);
+    }
+
+    [Fact]
+    public void NegativeHighestUnitPriceIsMalformed()
+    {
+        AssertMalformed(root => root["items"]![0]!["normal"]!["highestUnitPrice"] = -1);
+    }
+
+    [Fact]
     public void AnotherSchemaIsASchemaMismatch()
     {
         var quote = ShopperReplies.ParseQuoteResult(ShopperJsonEdit.Edit(ShopperFixtures.QuoteResult, root => root["schema"] = 2));

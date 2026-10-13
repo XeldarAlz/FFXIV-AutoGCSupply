@@ -39,6 +39,24 @@ internal static class ShopperFixtures
         }
         """;
 
+    public const string QuoteResultWithHighest = """
+        {
+          "schema": 1,
+          "quoteId": "b6c0...",
+          "state": "Ready",
+          "refusal": null,
+          "fetchedAtUtc": "2026-10-13T18:22:05Z",
+          "items": [
+            {
+              "itemId": 5057,
+              "quantity": 3,
+              "normal": { "available": true, "units": 3, "total": 1890, "unitPrice": 630, "highestUnitPrice": 700, "oldestListingHours": 4.5, "worlds": 1 },
+              "high":   { "available": false, "units": 0, "total": 0, "unitPrice": 0, "highestUnitPrice": 0, "oldestListingHours": 0, "worlds": 0 }
+            }
+          ]
+        }
+        """;
+
     public const string StartRunRequest = """
         {
           "schema": 1,
