@@ -65,6 +65,13 @@ public sealed class ShopperSettlementTests
     }
 
     [Fact]
+    public void LosingTrackOfARunSaysWhetherItTookTheStop()
+    {
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperLostTrackStopped), ShopperSettlementRule.LostTrack(stopTaken: true));
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperLostTrack), ShopperSettlementRule.LostTrack(stopTaken: false));
+    }
+
+    [Fact]
     public void AnUnreadableOrForgottenRunIsNotSettled()
     {
         Assert.Equal(ShopperSettlement.Unreadable, ShopperSettlementRule.Classify(ShopperRunView.Failed(ShopperReply.Unavailable), stopRequested: false));
@@ -108,6 +115,8 @@ public sealed class ShopperSettlementTests
     [InlineData((int)NeedsPlayerReason.ShopperInterrupted, true)]
     [InlineData((int)NeedsPlayerReason.ShopperNotReady, true)]
     [InlineData((int)NeedsPlayerReason.ShopperStopped, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperLostTrack, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperLostTrackStopped, true)]
     [InlineData((int)NeedsPlayerReason.ShopperRefused, false)]
     [InlineData((int)NeedsPlayerReason.HandInPaused, false)]
     [InlineData((int)NeedsPlayerReason.DeliveryUnconfirmed, false)]

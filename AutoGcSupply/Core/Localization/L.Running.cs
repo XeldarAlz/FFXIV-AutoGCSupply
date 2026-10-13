@@ -45,6 +45,7 @@ internal static partial class L
         public static readonly LocString InterruptedBody = new("running.interrupted.body", "An earlier Auto Shopper run stopped part way. Resume or discard it in Auto Shopper first.");
         public static readonly LocString RefusedTitle = new("running.refused.title", "Auto Shopper turned the order down");
         public static readonly LocString ShopperStoppedTitle = new("running.shopperStopped.title", "Auto Shopper stopped the run");
+        public static readonly LocString LostTrackTitle = new("running.lostTrack.title", "Lost track of Auto Shopper's run");
         public static readonly LocString HandInPausedTitle = new("running.handInPaused.title", "The hand-in paused");
         public static readonly LocString UnconfirmedTitle = new("running.unconfirmed.title", "A delivery could not be confirmed");
         public static readonly LocString NeedsPlayerFallback = new("running.needsPlayerFallback", "Check the game, then resume or stop the run.");

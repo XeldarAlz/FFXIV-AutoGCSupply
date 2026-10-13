@@ -51,6 +51,9 @@ internal static class ShopperSettlementRule
         return ShopperSettlement.NeedsPlayer(view.Refusal == ShopperRefusal.None ? NeedsPlayerReason.ShopperStopped : ReasonForRefusal(view.Refusal));
     }
 
+    public static ShopperSettlement LostTrack(bool stopTaken)
+        => ShopperSettlement.NeedsPlayer(stopTaken ? NeedsPlayerReason.ShopperLostTrackStopped : NeedsPlayerReason.ShopperLostTrack);
+
     public static NeedsPlayerReason ReasonForRefusal(ShopperRefusal refusal) => refusal switch
     {
         ShopperRefusal.ConsentRequired or ShopperRefusal.ConsentDenied => NeedsPlayerReason.ShopperConsent,
@@ -70,5 +73,7 @@ internal static class ShopperSettlementRule
             or NeedsPlayerReason.ShopperUncertainPurchase
             or NeedsPlayerReason.ShopperInterrupted
             or NeedsPlayerReason.ShopperNotReady
-            or NeedsPlayerReason.ShopperStopped;
+            or NeedsPlayerReason.ShopperStopped
+            or NeedsPlayerReason.ShopperLostTrack
+            or NeedsPlayerReason.ShopperLostTrackStopped;
 }

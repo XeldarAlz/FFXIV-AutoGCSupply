@@ -216,7 +216,7 @@ internal sealed partial class GcRunTask
     {
         var stopped = AutoShopperApi.Instance.StopRun(runId);
         Warn($"Run: {reason}; {(stopped ? "its run was asked to stop" : "it did not take the stop")} and the run needs you.");
-        return ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperInterrupted);
+        return ShopperSettlementRule.LostTrack(stopped);
     }
 
     private void Mirror(in ShopperRunView view)

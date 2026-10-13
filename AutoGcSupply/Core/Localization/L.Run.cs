@@ -59,6 +59,8 @@ internal static partial class L
         public static readonly LocString NeedsConsentDenied = new("run.needs.consentDenied", "Auto GC Supply was denied in Auto Shopper. Allow it under Auto Shopper's Settings, General, Other plugins, then press Automate again.");
         public static readonly LocString NeedsUncertain = new("run.needs.uncertain", "Auto Shopper has a purchase without a clear answer. Answer it in Auto Shopper, then press Automate again.");
         public static readonly LocString NeedsInterrupted = new("run.needs.interrupted", "Auto Shopper's run was interrupted. Resume or discard it in Auto Shopper, then press Automate again.");
+        public static readonly LocString NeedsLostTrackStopped = new("run.needs.lostTrackStopped", "Auto GC Supply lost track of Auto Shopper's run and asked it to stop. Press Automate to try again.");
+        public static readonly LocString NeedsLostTrack = new("run.needs.lostTrack", "Auto GC Supply lost track of Auto Shopper's run, and the run did not take the stop. Check it in Auto Shopper, then press Automate again.");
         public static readonly LocString NeedsShopperStopped = new("run.needs.shopperStopped", "The run was stopped inside Auto Shopper: by its Stop button, its GM alert or a change to Auto GC Supply's permission. Anything it bought stays in your bags; press Automate to hand it in.");
         public static readonly LocString NeedsRefused = new("run.needs.refused", "Auto Shopper refused the run ({0}).");
         public static readonly LocString NeedsInShopper = new("run.needs.inShopper", "Open Auto Shopper to sort it out, then press Automate again.");
@@ -70,6 +72,7 @@ internal static partial class L
         public static readonly LocString NeedsOfficerUnreachable = new("run.needs.officerUnreachable", "The Personnel Officer could not be reached on foot.");
         public static readonly LocString NeedsMenu = new("run.needs.menu", "The supply option was not found in the Personnel Officer's menu.");
         public static readonly LocString NeedsList = new("run.needs.list", "The supply list did not open or switch tabs as expected.");
+        public static readonly LocString NeedsListNotRefreshed = new("run.needs.listNotRefreshed", "A delivered request stayed open on the supply list.");
         public static readonly LocString NeedsPrompt = new("run.needs.prompt", "An unexpected question appeared and was answered No: {0}");
         public static readonly LocString NeedsAddon = new("run.needs.addon", "An unexpected window appeared: {0}");
         public static readonly LocString NeedsHighQualityPrompt = new("run.needs.highQualityPrompt", "The game asked to trade a high-quality item for a normal-quality request.");
