@@ -162,13 +162,15 @@ internal sealed partial class HandInDriver
 
     private async Task<Halt> AwaitRowClosed(HandInTarget target)
     {
-        if (await WaitUntilTimed(() => !SupplyListReader.Read().RowStillOpen(target), RowCloseTimeoutMs, "hand-in-row-closed", ListPollFrames)
-            || CancelToken.IsCancellationRequested)
+        if (await WaitUntilTimed(() => !SupplyListReader.Read().RowStillOpen(target), RowCloseTimeoutMs, "hand-in-row-closed", ListPollFrames))
         {
+            listSettlesUntil = Environment.TickCount64 + PostDeliverySettleMs;
             return Halt.None;
         }
 
-        return new Halt(HandInPauseReason.ListNotRefreshed, $"the supply list still shows {HandInReads.Describe(target)} as open {RowCloseTimeoutMs / TimeUnits.MillisecondsPerSecond}s after its delivery");
+        return CancelToken.IsCancellationRequested
+            ? Halt.None
+            : new Halt(HandInPauseReason.ListNotRefreshed, $"the supply list still shows {HandInReads.Describe(target)} as open {RowCloseTimeoutMs / TimeUnits.MillisecondsPerSecond}s after its delivery");
     }
 
     private async Task WaitForSealsToSettle(HandInTarget target)
