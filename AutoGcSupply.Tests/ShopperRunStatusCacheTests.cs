@@ -49,9 +49,39 @@ public sealed class ShopperRunStatusCacheTests
         var cache = new ShopperRunStatusCache();
         cache.Read(RunId, ShopperFixtures.RunStatus);
 
+        var view = cache.Read(RunId, Edit(root => root["reservedSpend"] = 630));
+
+        Assert.Equal(0, view.ReservedSpend);
+    }
+
+    [Fact]
+    public void ANewStatusLineUnderTheSameRevisionIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, ShopperFixtures.RunStatus);
+
         var view = cache.Read(RunId, Edit(root => root["status"] = "Changed without a new revision"));
 
-        Assert.Equal("Searching the listings of Darksteel Ore", view.Status);
+        Assert.Equal("Changed without a new revision", view.Status);
+    }
+
+    [Fact]
+    public void AManualPauseTakingOverADutyPauseIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, Edit(root =>
+        {
+            root["paused"] = true;
+            root["pauseReason"] = "InContent";
+        }));
+
+        var view = cache.Read(RunId, Edit(root =>
+        {
+            root["paused"] = true;
+            root["pauseReason"] = "Manual";
+        }));
+
+        Assert.Equal(ShopperPauseReason.Manual, view.PauseReason);
     }
 
     [Fact]

@@ -55,6 +55,8 @@ internal sealed class ShopperRunStatusCache
         var paused = false;
         var needsPlayer = false;
         var phase = 0;
+        var status = 0;
+        var pauseReason = 0;
         try
         {
             var reader = new Utf8JsonReader(utf8Json);
@@ -88,7 +90,13 @@ internal sealed class ShopperRunStatusCache
                         needsPlayer = FlagOf(reader.TokenType) == true;
                         break;
                     case StampProperty.Phase:
-                        phase = PhaseKeyOf(ref reader);
+                        phase = ValueKeyOf(ref reader);
+                        break;
+                    case StampProperty.Status:
+                        status = ValueKeyOf(ref reader);
+                        break;
+                    case StampProperty.PauseReason:
+                        pauseReason = ValueKeyOf(ref reader);
                         break;
                 }
 
@@ -105,7 +113,7 @@ internal sealed class ShopperRunStatusCache
             return false;
         }
 
-        stamp = new RunStamp(isKnown, revisionNumber, terminal, paused, needsPlayer, phase);
+        stamp = new RunStamp(isKnown, revisionNumber, terminal, paused, needsPlayer, phase, status, pauseReason);
         return true;
     }
 
@@ -116,7 +124,7 @@ internal sealed class ShopperRunStatusCache
         _ => null,
     };
 
-    private static int PhaseKeyOf(ref Utf8JsonReader reader)
+    private static int ValueKeyOf(ref Utf8JsonReader reader)
     {
         if (reader.TokenType is not (JsonTokenType.String or JsonTokenType.Number))
         {
@@ -166,6 +174,16 @@ internal sealed class ShopperRunStatusCache
             return StampProperty.Phase;
         }
 
+        if (Ascii.EqualsIgnoreCase(name, "status"u8))
+        {
+            return StampProperty.Status;
+        }
+
+        if (Ascii.EqualsIgnoreCase(name, "pauseReason"u8))
+        {
+            return StampProperty.PauseReason;
+        }
+
         return Ascii.EqualsIgnoreCase(name, "schema"u8) ? StampProperty.Schema : StampProperty.Other;
     }
 
@@ -179,7 +197,9 @@ internal sealed class ShopperRunStatusCache
         Paused,
         NeedsPlayer,
         Phase,
+        Status,
+        PauseReason,
     }
 
-    private readonly record struct RunStamp(bool Known, long Revision, bool Terminal, bool Paused, bool NeedsPlayer, int Phase);
+    private readonly record struct RunStamp(bool Known, long Revision, bool Terminal, bool Paused, bool NeedsPlayer, int Phase, int Status, int PauseReason);
 }

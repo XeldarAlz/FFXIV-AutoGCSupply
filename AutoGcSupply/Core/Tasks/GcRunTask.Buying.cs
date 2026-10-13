@@ -196,7 +196,7 @@ internal sealed partial class GcRunTask
 
             if (watch.Stalled(nowMs))
             {
-                return GiveUp(runId, $"Auto Shopper run {runId} showed no change for {ShopperWatch.StallLimitMs / TimeUnits.MillisecondsPerMinute} minutes while not paused");
+                return GiveUp(runId, $"Auto Shopper run {runId} showed no change for {watch.StallLimit / TimeUnits.MillisecondsPerMinute} minutes while not paused ({lastView.Phase})");
             }
 
             if (watch.Overdue(nowMs))
