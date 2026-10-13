@@ -1,4 +1,7 @@
+using AutoGcSupply.Core.Inventory.Model;
+using AutoGcSupply.Core.Requests.Model;
 using AutoGcSupply.Core.Tasks.Model;
+using static AutoGcSupply.Tests.Run.RunFixtures;
 
 namespace AutoGcSupply.Tests.Run;
 
@@ -18,12 +21,12 @@ public sealed class RunTrackerTests
 
         Assert.Same(first, tracker.Current);
 
-        tracker.SetRow(1, new RunRow(16, RowRunState.Buying, "0 of 10 bought"));
+        tracker.SetRow(1, new RunRow(16, 5106, ItemQuality.Normal, 10, RowRunState.Buying, "0 of 10 bought"));
         var second = tracker.Current;
 
         Assert.NotSame(first, second);
         Assert.True(second.Revision > first.Revision);
-        Assert.Equal(new RunRow(16, RowRunState.Buying, "0 of 10 bought"), second.Rows[1]);
+        Assert.Equal(new RunRow(16, 5106, ItemQuality.Normal, 10, RowRunState.Buying, "0 of 10 bought"), second.Rows[1]);
         Assert.Equal(default, first.Rows[1]);
     }
 
@@ -88,5 +91,15 @@ public sealed class RunTrackerTests
         tracker.Begin(new RunRow[1], "Reading");
 
         Assert.False(tracker.Current.ShopperPaused);
+    }
+
+    [Fact]
+    public void ARunRowKeepsWhatTheRunAuthorized()
+    {
+        var authorized = ToBuy(SupplyClasses.Carpenter, CarpenterItem, 3, ItemQuality.High, 3, 9_000);
+
+        var row = RunRow.For(authorized, RowProgress.Of(RowRunState.Bought, RowNote.Bought), "Bought");
+
+        Assert.Equal(new RunRow(SupplyClasses.Carpenter, CarpenterItem, ItemQuality.High, 3, RowRunState.Bought, "Bought"), row);
     }
 }

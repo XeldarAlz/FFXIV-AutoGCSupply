@@ -77,6 +77,8 @@ internal sealed partial class GcRunController
 
     public RunModel Run => tracker.Current;
 
+    public IRowLabels Labels => labels;
+
     public void Refresh()
     {
         if (session is not null)

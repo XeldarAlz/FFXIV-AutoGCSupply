@@ -1,3 +1,5 @@
+using AutoGcSupply.Core.Inventory.Model;
+using AutoGcSupply.Core.Value.Model;
 using System.Collections.Immutable;
 
 namespace AutoGcSupply.Core.Tasks.Model;
@@ -19,7 +21,11 @@ internal enum NeedsPlayerReason : byte
 
 internal enum RowRunState : byte { Waiting, Buying, Bought, NotBought, HandingIn, Delivered, WouldDeliver, Skipped, Unconfirmed }
 
-internal readonly record struct RunRow(byte ClassJobId, RowRunState State, string Detail);
+internal readonly record struct RunRow(byte ClassJobId, uint ItemId, ItemQuality Quality, int Requested, RowRunState State, string Detail)
+{
+    public static RunRow For(in RowDecision authorized, in RowProgress progress, string detail)
+        => new(authorized.Request.ClassJobId, authorized.Request.ItemId, authorized.ChosenQuality, authorized.Request.Requested, progress.State, detail);
+}
 
 internal readonly record struct RunSummary(int Delivered, int Planned, long Experience, long Seals, long SealsLost, long GilSpent, bool DrySpend, TimeSpan Duration, bool DryRun);
 

@@ -38,6 +38,7 @@ internal static class RunPanel
     private const float RowItemIconSize = 24f;
     private const float RowStateColumn = 18f;
     private const float NoteGap = 6f;
+    private const float QuantityGap = 6f;
     private const int StepCount = 6;
     private const int FinishingStep = 5;
     private const int ProgressKeyShift = 16;
@@ -52,6 +53,8 @@ internal static class RunPanel
         L.Running.StepDone,
     ];
 
+    private static readonly CachedText[] quantityTexts = new CachedText[SupplyClasses.Count];
+
     private static CachedText progressText;
     private static CachedText spentText;
 
@@ -59,11 +62,10 @@ internal static class RunPanel
     {
         var controller = plugin.Controller;
         var run = controller.Run;
-        var today = controller.Today;
         var running = controller.Running;
         var (accent, accentSoft, label) = PhasePalette(controller);
 
-        DrawHeaderStrip(controller, run, today, accent, accentSoft);
+        DrawHeaderStrip(controller, run, controller.Today, accent, accentSoft);
         Styling.VSpace(6f);
         if (running)
         {
@@ -93,7 +95,7 @@ internal static class RunPanel
             DrawShopperCard(run);
         }
 
-        DrawRows(run, today);
+        DrawRows(run, controller.Labels);
         Styling.VSpace(12f);
     }
 
@@ -405,7 +407,7 @@ internal static class RunPanel
         ImGui.Dummy(size);
     }
 
-    private static void DrawRows(RunModel run, TodayModel today)
+    private static void DrawRows(RunModel run, IRowLabels labels)
     {
         var rows = run.Rows;
         if (rows.Length == 0)
@@ -428,14 +430,14 @@ internal static class RunPanel
                 continue;
             }
 
-            DrawRow(rows[index], today, min, max);
+            DrawRow(rows.ItemRef(index), index, labels, min, max);
         }
 
         ImGui.SetCursorScreenPos(top);
         ImGui.Dummy(new Vector2(width, rows.Length * stride - RowGap * scale));
     }
 
-    private static void DrawRow(in RunRow row, TodayModel today, Vector2 min, Vector2 max)
+    private static void DrawRow(in RunRow row, int rowIndex, IRowLabels labels, Vector2 min, Vector2 max)
     {
         var scale = ImGuiHelpers.GlobalScale;
         var drawList = ImGui.GetWindowDrawList();
@@ -462,20 +464,12 @@ internal static class RunPanel
         ItemIcon.Draw(drawList, SupplyClasses.IconId(row.ClassJobId), new Vector2(x, midY - classSize * 0.5f), classSize);
         x += classSize + 8f * scale;
 
-        var name = SupplyClasses.Abbreviation(row.ClassJobId);
-        var className = string.Empty;
-        var todayIndex = FindTodayRow(today, row.ClassJobId);
-        if (todayIndex >= 0)
-        {
-            ref readonly var known = ref today.Rows.ItemRef(todayIndex);
-            var itemSize = RowItemIconSize * scale;
-            var highQuality = known.Decision.Request.Kind == SupplyMissionKind.Supply && known.Decision.ChosenQuality == ItemQuality.High;
-            ItemIcon.Draw(drawList, known.ItemIconId, new Vector2(x, midY - itemSize * 0.5f), itemSize, highQuality);
-            x += itemSize + 10f * scale;
-            name = known.ItemName;
-            className = known.ClassName;
-        }
+        var itemSize = RowItemIconSize * scale;
+        ItemIcon.Draw(drawList, labels.ItemIconId(row.ItemId), new Vector2(x, midY - itemSize * 0.5f), itemSize, row.Quality == ItemQuality.High);
+        x += itemSize + 10f * scale;
 
+        var itemName = labels.ItemName(row.ItemId);
+        var name = itemName.Length > 0 ? itemName : SupplyClasses.Abbreviation(row.ClassJobId);
         var stateLabel = RunLabels.RowStateLabel(row.State);
         float badgeWidth;
         using (Fonts.PushCaption())
@@ -487,34 +481,21 @@ internal static class RunPanel
         Badge.Draw(drawList, stateLabel, color, right, midY);
         var textRight = right - badgeWidth - 12f * scale;
         var lineY = midY - ImGui.GetTextLineHeight() * 0.5f;
-        var shown = TextDraw.Truncate(name, MathF.Max(0f, textRight - x));
+        var quantity = quantityTexts[rowIndex].Get(row.Requested, static requested => Loc.T(L.Requests.Quantity, requested));
+        var quantityGap = QuantityGap * scale;
+        var quantityWidth = TextDraw.Measure(quantity).X;
+        var shown = TextDraw.Truncate(name, MathF.Max(0f, textRight - x - quantityGap - quantityWidth));
         TextDraw.At(shown, new Vector2(x, lineY), RunLabels.IsDelivered(row.State) ? Styling.AccentMintSoft : Styling.TextStrong);
-        if (className.Length > 0)
+        var quantityX = x + TextDraw.Measure(shown).X + quantityGap;
+        TextDraw.At(quantity, new Vector2(quantityX, lineY), Styling.AccentGlowSoft);
+        using (Fonts.PushCaption())
         {
-            using (Fonts.PushCaption())
-            {
-                var classX = x + TextDraw.Measure(shown).X;
-                TextDraw.Trailing(className, classX, textRight, midY - ImGui.GetTextLineHeight() * 0.5f, Styling.TextMuted);
-            }
+            TextDraw.Trailing(labels.ClassName(row.ClassJobId), quantityX + quantityWidth, textRight, midY - ImGui.GetTextLineHeight() * 0.5f, Styling.TextMuted);
         }
 
         if (hovered && row.Detail.Length > 0)
         {
             Tooltip.Show(row.Detail);
         }
-    }
-
-    private static int FindTodayRow(TodayModel today, byte classJobId)
-    {
-        var rows = today.Rows;
-        for (var index = 0; index < rows.Length; index++)
-        {
-            if (rows.ItemRef(index).Decision.Request.ClassJobId == classJobId)
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 }
