@@ -88,6 +88,18 @@ internal sealed partial class GcRunController
             return;
         }
 
+        if (active.End != RunEnd.None)
+        {
+            return;
+        }
+
+        StopTask();
+        if (Settling)
+        {
+            StopAfterHandIn(active);
+            return;
+        }
+
         EndNow(active, "stopped by the player");
     }
 
@@ -194,6 +206,11 @@ internal sealed partial class GcRunController
         {
             settlingTask = null;
             RunLog.Info("The stopped hand-in finished closing the Personnel Officer's windows.");
+            if (currentTask is null && session is { End: not RunEnd.None } stopped)
+            {
+                Settle(stopped);
+            }
+
             return;
         }
 
@@ -228,6 +245,15 @@ internal sealed partial class GcRunController
 
         RunLog.Info($"Run stopped: {reason}.");
         Settle(active);
+    }
+
+    private void StopAfterHandIn(GcRunSession active)
+    {
+        active.Conclude(RunEnd.Stopped);
+        active.RequestStop(Environment.TickCount64);
+        PauseReason = PauseReason.None;
+        tracker.SetStatus(Loc.T(L.Run.StatusClosingList));
+        RunLog.Info("Run stopped by the player; it ends once the stopped hand-in has closed the Personnel Officer's windows and reported its rows.");
     }
 
     private void StopTask()

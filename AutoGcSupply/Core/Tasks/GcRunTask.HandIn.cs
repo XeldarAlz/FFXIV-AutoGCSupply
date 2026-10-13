@@ -64,6 +64,7 @@ internal sealed partial class GcRunTask
             await AwaitCleanup(driver);
         }
 
+        MirrorRows(driver, plan);
         HandingIn = false;
         if (CancelToken.IsCancellationRequested)
         {
@@ -79,7 +80,7 @@ internal sealed partial class GcRunTask
             return false;
         }
 
-        MirrorHandIn(driver, plan);
+        ShowHandInStep(driver, plan);
         var result = driver.Result;
         var verdict = RunOutcomeRule.AfterHandIn(result, session.Progress, dryRun);
         switch (verdict.End)
@@ -128,12 +129,16 @@ internal sealed partial class GcRunTask
 
     private void MirrorHandIn(HandInDriver driver, in HandInPlan plan)
     {
+        MirrorRows(driver, plan);
+        ShowHandInStep(driver, plan);
+    }
+
+    private void MirrorRows(HandInDriver driver, in HandInPlan plan)
+    {
         if (HandInMirror.Apply(driver.Rows, plan.RowOfTarget, session.Progress) > 0)
         {
             session.PublishRows();
         }
-
-        ShowHandInStep(driver, plan);
     }
 
     private void ShowHandInStep(HandInDriver driver, in HandInPlan plan)
