@@ -50,7 +50,7 @@ body:
     id: region
     attributes:
       label: Region
-      description: Game data and market board prices differ per region, so the region is a frequent root cause.
+      description: Game data, client languages and market board prices differ per region, so the region is a frequent root cause.
       options:
         - North America
         - Europe
@@ -67,15 +67,24 @@ body:
       description: Which Grand Company is your character in, and on which world did the run fail?
       placeholder: "Immortal Flames, on Gilgamesh (Aether)"
 
-  - type: dropdown
-    id: buying
+  - type: input
+    id: shopper-version
     attributes:
-      label: Did the run buy anything?
-      description: Auto GC Supply buys missing items through Auto Shopper, with Auto Shopper's own dry run, caps and confirmations. A hand-in-only run buys nothing.
+      label: Auto Shopper version
+      description: Shown in `/xlplugins` next to "Auto Shopper". Buying needs 1.1.0.0 or later. Write "not installed" when you run hand-in only.
+      placeholder: "1.1.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dry-run
+    attributes:
+      label: Was Auto Shopper's dry run on?
+      description: The Dry run tile next to Automate shows Auto Shopper's switch. While it is on, a run buys nothing and hands nothing in. Without Auto Shopper there is no dry run, and a hand-in-only run delivers for real.
       options:
-        - Yes, Auto Shopper bought items for this run
-        - Auto Shopper ran, but on dry run
-        - No, it was a hand-in-only run
+        - Yes, it was a dry run (nothing bought or handed in)
+        - No, it bought or handed in for real
+        - Auto Shopper is not installed or is too old (hand-in only, for real)
         - Not sure
     validations:
       required: true
@@ -84,16 +93,16 @@ body:
     id: stage
     attributes:
       label: Where in the run did it fail?
-      description: The Today page and the Console show the stage a run is in. A run goes reading the requests -> buying through Auto Shopper -> travelling to your Grand Company -> walking to the Personnel Officer -> handing in -> confirming the delivery.
+      description: The run view on the Today page and the Console show the stage a run is in. A run goes reading the requests -> pricing -> buying through Auto Shopper -> travelling to your Grand Company -> handing in at the Personnel Officer -> confirming each delivery.
       options:
-        - Before Automate (the Today page, the request list, owned counts, estimates, settings)
-        - Reading the day's supply and provisioning requests
-        - Buying the missing items through Auto Shopper
-        - Travelling to your Grand Company (teleport, aethernet, walking)
-        - Walking to or talking to the Personnel Officer
-        - Handing in an item (wrong item, wrong quality, a prompt it should not answer)
-        - Confirming a delivery (seals, XP or the remaining requests looked wrong)
-        - Pausing, resuming or stopping a run
+        - Before Automate (the Today page, the request list, owned counts, estimates, the spend cap, settings, Automate refusing to start)
+        - Reading the requests (the Timers window, missing or wrong requests, the daily reset)
+        - Pricing (prices that never came, failed, or look wrong)
+        - Buying through Auto Shopper (refused, the permission card, wrong items or amounts, stopping or pausing while it buys)
+        - Travelling to your Grand Company (teleport, aethernet, walking to the Personnel Officer)
+        - Handing in (the officer's menu, the supply list, a wrong row or quality, a prompt, the reward window)
+        - Confirming a delivery (bags, seals or the supply list looked wrong, a delivery marked unconfirmed)
+        - Pausing, resuming or stopping a run outside the buying
         - History or the Console
         - Other / not sure
     validations:
@@ -107,8 +116,8 @@ body:
         **If you can provide any of these, it turns guesswork into a fix.**
 
         - **Plugin console**: open `/gcsupply log`, press *Copy log* and paste the result into the console field below. It already includes the plugin version, Dalamud version and zone.
-        - **Dalamud log**: open `/xllog`, click the *Open log folder* button at the bottom-right, attach `dalamud.log`. Filter by `[AGCS]` if you want to trim it down.
-        - **The supply and provisioning window** as a screenshot, if the plugin read a request wrong or handed in the wrong item.
+        - **Dalamud log**: open `/xllog`, click the *Open log folder* button at the bottom-right, attach `dalamud.log`. Filter by `[AGCS]` if you want to trim it down; when the buying went wrong, keep the `[ASHOP]` lines of Auto Shopper too.
+        - **The supply list and the reward window** as screenshots, if the plugin read a request wrong, picked the wrong row, or stopped on the reward window.
         - **Screenshots / short clip** if the issue is visual (selection state, wrong tooltip, frozen card, etc.)
         - **Other plugins active** that touch dialogs, movement, teleport, or input, which helps rule out conflicts.
 
@@ -124,4 +133,4 @@ body:
     id: extra
     attributes:
       label: Anything else?
-      description: Whether Auto Shopper is installed and on dry run, which classes you turn in for, hunches, anything that helps the bug land.
+      description: Your client language, the Supply quality and seal cap settings under Settings, Run, the run spend cap, which classes you turn in for, hunches, anything that helps the bug land.

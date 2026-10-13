@@ -23,15 +23,16 @@ That is the honest label and it is deliberately not the lowest one that could be
 
 Claude Code is the tool, used as a senior harness rather than as an autocomplete:
 
-- **Orchestrated agent pipelines.** Full workflows built for the task: coder agents that implement, reviewer agents that read the diff back, tester agents that exercise it. Multiple agents run per task, fanning out and reporting into one result.
-- **Review passes.** Pull request review and code review run through the same tooling, against CONTRIBUTING.md and .editorconfig as the rulebook.
-- **Autonomous execution inside human gates.** The pipeline runs unattended once started. It does not decide what to start.
+- **Planned by the human.** Each phase of the plugin (reading the requests, the hand-in, the Auto Shopper client, the run, the windows) and each round of fixes starts as a written plan: what to build, the rules it has to keep, and how it will be checked.
+- **Parallel implementers.** Claude Code agent pipelines carry the plan out, with several implementer agents working at once, each on its own branch, writing the code and its unit tests.
+- **Independent reviewers.** Separate reviewer agents read each diff back without having written it, against the plan, CONTRIBUTING.md and .editorconfig as the rulebook, and their findings go back to an implementer before anything merges.
+- **Autonomous execution inside human gates.** The pipeline runs unattended once started. It does not decide what to start, and it does not decide what ships.
 
 The human gates, in order, none of them skippable:
 
-1. **The spec comes first.** What to build, and the constraints it has to respect, are written before any agent runs.
+1. **The plan comes first.** What to build, and the constraints it has to respect, are written before any agent runs.
 2. **The diff is read.** Output is reviewed before it lands, not after users find the problem.
-3. **It is tested in the game.** On a real client, running at least one run end to end, with Auto Shopper on dry run when the change touches buying, plus one real hand-in when the change touches the hand-in. A clean `dotnet build` and a green `dotnet test` do not replace it.
+3. **It is tested in the game before release.** On a real client, at least one dry run end to end with Auto Shopper's dry run on, plus one supervised real hand-in when the change touches the run, the buying or the hand-in. A clean `dotnet build` and a green `dotnet test` do not replace it.
 4. **Ownership transfers.** Every merged line is the maintainer's to defend, explain, and fix. "The AI did it" is not an answer to why something is written the way it is.
 5. **Feedback is taken on its merits.** AI-assisted work invites sharper review, from users and from any reviewer, and that scrutiny is earned rather than unfair. The answer to a review comment is a fix or a reason, never a defense of the tooling.
 
@@ -39,7 +40,7 @@ The human gates, in order, none of them skippable:
 
 Nothing in this doc lowers a standard. Code produced with AI assistance is held to exactly the bar every other change meets: the CONTRIBUTING.md checklist, the .editorconfig style, one concern per pull request, and `[AGCS]` log lines that make every step of a run auditable. A reviewer cannot tell which lines came from where, and that is the point.
 
-The one thing AI use does change is where the verification effort goes. AI gets Dalamud and FFXIVClientStructs APIs wrong often enough that any call into either is suspect until it has run in game. The calls into vnavmesh, Lifestream and Auto Shopper, the helpers listed in `/gcsupply deps`, deserve the same suspicion: a call that compiles says nothing about whether the other plugin still answers it the same way. The hand-in deserves the most: every delivery is verified, and buying stays with Auto Shopper, whose dry run lets a run be watched before it spends anything.
+The one thing AI use does change is where the verification effort goes. AI gets Dalamud and FFXIVClientStructs APIs wrong often enough that any call into either is suspect until it has run in game, and the supply list, the officer's windows and the reward window are read straight from game memory. The IPC calls into vnavmesh and into Auto Shopper's Buying API, with the helpers listed in `/gcsupply deps`, deserve the same suspicion: a call that compiles says nothing about whether the other plugin still answers it the same way. The hand-in deserves the most: the officer's menu is chosen by its text, rows are matched by item and class, the reward window is checked before Deliver, the only prompt answered Yes is the game's HQ trade prompt on an HQ row, and every delivery is confirmed by bags and seals. Buying stays with Auto Shopper, whose dry run covers the whole run, so a run can be watched before it spends or hands in anything.
 
 ## If you contribute
 
@@ -53,7 +54,7 @@ Nobody is judged for the level they declare. An undeclared one is the problem.
 
 ## Translations
 
-The eight non-English catalogs under AutoGcSupply/Localization/ are AI-assisted with human review. English is the source: it is the default text of every string in the `Core/Localization/L*.cs` files, and en.json is never loaded when the plugin runs in English. Game data is not translated at all: zone, item, and world names are read from the game client, so they always match what the player sees in their own client.
+The eight non-English catalogs under AutoGcSupply/Localization/ are AI-assisted with human review. English is the source: it is the default text of every string in the `Core/Localization/L*.cs` files, and en.json is never loaded when the plugin runs in English. Game data is not translated at all: zone, item, and world names are read from the game client, and so are the officer's menu option and the HQ trade prompt the hand-in looks for, so they always match what the player sees in their own client.
 
 This is the approach Dalamud's policy asks for, and the gap is coverage rather than method: catalogs without a native-speaker pass should be treated as placeholders until one lands. Native corrections are welcome from anyone, through the [translation issue form](https://github.com/XeldarAlz/FFXIV-AutoGCSupply/issues/new?template=translation_report.yml).
 
@@ -61,7 +62,7 @@ This is the approach Dalamud's policy asks for, and the gap is coverage rather t
 
 - **Nobody enforces this on the project, which is the whole point.** A custom repository has no review queue and no ban list, so every rule here holds because the project chose it. Standards that only survive enforcement are not standards.
 - **The no-attribution git rule is not concealment.** Commits here carry no co-author trailers or generated-with footers, so a commit message holds substantive content only. Disclosure lives in this doc and in pull request descriptions instead. The history on master carries no trailers at all, which is exactly why this doc has to exist: without it, nothing in the repository would say how the code was written.
-- **A clean build is not a test.** Item 3 of the human gates exists because AI output compiles far more reliably than it works. Grand Company headquarters and their officers differ per city, so a fix proven for one Grand Company says nothing about another.
+- **A clean build is not a test.** Item 3 of the human gates exists because AI output compiles far more reliably than it works. Grand Company headquarters and their officers differ per city, and the officer's menu text differs per client language, so a fix proven for one Grand Company or one language says nothing about another.
 
 ## Related docs
 
