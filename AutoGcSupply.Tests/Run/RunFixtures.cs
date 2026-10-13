@@ -74,6 +74,17 @@ internal static class RunFixtures
         return rows;
     }
 
+    public static RowProgress[] Progress(params RowRunState[] states)
+    {
+        var progress = new RowProgress[states.Length];
+        for (var index = 0; index < states.Length; index++)
+        {
+            progress[index] = RowProgress.Of(states[index], RowNote.None);
+        }
+
+        return progress;
+    }
+
     public static ShopperRunView RunView(bool terminal, ShopperRunOutcome outcome, params ShopperRunLine[] lines)
     {
         return ShopperRunView.Failed(ShopperReply.Valid) with

@@ -1,0 +1,31 @@
+namespace AutoGcSupply.Core.Tasks.Model;
+
+internal enum RowNote : byte
+{
+    None,
+    InBags,
+    ToBuy,
+    Buying,
+    Bought,
+    NoPrice,
+    NoListings,
+    ShopperMissing,
+    ShopperOutdated,
+    PriceCapExceeded,
+    NoStock,
+    InventoryFull,
+    InsufficientGil,
+    BudgetReached,
+    NotMarketable,
+    ShopperIssue,
+    RequestChanged,
+    DayChanged,
+    AlreadyHandedIn,
+    NotInBags,
+    SealCap,
+    NotOffered,
+    HandingIn,
+    HandedIn,
+    WouldHandIn,
+    Unconfirmed,
+}
