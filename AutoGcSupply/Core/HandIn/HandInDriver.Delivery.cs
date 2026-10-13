@@ -122,6 +122,7 @@ internal sealed partial class HandInDriver
         var verdict = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
         if (verdict == RewardWindowVerdict.Matches)
         {
+            WarnIfCapHidesQuality(target, sealsBefore);
             return Halt.None;
         }
 
@@ -132,6 +133,19 @@ internal sealed partial class HandInDriver
         Warn($"Hand-in: {detail} ({verdict}); cancelling it");
         await OfficerWindows.CloseReward(cancelled);
         return new Halt(HandInPauseReason.RewardWindowMismatch, detail) { RewardWindow = mismatch };
+    }
+
+    private void WarnIfCapHidesQuality(in HandInTarget target, int sealsBefore)
+    {
+        if (!RewardWindowCheck.CapHidesQuality(target, sealsBefore, sealCap))
+        {
+            return;
+        }
+
+        Warn(
+            $"Hand-in: the seal cap leaves room for {RewardWindowCheck.LowestSeals(target.SealReward, sealsBefore, sealCap)} seals, no more than normal quality pays " +
+            $"({RewardWindowCheck.NormalQualitySeals(target.SealReward)}), so the reward window's seals cannot tell a normal-quality swap on {HandInReads.Describe(target)}. " +
+            "No reward window value is known to hold the experience to compare instead; the bag count after Deliver confirms the quality.");
     }
 
     private async Task<Halt> PressDeliver(HandInTarget target)

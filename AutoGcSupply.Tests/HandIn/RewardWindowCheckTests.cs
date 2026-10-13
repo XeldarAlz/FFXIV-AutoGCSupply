@@ -96,6 +96,56 @@ public sealed class RewardWindowCheckTests
     }
 
     [Fact]
+    public void PassesNormalQualitySealsOnceTheCapLeavesNoMoreThanThem()
+    {
+        var shown = new RewardWindowSample(true, MapleLumber, NormalSeals);
+
+        Assert.Equal(RewardWindowVerdict.Matches, RewardWindowCheck.Judge(shown, MapleLumber, highQualityRow, RankCap - NormalSeals, RankCap));
+    }
+
+    [Theory]
+    [InlineData(RankCap - NormalSeals)]
+    [InlineData(RankCap - 1)]
+    [InlineData(RankCap)]
+    public void SaysTheCapHidesTheQualityWhenItLeavesNoMoreThanNormalQualitySeals(int sealsBefore)
+    {
+        Assert.True(RewardWindowCheck.CapHidesQuality(highQualityRow, sealsBefore, RankCap));
+    }
+
+    [Theory]
+    [InlineData(NoSealsYet)]
+    [InlineData(RankCap - HighSeals)]
+    [InlineData(RankCap - NormalSeals - 1)]
+    public void SaysTheSealsTellTheQualityWhileTheCapLeavesMoreThanNormalQualitySeals(int sealsBefore)
+    {
+        Assert.False(RewardWindowCheck.CapHidesQuality(highQualityRow, sealsBefore, RankCap));
+    }
+
+    [Fact]
+    public void NeverSaysTheCapHidesTheQualityOfANormalQualityRow()
+    {
+        Assert.False(RewardWindowCheck.CapHidesQuality(normalQualityRow, RankCap, RankCap));
+    }
+
+    [Fact]
+    public void NeverSaysTheCapHidesTheQualityWithoutAKnownCap()
+    {
+        Assert.False(RewardWindowCheck.CapHidesQuality(highQualityRow, RankCap, SealCapRule.UnknownCap));
+    }
+
+    [Fact]
+    public void NeverSaysTheCapHidesTheQualityOfARowWithoutSeals()
+    {
+        Assert.False(RewardWindowCheck.CapHidesQuality(highQualityRow with { SealReward = 0 }, RankCap, RankCap));
+    }
+
+    [Fact]
+    public void HalvesHighQualitySealsForNormalQuality()
+    {
+        Assert.Equal(NormalSeals, RewardWindowCheck.NormalQualitySeals(HighSeals));
+    }
+
+    [Fact]
     public void ChecksOnlyTheItemWhenTheRowsSealsAreUnknown()
     {
         var unknownSealsRow = highQualityRow with { SealReward = 0 };

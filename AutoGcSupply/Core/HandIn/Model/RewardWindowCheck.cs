@@ -1,3 +1,6 @@
+using AutoGcSupply.Core.Inventory.Model;
+using AutoGcSupply.Core.Value.Model;
+
 namespace AutoGcSupply.Core.HandIn.Model;
 
 internal static class RewardWindowCheck
@@ -33,6 +36,13 @@ internal static class RewardWindowCheck
             PromptText.Normalize(expectedItemName),
             LowestSeals(target.SealReward, sealsBefore, sealCap),
             HighestSeals(target.SealReward));
+
+    public static bool CapHidesQuality(in HandInTarget target, int sealsBefore, int sealCap)
+        => target.Quality == ItemQuality.High
+        && target.SealReward > 0
+        && LowestSeals(target.SealReward, sealsBefore, sealCap) <= NormalQualitySeals(target.SealReward);
+
+    public static int NormalQualitySeals(int highQualitySeals) => highQualitySeals / RewardMath.HighQualitySupplyFactor;
 
     public static bool SealsFit(int shownSeals, int expectedSeals, int sealsBefore, int sealCap)
     {
