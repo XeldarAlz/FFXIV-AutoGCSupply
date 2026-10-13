@@ -63,7 +63,7 @@ internal static class DryRunTile
             TextDraw.At(TextDraw.Truncate(caption, textWidth), new Vector2(textX, top + titleHeight + LineGap * scale), dryRun ? Styling.AccentBlueSoft : Styling.AccentAmberSoft);
         }
 
-        var titleTop = midY - (titleHeight + LineGap * scale + CaptionHeight()) * 0.5f;
+        var titleTop = midY - (titleHeight + LineGap * scale + TextDraw.CaptionLineHeight()) * 0.5f;
         TextDraw.At(TextDraw.Truncate(Loc.T(L.Automate.DryRun), textWidth), new Vector2(textX, titleTop), Styling.TextStrong);
         if (hit.Hovered)
         {
@@ -75,11 +75,4 @@ internal static class DryRunTile
         }
     }
 
-    private static float CaptionHeight()
-    {
-        using (Fonts.PushCaption())
-        {
-            return ImGui.GetTextLineHeight();
-        }
-    }
 }

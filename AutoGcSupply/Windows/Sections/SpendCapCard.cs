@@ -18,6 +18,10 @@ internal static class SpendCapCard
     private const float ButtonGap = 10f;
     private const float LineGap = 3f;
     private const string FieldId = "##agcs_today_spend_cap";
+    private const long CapMissing = 0;
+    private const long CapCovers = 1;
+    private const long CapBelow = 2;
+    private const long VerdictCount = 3;
 
     private static readonly GilField.Buffer buffer = new();
     private static CachedText statusText;
@@ -70,16 +74,12 @@ internal static class SpendCapCard
         var contentRight = (showSuggest ? suggestX : fieldX) - 14f * scale;
         var contentWidth = MathF.Max(0f, contentRight - contentX);
         var lineHeight = ImGui.GetTextLineHeight();
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (lineHeight + LineGap * scale + captionHeight) * 0.5f;
         var title = Loc.T(L.Requests.SpendCap);
         TextDraw.At(TextDraw.Truncate(title, contentWidth), new Vector2(contentX, top), Styling.TextStrong);
-        var status = statusText.Get(HashCode.Combine(today.Revision, cap), static _ => Status(Plugin.Instance.Controller.Today));
+        var status = Status(cap, today.Totals.EstimatedSpend);
         using (Fonts.PushCaption())
         {
             TextDraw.At(TextDraw.Truncate(status, contentWidth), new Vector2(contentX, top + lineHeight + LineGap * scale), statusColor);
@@ -94,14 +94,22 @@ internal static class SpendCapCard
         ImGui.Dummy(size);
     }
 
-    private static string Status(TodayModel today)
+    private static string Status(long cap, long estimate)
     {
-        if (today.SpendCap <= 0)
+        var verdict = cap <= 0 ? CapMissing : cap >= estimate ? CapCovers : CapBelow;
+        var key = estimate * VerdictCount + verdict;
+        if (statusText.TryGet(key, out var text))
         {
-            return Loc.T(L.Requests.SpendCapMissing);
+            return text;
         }
 
-        var estimate = Formatting.Gil(today.Totals.EstimatedSpend);
-        return today.SpendCap >= today.Totals.EstimatedSpend ? Loc.T(L.Requests.SpendCapCovers, estimate) : Loc.T(L.Requests.SpendCapBelow, estimate);
+        var gil = Formatting.Gil(estimate);
+        var built = verdict switch
+        {
+            CapMissing => Loc.T(L.Requests.SpendCapMissing),
+            CapCovers => Loc.T(L.Requests.SpendCapCovers, gil),
+            _ => Loc.T(L.Requests.SpendCapBelow, gil),
+        };
+        return statusText.Set(key, built);
     }
 }

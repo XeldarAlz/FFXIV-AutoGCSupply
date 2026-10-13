@@ -41,7 +41,7 @@ internal static class NeedsPlayerCard
         };
 
         var accent = reason is NeedsPlayerReason.DeliveryUnconfirmed or NeedsPlayerReason.ShopperUncertainPurchase ? Styling.AccentRose : Styling.AccentAmber;
-        var resume = controller.Paused;
+        var resume = controller.Paused && controller.PauseReason != PauseReason.InContent;
         var stop = controller.Running;
         var buttons = (shopperOwned ? 1 : 0) + (resume ? 1 : 0) + (stop ? 1 : 0);
         var card = BeginCard(title, body, facts, accent, buttons);

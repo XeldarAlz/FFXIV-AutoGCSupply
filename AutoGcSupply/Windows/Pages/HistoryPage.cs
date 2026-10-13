@@ -99,9 +99,14 @@ internal sealed class HistoryPage
         {
             var record = records[index];
             completedRuns += record.End == RunEnd.Completed ? 1 : 0;
+            if (record.DryRun)
+            {
+                continue;
+            }
+
             experienceSum += record.Experience;
             sealsSum += record.Seals;
-            spentSum += record.DryRun ? 0 : record.GilSpent;
+            spentSum += record.GilSpent;
         }
 
         var culture = Loc.Culture;
@@ -178,11 +183,7 @@ internal sealed class HistoryPage
         var textX = origin.X + padX + column + 10f * scale;
 
         var whenSize = TextDraw.Measure(text.When);
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (whenSize.Y + 3f * scale + captionHeight) * 0.5f;
         TextDraw.At(text.When, new Vector2(textX, top), Styling.TextStrong);

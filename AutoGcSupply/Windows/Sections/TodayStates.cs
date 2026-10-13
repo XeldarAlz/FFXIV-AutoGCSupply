@@ -19,6 +19,7 @@ internal static class TodayStates
     private const float LineGap = 8f;
     private const float AllDoneHeight = 150f;
     private const float TrophySize = 34f;
+    private const long MinutesKeyStride = 4096;
 
     private static CachedText allDoneText;
 
@@ -93,17 +94,15 @@ internal static class TodayStates
             TextDraw.Center(title, trophyCenter.X, trophyCenter.Y + TrophySize * scale * 0.5f + 14f * scale, Styling.TextStrong);
         }
 
-        var remaining = header.NextResetUtc - DateTime.UtcNow;
-        var minutes = Math.Max(0L, (long)Math.Ceiling(remaining.TotalMinutes));
-        var body = allDoneText.Get(HashCode.Combine(header.NextResetUtc, minutes), static _ => Body(Plugin.Instance.Controller.Today.Header));
+        var nextReset = Formatting.NextReset(header.NextResetUtc);
+        var minutes = Formatting.MinutesUntilReset(nextReset);
+        var key = nextReset.Ticks / TimeSpan.TicksPerMinute * MinutesKeyStride + minutes;
+        if (!allDoneText.TryGet(key, out var body))
+        {
+            body = allDoneText.Set(key, Loc.T(L.Requests.AllDoneBody, Formatting.ResetTime(nextReset), Formatting.Countdown(TimeSpan.FromMinutes(minutes))));
+        }
+
         TextDraw.Center(body, trophyCenter.X, trophyCenter.Y + TrophySize * scale * 0.5f + 14f * scale + titleHeight + 6f * scale, Styling.TextDim);
         ImGui.Dummy(size);
-    }
-
-    private static string Body(in TodayHeader header)
-    {
-        var remaining = header.NextResetUtc - DateTime.UtcNow;
-        var minutes = Math.Max(0L, (long)Math.Ceiling(remaining.TotalMinutes));
-        return Loc.T(L.Requests.AllDoneBody, TodayHeadline.ResetTime(header.NextResetUtc), Formatting.Countdown(TimeSpan.FromMinutes(minutes)));
     }
 }

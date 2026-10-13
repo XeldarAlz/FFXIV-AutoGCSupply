@@ -44,14 +44,12 @@ internal static class ActionDock
         ImGui.Dummy(size);
     }
 
-    public static bool CanPause(GcRunController controller) => controller.Phase != RunPhase.Buying;
-
     private static void DrawRunControls(GcRunController controller, float innerWidth)
     {
         var gap = ButtonGap * ImGuiHelpers.GlobalScale;
         var half = (innerWidth - gap) * 0.5f;
         var origin = ImGui.GetCursorScreenPos();
-        var canPause = CanPause(controller);
+        var canPause = ReadyState.CanPause(controller);
         if (PauseButton.Draw(controller.PauseReason, canPause, half))
         {
             controller.TogglePause();

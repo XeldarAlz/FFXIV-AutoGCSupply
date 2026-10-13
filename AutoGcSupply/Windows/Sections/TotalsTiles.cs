@@ -15,7 +15,7 @@ internal static class TotalsTiles
     private const float MinimumTileWidth = 128f;
     private const string NoValue = "-";
 
-    private static int textsRevision = -1;
+    private static TodayModel? textsModel;
     private static LanguageInfo? textsLanguage;
     private static string selected = string.Empty;
     private static string selectedSub = string.Empty;
@@ -65,12 +65,12 @@ internal static class TotalsTiles
 
     private static void Refresh(TodayModel today)
     {
-        if (today.Revision == textsRevision && ReferenceEquals(textsLanguage, Loc.Current))
+        if (ReferenceEquals(today, textsModel) && ReferenceEquals(textsLanguage, Loc.Current))
         {
             return;
         }
 
-        textsRevision = today.Revision;
+        textsModel = today;
         textsLanguage = Loc.Current;
         var totals = today.Totals;
         var culture = Loc.Culture;

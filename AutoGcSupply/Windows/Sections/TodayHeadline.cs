@@ -15,7 +15,10 @@ internal static class TodayHeadline
     private const float DetailGap = 6f;
     private const float RightGap = 18f;
     private const float PluginsButtonHeight = 30f;
-    private const string ResetTimeFormat = "t";
+    private const int StartBlockShift = 8;
+    private const int HandInShift = 16;
+    private const int ResetShift = 24;
+    private const int RevisionShift = 32;
     private const long LastRunRefreshMs = 60_000;
 
     private static CachedText detailText;
@@ -55,7 +58,13 @@ internal static class TodayHeadline
         }
 
         y += titleHeight + DetailGap * scale;
-        var detail = detailText.Get(HashCode.Combine(today.Revision, today.State, today.StartBlock), static _ => Detail(Plugin.Instance.Controller.Today));
+        var detailKey = ((Formatting.NextReset(today.Header.NextResetUtc).Ticks / TimeSpan.TicksPerMinute) << ResetShift)
+            | ((long)(byte)today.Totals.ToHandIn << HandInShift) | ((long)today.StartBlock << StartBlockShift) | (long)today.State;
+        if (!detailText.TryGet(detailKey, out var detail))
+        {
+            detail = detailText.Set(detailKey, Detail(today));
+        }
+
         TextDraw.At(TextDraw.Truncate(detail, maxTextWidth), new Vector2(origin.X, y), Styling.TextDim);
         y += detailHeight;
 
@@ -63,8 +72,6 @@ internal static class TodayHeadline
         ImGui.Dummy(new Vector2(width, y - origin.Y));
         return openPlugins;
     }
-
-    public static string ResetTime(DateTime nextResetUtc) => nextResetUtc.ToLocalTime().ToString(ResetTimeFormat, Loc.Culture);
 
     private static (FontAwesomeIcon Icon, Vector4 Color, string Greeting) Greeting() => DateTime.Now.Hour switch
     {
@@ -90,7 +97,7 @@ internal static class TodayHeadline
         TodayState.NoGrandCompany => Loc.T(L.Requests.DetailNoGrandCompany),
         TodayState.Reading => Loc.T(L.Requests.DetailReading),
         TodayState.NotLoaded => Loc.T(L.Requests.DetailNotLoaded),
-        TodayState.AllDone => Loc.T(L.Requests.DetailAllDone, ResetTime(today.Header.NextResetUtc)),
+        TodayState.AllDone => Loc.T(L.Requests.DetailAllDone, Formatting.ResetTime(today.Header.NextResetUtc)),
         _ when today.StartBlock == StartBlock.None => Loc.Plural(L.Requests.DetailReady, today.Totals.ToHandIn),
         _ => Loc.T(L.Requests.DetailBlocked, RunLabels.BlockReason(today.StartBlock)),
     };
@@ -110,9 +117,7 @@ internal static class TodayHeadline
 
         var latest = HistoryOrder.Latest(history);
         var title = latest is null ? Loc.T(L.Requests.NoRunsYet) : Loc.T(L.Requests.LastRun);
-        var detail = latest is null
-            ? Loc.T(L.Requests.ResultsAppearHere)
-            : lastRunText.Get(HashCode.Combine(history.Revision, Environment.TickCount64 / LastRunRefreshMs), static _ => LastRunDetail());
+        var detail = latest is null ? Loc.T(L.Requests.ResultsAppearHere) : LastRunDetail(latest, history.Revision);
         using (Fonts.PushCaption())
         {
             var titleSize = TextDraw.Measure(title);
@@ -125,13 +130,14 @@ internal static class TodayHeadline
         }
     }
 
-    private static string LastRunDetail()
+    private static string LastRunDetail(RunRecord record, int revision)
     {
-        if (HistoryOrder.Latest(Plugin.Instance.History) is not { } record)
+        var key = ((long)revision << RevisionShift) | ((Environment.TickCount64 / LastRunRefreshMs) & uint.MaxValue);
+        if (lastRunText.TryGet(key, out var text))
         {
-            return string.Empty;
+            return text;
         }
 
-        return Loc.T(L.Requests.LastRunDetail, Formatting.RelativeTime(record.EndedAtUtc), record.Delivered, record.Planned);
+        return lastRunText.Set(key, Loc.T(L.Requests.LastRunDetail, Formatting.RelativeTime(record.EndedAtUtc), record.Delivered, record.Planned));
     }
 }

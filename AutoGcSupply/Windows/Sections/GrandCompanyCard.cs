@@ -83,11 +83,7 @@ internal static class GrandCompanyCard
             nameHeight = ImGui.GetTextLineHeight();
         }
 
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (nameHeight + LineGap * scale + captionHeight) * 0.5f;
         var name = GrandCompanyText.CompanyName(header.GrandCompany);
@@ -139,19 +135,8 @@ internal static class GrandCompanyCard
 
     private static void DrawReset(in TodayHeader header, float right, float midY)
     {
-        if (header.NextResetUtc == default)
-        {
-            return;
-        }
-
         var scale = ImGuiHelpers.GlobalScale;
-        var remaining = header.NextResetUtc - DateTime.UtcNow;
-        if (remaining < TimeSpan.Zero)
-        {
-            remaining = TimeSpan.Zero;
-        }
-
-        var minutes = (long)Math.Ceiling(remaining.TotalMinutes);
+        var minutes = Formatting.MinutesUntilReset(header.NextResetUtc);
         var countdown = countdownText.Get(minutes, static value => Formatting.Countdown(TimeSpan.FromMinutes(value)));
         var label = Loc.T(L.Requests.ResetsIn);
         var labelSize = TextDraw.SmallCapsSize(label);
@@ -172,7 +157,8 @@ internal static class GrandCompanyCard
 
         if (Hit.HoveringRect(new Vector2(right - width, top), new Vector2(right, top + labelSize.Y + gap + valueSize.Y)))
         {
-            var help = resetHelpText.Get(header.NextResetUtc.Ticks, static ticks => Loc.T(L.Requests.ResetHelp, TodayHeadline.ResetTime(new DateTime(ticks, DateTimeKind.Utc))));
+            var nextReset = Formatting.NextReset(header.NextResetUtc);
+            var help = resetHelpText.Get(nextReset.Ticks, static ticks => Loc.T(L.Requests.ResetHelp, Formatting.ResetTime(new DateTime(ticks, DateTimeKind.Utc))));
             Tooltip.Show(help);
         }
     }

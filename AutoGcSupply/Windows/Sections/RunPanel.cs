@@ -203,11 +203,7 @@ internal static class RunPanel
     {
         var scale = ImGuiHelpers.GlobalScale;
         var bodyLine = ImGui.GetTextLineHeight();
-        float captionLine;
-        using (Fonts.PushCaption())
-        {
-            captionLine = ImGui.GetTextLineHeight();
-        }
+        var captionLine = TextDraw.CaptionLineHeight();
 
         var chip = captionLine + ChipPadY * 2f * scale;
         var gaps = (CardPadY * 2f + ChipGap + StatusGap + BarHeight) * scale;
@@ -292,17 +288,13 @@ internal static class RunPanel
         var drawList = ImGui.GetWindowDrawList();
         Paint.Surface(drawList, origin, end, Styling.CardRounding * scale, Styling.WithAlpha(Styling.Surface1, 0.45f), Styling.WithAlpha(Styling.BorderDim, 0.5f), topLight: false);
 
-        var current = StepIndex(run.Step);
+        var current = !running && run.End is RunEnd.Completed or RunEnd.CompletedPartial ? StepCount : StepIndex(run.Step);
         var halted = running ? run.NeedsPlayer != NeedsPlayerReason.None : run.End is RunEnd.Stopped or RunEnd.Failed or RunEnd.NeedsPlayer;
         var haltColor = running || run.End == RunEnd.NeedsPlayer ? Styling.AccentAmber : Styling.AccentRose;
         var radius = StepRadius * scale;
         var padX = PadX * scale + radius;
         var spacing = (size.X - padX * 2f) / (StepCount - 1);
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var circleY = origin.Y + (size.Y - (radius * 2f + StepLabelGap * scale + captionHeight)) * 0.5f + radius;
         for (var step = 0; step < StepCount - 1; step++)
@@ -403,11 +395,7 @@ internal static class RunPanel
         var x = iconCenter.X + iconBox * 0.5f + 14f * scale;
         var width = MathF.Max(0f, end.X - padX - spentWidth - 14f * scale - x);
         var lineHeight = ImGui.GetTextLineHeight();
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (captionHeight + 3f * scale + lineHeight) * 0.5f;
         TextDraw.SmallCaps(Loc.T(L.Running.ShopperTitle), new Vector2(x, top), Styling.TextMuted);
@@ -473,12 +461,18 @@ internal static class RunPanel
         ItemIcon.Draw(drawList, SupplyClasses.IconId(row.ClassJobId), new Vector2(x, midY - classSize * 0.5f), classSize);
         x += classSize + 8f * scale;
 
-        var todayRow = FindTodayRow(today, row.ClassJobId);
-        var itemSize = RowItemIconSize * scale;
-        if (todayRow is { } known)
+        var name = SupplyClasses.Abbreviation(row.ClassJobId);
+        var className = string.Empty;
+        var todayIndex = FindTodayRow(today, row.ClassJobId);
+        if (todayIndex >= 0)
         {
-            ItemIcon.Draw(drawList, known.ItemIconId, new Vector2(x, midY - itemSize * 0.5f), itemSize, known.Decision.ChosenQuality == ItemQuality.High);
+            ref readonly var known = ref today.Rows.ItemRef(todayIndex);
+            var itemSize = RowItemIconSize * scale;
+            var highQuality = known.Decision.Request.Kind == SupplyMissionKind.Supply && known.Decision.ChosenQuality == ItemQuality.High;
+            ItemIcon.Draw(drawList, known.ItemIconId, new Vector2(x, midY - itemSize * 0.5f), itemSize, highQuality);
             x += itemSize + 10f * scale;
+            name = known.ItemName;
+            className = known.ClassName;
         }
 
         var stateLabel = RunLabels.RowStateLabel(row.State);
@@ -490,8 +484,6 @@ internal static class RunPanel
 
         var right = max.X - padX;
         Badge.Draw(drawList, stateLabel, color, right, midY);
-        var name = todayRow is { } found ? found.ItemName : SupplyClasses.Abbreviation(row.ClassJobId);
-        var className = todayRow is { } owner ? owner.ClassName : string.Empty;
         var textRight = right - badgeWidth - 12f * scale;
         var lineY = midY - ImGui.GetTextLineHeight() * 0.5f;
         var shown = TextDraw.Truncate(name, MathF.Max(0f, textRight - x));
@@ -511,17 +503,17 @@ internal static class RunPanel
         }
     }
 
-    private static TodayRow? FindTodayRow(TodayModel today, byte classJobId)
+    private static int FindTodayRow(TodayModel today, byte classJobId)
     {
         var rows = today.Rows;
         for (var index = 0; index < rows.Length; index++)
         {
-            if (rows[index].Decision.Request.ClassJobId == classJobId)
+            if (rows.ItemRef(index).Decision.Request.ClassJobId == classJobId)
             {
-                return rows[index];
+                return index;
             }
         }
 
-        return null;
+        return -1;
     }
 }

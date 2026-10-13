@@ -45,7 +45,7 @@ internal static class RequestTable
     private static RowText[] texts = [];
     private static int supplyCount;
     private static int provisioningCount;
-    private static int textsRevision = -1;
+    private static TodayModel? textsModel;
     private static LanguageInfo? textsLanguage;
 
     private readonly record struct RowText(string Level, string Quantity, string Owned, string Cost, string Experience, string Share, string Seals, string Value, string Tooltip);
@@ -101,7 +101,7 @@ internal static class RequestTable
                 continue;
             }
 
-            DrawRow(controller, rows[index], texts[index], min, max, columns);
+            DrawRow(controller, rows.ItemRef(index), texts[index], min, max, columns);
         }
 
         ImGui.SetCursorScreenPos(top);
@@ -214,7 +214,7 @@ internal static class RequestTable
         ItemIcon.Draw(drawList, SupplyClasses.IconId(request.ClassJobId), classIconMin, classIconSize);
         var itemIconSize = ItemIconSize * scale;
         var itemIconMin = new Vector2(columns.ItemIcon, midY - itemIconSize * 0.5f);
-        var highQuality = decision.ChosenQuality == ItemQuality.High && coverage != RowCoverage.Delivered;
+        var highQuality = request.Kind == SupplyMissionKind.Supply && decision.ChosenQuality == ItemQuality.High && coverage != RowCoverage.Delivered;
         ItemIcon.Draw(drawList, row.ItemIconId, itemIconMin, itemIconSize, highQuality);
         if (muted)
         {
@@ -299,11 +299,7 @@ internal static class RequestTable
         var scale = ImGuiHelpers.GlobalScale;
         var decision = row.Decision;
         var lineHeight = ImGui.GetTextLineHeight();
-        float captionHeight;
-        using (Fonts.PushCaption())
-        {
-            captionHeight = ImGui.GetTextLineHeight();
-        }
+        var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (lineHeight + CaptionGap * scale + captionHeight) * 0.5f;
         var x = columns.Name;
@@ -353,7 +349,7 @@ internal static class RequestTable
     private static void TwoLines(string first, string second, float x, float width, float midY, Vector4 firstColor, Vector4 secondColor)
     {
         var lineHeight = ImGui.GetTextLineHeight();
-        var top = midY - (lineHeight + CaptionGap * ImGuiHelpers.GlobalScale + CaptionHeight()) * 0.5f;
+        var top = midY - (lineHeight + CaptionGap * ImGuiHelpers.GlobalScale + TextDraw.CaptionLineHeight()) * 0.5f;
         TextDraw.At(TextDraw.Truncate(first, width), new Vector2(x, top), firstColor);
         using (Fonts.PushCaption())
         {
@@ -370,7 +366,7 @@ internal static class RequestTable
             return;
         }
 
-        var top = midY - (lineHeight + CaptionGap * ImGuiHelpers.GlobalScale + CaptionHeight()) * 0.5f;
+        var top = midY - (lineHeight + CaptionGap * ImGuiHelpers.GlobalScale + TextDraw.CaptionLineHeight()) * 0.5f;
         TextDraw.Right(first, right, top, firstColor);
         using (Fonts.PushCaption())
         {
@@ -378,13 +374,6 @@ internal static class RequestTable
         }
     }
 
-    private static float CaptionHeight()
-    {
-        using (Fonts.PushCaption())
-        {
-            return ImGui.GetTextLineHeight();
-        }
-    }
 
     private static Columns ColumnsFor(float left, float width)
     {
@@ -409,12 +398,12 @@ internal static class RequestTable
 
     private static void Refresh(TodayModel today)
     {
-        if (today.Revision == textsRevision && ReferenceEquals(textsLanguage, Loc.Current) && texts.Length == today.Rows.Length)
+        if (ReferenceEquals(today, textsModel) && ReferenceEquals(textsLanguage, Loc.Current))
         {
             return;
         }
 
-        textsRevision = today.Revision;
+        textsModel = today;
         textsLanguage = Loc.Current;
         var rows = today.Rows;
         if (texts.Length != rows.Length)

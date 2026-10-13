@@ -19,7 +19,7 @@ internal static class FinishedRunCard
     private const int TileCount = 5;
     private const float TileGap = 8f;
 
-    private static int textsRevision = -1;
+    private static RunSummary? textsSummary;
     private static LanguageInfo? textsLanguage;
     private static string detail = string.Empty;
     private static string delivered = string.Empty;
@@ -112,12 +112,12 @@ internal static class FinishedRunCard
 
     private static void Refresh(RunModel run)
     {
-        if (run.Revision == textsRevision && ReferenceEquals(textsLanguage, Loc.Current))
+        if (textsSummary == run.Summary && ReferenceEquals(textsLanguage, Loc.Current))
         {
             return;
         }
 
-        textsRevision = run.Revision;
+        textsSummary = run.Summary;
         textsLanguage = Loc.Current;
         var summary = run.Summary;
         var culture = Loc.Culture;
