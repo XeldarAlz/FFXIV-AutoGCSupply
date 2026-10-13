@@ -1,3 +1,4 @@
+using AutoGcSupply.Core.HandIn;
 using AutoGcSupply.Core.Localization;
 using AutoGcSupply.Core.Requests;
 using AutoGcSupply.Core.Requests.Model;
@@ -6,9 +7,12 @@ using System.Threading.Tasks;
 
 namespace AutoGcSupply.Core.Tasks;
 
-internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quotes, TimersPasses passes) : AutoCommon
+internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quotes, TimersPasses passes, Func<bool> settling) : AutoCommon
 {
+    public const int SettleBoundMs = HandInDriver.CleanupBoundMs + SettleMarginMs;
+
     private const int PollMs = TimeUnits.MillisecondsPerSecond;
+    private const int SettleMarginMs = 5 * TimeUnits.MillisecondsPerSecond;
 
     protected override async Task Execute()
     {
@@ -28,6 +32,11 @@ internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quote
 
     private async Task RunSteps()
     {
+        if (!await AwaitEarlierHandIn())
+        {
+            return;
+        }
+
         if (!await ReadRequests())
         {
             return;
@@ -50,6 +59,19 @@ internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quote
         }
 
         Finish();
+    }
+
+    private async Task<bool> AwaitEarlierHandIn()
+    {
+        if (!settling())
+        {
+            return true;
+        }
+
+        session.Tracker.SetStatus(Loc.T(L.Run.StatusClosingList));
+        Diag("Run: a stopped hand-in is still closing the Personnel Officer's windows; waiting for it before going on.");
+        await WaitUntilTimed(() => !settling(), SettleBoundMs, "run-earlier-hand-in");
+        return !CancelToken.IsCancellationRequested;
     }
 
     private async Task<bool> ReadRequests()

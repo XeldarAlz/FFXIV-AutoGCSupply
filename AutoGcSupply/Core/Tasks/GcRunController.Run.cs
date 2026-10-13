@@ -13,6 +13,10 @@ internal sealed partial class GcRunController
 {
     private GcRunSession? session;
     private GcRunTask? currentTask;
+    private GcRunTask? settlingTask;
+    private long settlingUntilMs;
+
+    public bool Settling => settlingTask is not null && Environment.TickCount64 < settlingUntilMs;
 
     public StartBlock Start()
     {
@@ -170,7 +174,7 @@ internal sealed partial class GcRunController
     {
         try
         {
-            var task = new GcRunTask(active, quotes, timersPasses);
+            var task = new GcRunTask(active, quotes, timersPasses, () => Settling);
             currentTask = task;
             ClibServices.Automation.Start(task, OnCompleted: () => _ = Svc.Framework.RunOnFrameworkThread(() => HandOff(task)));
         }
@@ -186,6 +190,13 @@ internal sealed partial class GcRunController
 
     private void HandOff(GcRunTask task)
     {
+        if (ReferenceEquals(settlingTask, task))
+        {
+            settlingTask = null;
+            RunLog.Info("The stopped hand-in finished closing the Personnel Officer's windows.");
+            return;
+        }
+
         if (!ReferenceEquals(currentTask, task))
         {
             RunLog.Debug("A run task that was paused or stopped finished unwinding.");
@@ -221,7 +232,7 @@ internal sealed partial class GcRunController
 
     private void StopTask()
     {
-        if (currentTask is null)
+        if (currentTask is not { } task)
         {
             return;
         }
@@ -229,6 +240,14 @@ internal sealed partial class GcRunController
         currentTask = null;
         ClibServices.Automation.Stop();
         NavmeshIPC.Instance.Stop();
+        if (!task.HandingIn)
+        {
+            return;
+        }
+
+        settlingTask = task;
+        settlingUntilMs = Environment.TickCount64 + GcRunTask.SettleBoundMs;
+        RunLog.Info("The stopped hand-in is closing the Personnel Officer's windows; nothing new starts until it is done.");
     }
 
     private void Settle(GcRunSession active)

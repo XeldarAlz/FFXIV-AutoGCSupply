@@ -12,6 +12,7 @@ namespace AutoGcSupply.Core.HandIn;
 internal sealed partial class HandInDriver : AutoCommon
 {
     public const int WatchdogMs = 1_200_000;
+    public const int CleanupBoundMs = 30_000;
     public const int NoTarget = RowMatch.NoTarget;
 
     private const int PollMs = 100;
@@ -53,6 +54,8 @@ internal sealed partial class HandInDriver : AutoCommon
     public ReadOnlySpan<HandInRowResult> Rows => rows;
 
     public HandInResult Result { get; private set; } = HandInResult.Running;
+
+    public bool Settled => Step == HandInStep.Finished;
 
     protected override async Task Execute()
     {

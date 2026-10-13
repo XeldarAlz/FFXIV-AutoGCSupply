@@ -13,6 +13,10 @@ namespace AutoGcSupply.Core.Tasks;
 
 internal sealed partial class GcRunTask
 {
+    private const int CleanupPollFrames = 4;
+
+    public bool HandingIn { get; private set; }
+
     private HandInPlan CountBags()
     {
         session.Tracker.SetStatus(Loc.T(L.Run.StatusCounting));
@@ -53,17 +57,14 @@ internal sealed partial class GcRunTask
         };
 
         ShowHandInStep(driver, plan);
-        bool finished;
-        Svc.Framework.Update += mirror;
-        try
+        HandingIn = true;
+        var finished = await RunDriver(driver, mirror);
+        if (!finished)
         {
-            finished = await RunCancellable(driver, HandInDriver.WatchdogMs, "run-hand-in");
-        }
-        finally
-        {
-            Svc.Framework.Update -= mirror;
+            await AwaitCleanup(driver);
         }
 
+        HandingIn = false;
         if (CancelToken.IsCancellationRequested)
         {
             return false;
@@ -91,6 +92,37 @@ internal sealed partial class GcRunTask
                 return false;
             default:
                 return true;
+        }
+    }
+
+    private async Task<bool> RunDriver(HandInDriver driver, IFramework.OnUpdateDelegate mirror)
+    {
+        Svc.Framework.Update += mirror;
+        try
+        {
+            return await RunCancellable(driver, HandInDriver.WatchdogMs, "run-hand-in");
+        }
+        catch (OperationCanceledException) when (CancelToken.IsCancellationRequested)
+        {
+            return false;
+        }
+        finally
+        {
+            Svc.Framework.Update -= mirror;
+        }
+    }
+
+    private async Task AwaitCleanup(HandInDriver driver)
+    {
+        var deadline = Environment.TickCount64 + HandInDriver.CleanupBoundMs;
+        while (!driver.Settled && Environment.TickCount64 < deadline)
+        {
+            await Svc.Framework.DelayTicks(CleanupPollFrames);
+        }
+
+        if (!driver.Settled)
+        {
+            Warn($"Run: the hand-in did not finish closing the Personnel Officer's windows within {HandInDriver.CleanupBoundMs / TimeUnits.MillisecondsPerSecond}s.");
         }
     }
 
