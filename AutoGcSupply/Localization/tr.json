@@ -306,7 +306,6 @@
   "plugins.repoHint": "Depo: {0}\nSol tık depo adresini açar · sağ tık kopyalar",
   "plugins.footer": "Kur, eklentinin kaynak deposunu Dalamud'a ekler ve kurulumu sıraya alır. Tek tıkla kurulum başarısız olursa (adres değişikliği, ağ), eklenti adına sağ tıklayıp depo adresini kopyalayın ve /xlsettings -> Experimental -> Custom Plugin Repositories üzerinden elle ekleyin.",
   "plugins.purpose.vnavmesh": "Personel subayına yürümek için yol bulma ve hareket.",
-  "plugins.purpose.lifestream": "Grand Company karargâhınıza yolculuk.",
   "plugins.purpose.autoShopper": "Eksik eşyaları pazar panosundan satın alır.",
   "log.title": "Konsol",
   "log.entries.one": "Arabellekte {0} satır",

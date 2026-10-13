@@ -306,7 +306,6 @@
   "plugins.repoHint": "リポジトリ: {0}\n左クリックでURLを開く · 右クリックでコピー",
   "plugins.footer": "導入を押すと、プラグインのリポジトリをDalamudに追加して導入を予約します。ワンクリック導入に失敗した場合（URL変更、ネットワークなど）は、プラグイン名を右クリックしてリポジトリURLをコピーし、/xlsettings -> Experimental -> Custom Plugin Repositories から手動で追加してください。",
   "plugins.purpose.vnavmesh": "人事担当官まで歩くための経路探索と移動。",
-  "plugins.purpose.lifestream": "所属グランドカンパニーの本部への移動。",
   "plugins.purpose.autoShopper": "足りないアイテムをマーケットボードで購入します。",
   "log.title": "コンソール",
   "log.entries.one": "バッファ内に{0}行",

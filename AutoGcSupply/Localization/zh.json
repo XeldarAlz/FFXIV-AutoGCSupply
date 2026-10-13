@@ -306,7 +306,6 @@
   "plugins.repoHint": "仓库：{0}\n左键打开仓库地址 · 右键复制",
   "plugins.footer": "安装会把插件的源仓库添加到Dalamud并排队安装。如果一键安装失败（地址变更、网络问题），请右键点击插件名复制仓库地址，然后通过 /xlsettings -> Experimental -> Custom Plugin Repositories 手动添加。",
   "plugins.purpose.vnavmesh": "寻路与移动，用于走到人事负责人处。",
-  "plugins.purpose.lifestream": "前往你所属大国防联军的总部。",
   "plugins.purpose.autoShopper": "在市场布告板上购买缺少的物品。",
   "log.title": "控制台",
   "log.entries.one": "缓冲区中有 {0} 行",

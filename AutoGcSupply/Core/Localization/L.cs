@@ -85,7 +85,6 @@ internal static partial class L
         public static readonly LocString Footer = new("plugins.footer",
             "Install adds the plugin's source repository to Dalamud and queues an install. If one-click install fails (URL drift, network), right-click a plugin name to copy its repo URL and add it manually via /xlsettings -> Experimental -> Custom Plugin Repositories.");
         public static readonly LocString PurposeVnavmesh = new("plugins.purpose.vnavmesh", "Pathfinding and movement for walking to the Personnel Officer.");
-        public static readonly LocString PurposeLifestream = new("plugins.purpose.lifestream", "Travel to your Grand Company's headquarters.");
         public static readonly LocString PurposeAutoShopper = new("plugins.purpose.autoShopper", "Buys the missing items on the market board.");
     }
 

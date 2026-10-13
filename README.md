@@ -78,9 +78,8 @@ Tick **Enabled**, click **+**, then **Save and Close**. Open `/xlplugins` → **
 
 ## Requirements
 
-- **vnavmesh** for walking to the Personnel Officer.
-- **Lifestream**, which Auto Shopper uses to travel between worlds. Automate stays off until both helpers are installed and loaded.
-- **Auto Shopper 1.1.0.0 or later** for buying the missing items, through its Buying API. It is optional: without it, only requests your bags already cover are handed in, and there is no dry run. The first run that buys asks you once, on Auto Shopper's Shop page, to allow Auto GC Supply; press Allow there, then press Automate again.
+- **vnavmesh** for walking to the Personnel Officer. Automate stays off until it is installed and loaded.
+- **Auto Shopper 1.1.0.0 or later** for buying the missing items, through its Buying API. It is optional: without it, only requests your bags already cover are handed in, and there is no dry run. The first run that buys asks you once, on Auto Shopper's Shop page, to allow Auto GC Supply; press Allow there, then press Automate again. Auto Shopper brings its own requirements, such as Lifestream for its trips between worlds.
 - **A Grand Company**, with runs started from your home world.
 - **A run spend cap** on the Today page or under Settings, Run, for any run that buys.
 

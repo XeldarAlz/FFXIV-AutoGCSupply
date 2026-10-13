@@ -306,7 +306,6 @@
   "plugins.repoHint": "Repo: {0}\nLinksklick öffnet die Repo-URL · Rechtsklick kopiert sie",
   "plugins.footer": "Installieren fügt das Quell-Repository des Plugins zu Dalamud hinzu und startet eine Installation. Wenn die Ein-Klick-Installation fehlschlägt (URL-Änderung, Netzwerk), klicke mit rechts auf einen Plugin-Namen, kopiere die Repo-URL und füge sie manuell über /xlsettings -> Experimental -> Custom Plugin Repositories hinzu.",
   "plugins.purpose.vnavmesh": "Wegfindung und Bewegung für den Weg zum Personaloffizier.",
-  "plugins.purpose.lifestream": "Reisen zum Hauptquartier deiner Staatsgesellschaft.",
   "plugins.purpose.autoShopper": "Kauft die fehlenden Gegenstände am Marktbrett.",
   "log.title": "Konsole",
   "log.entries.one": "{0} Zeile im Puffer",

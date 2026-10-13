@@ -49,7 +49,6 @@ internal sealed class PluginsPage
     private static string Purpose(ExternalPlugin plugin) => plugin switch
     {
         ExternalPlugin.Vnavmesh    => Loc.T(L.Plugins.PurposeVnavmesh),
-        ExternalPlugin.Lifestream  => Loc.T(L.Plugins.PurposeLifestream),
         ExternalPlugin.AutoShopper => Loc.T(L.Plugins.PurposeAutoShopper),
         _                          => ExternalPlugins.Catalog[plugin].Purpose,
     };

@@ -306,7 +306,6 @@
   "plugins.repoHint": "Dépôt : {0}\nClic gauche pour ouvrir l'URL du dépôt · clic droit pour la copier",
   "plugins.footer": "Installer ajoute le dépôt source du plugin à Dalamud et lance une installation. Si l'installation en un clic échoue (URL modifiée, réseau), faites un clic droit sur le nom du plugin pour copier l'URL du dépôt et ajoutez-la manuellement via /xlsettings -> Experimental -> Custom Plugin Repositories.",
   "plugins.purpose.vnavmesh": "Recherche de chemin et déplacement pour marcher jusqu'à l'officier du personnel.",
-  "plugins.purpose.lifestream": "Trajets jusqu'au quartier général de votre Grande Compagnie.",
   "plugins.purpose.autoShopper": "Achète les objets manquants au tableau des ventes.",
   "log.title": "Console",
   "log.entries.one": "{0} ligne en mémoire",
