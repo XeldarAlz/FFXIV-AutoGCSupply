@@ -163,7 +163,7 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
 
     private static bool RequestsLoaded() => GcSupplyReader.Read().Loaded;
 
-    private static bool PlayerFree()
+    public static bool PlayerFree()
         => Svc.Objects.LocalPlayer is not null
         && !Svc.Condition[ConditionFlag.InCombat]
         && !Svc.Condition[ConditionFlag.BoundByDuty]
