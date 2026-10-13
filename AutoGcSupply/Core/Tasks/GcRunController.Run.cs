@@ -14,12 +14,12 @@ internal sealed partial class GcRunController
     private GcRunSession? session;
     private GcRunTask? currentTask;
 
-    public void Start()
+    public StartBlock Start()
     {
         if (session is not null)
         {
             RunLog.Info("Start ignored: a run is already running.");
-            return;
+            return StartBlock.Running;
         }
 
         viewedAtMs = Environment.TickCount64;
@@ -29,7 +29,7 @@ internal sealed partial class GcRunController
         if (model.StartBlock != StartBlock.None)
         {
             RunLog.Info($"Start refused: {model.StartBlock}.");
-            return;
+            return model.StartBlock;
         }
 
         var decisions = new RowDecision[model.Rows.Length];
@@ -58,6 +58,7 @@ internal sealed partial class GcRunController
             $"{model.Totals.ToBuy} to buy for about {model.Totals.EstimatedSpend} gil under a cap of {authorization.RunCap} gil, " +
             $"tolerance {authorization.TolerancePercent}%, seal cap policy {authorization.SealCapPolicy}.");
         Launch(active);
+        return StartBlock.None;
     }
 
     public void Stop()

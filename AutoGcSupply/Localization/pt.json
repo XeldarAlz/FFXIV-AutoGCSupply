@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "Enquanto uma caixa de texto do jogo estiver em foco, como a linha do chat, uma rodada não começa nenhum movimento novo até você fechá-la. Um movimento em andamento continua.",
   "plugin.commandHelp": "Abre ou fecha a janela do Auto GC Supply. /gcsupply config | stats | deps | log | changelog | about | start (inicia a rodada) | stop (para a rodada) | pause (pausa ou retoma a rodada) | target (mostra o BaseId do alvo atual).",
   "plugin.commandHelpAlias": "Atalho para /gcsupply.",
+  "plugin.startRefused": "Automatizar não começou: {0}.",
   "plugin.configReset": "Não foi possível ler suas configurações, então o Auto GC Supply iniciou com as configurações padrão. O arquivo antigo foi guardado como {0}.",
   "plugin.configResetUnsaved": "Não foi possível ler suas configurações, então o Auto GC Supply iniciou com as configurações padrão. Não foi possível guardar o arquivo antigo; o log tem os detalhes.",
   "safety.add": "Adicionar",

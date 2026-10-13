@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "Sohbet satırı gibi oyunun bir metin kutusu odaktayken bir tur, siz kapatana kadar yeni bir harekete başlamaz. Süren bir hareket devam eder.",
   "plugin.commandHelp": "Auto GC Supply penceresini açar veya kapatır. /gcsupply config | stats | deps | log | changelog | about | start (turu başlatır) | stop (turu durdurur) | pause (turu duraklatır veya sürdürür) | target (mevcut hedefin BaseId değerini yazar).",
   "plugin.commandHelpAlias": "/gcsupply için kısayol.",
+  "plugin.startRefused": "Otomatikleştir başlamadı: {0}.",
   "plugin.configReset": "Ayarlarınız okunamadı, bu yüzden Auto GC Supply varsayılan ayarlarla başladı. Eski dosya {0} olarak saklandı.",
   "plugin.configResetUnsaved": "Ayarlarınız okunamadı, bu yüzden Auto GC Supply varsayılan ayarlarla başladı. Eski dosya saklanamadı; ayrıntılar kayıtta.",
   "safety.add": "Ekle",

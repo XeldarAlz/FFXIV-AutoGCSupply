@@ -256,6 +256,7 @@ internal static partial class L
     {
         public static readonly LocString CommandHelp = new("plugin.commandHelp", "Toggle the Auto GC Supply window. /gcsupply config | stats | deps | log | changelog | about | start (start the run) | stop (stop the run) | pause (pause or resume the run) | target (dump the current target's BaseId).");
         public static readonly LocString CommandHelpAlias = new("plugin.commandHelpAlias", "Alias for /gcsupply.");
+        public static readonly LocString StartRefused = new("plugin.startRefused", "Automate did not start: {0}.");
         public static readonly LocString ConfigReset = new("plugin.configReset", "Your settings could not be read, so Auto GC Supply started with default settings. The old file is kept as {0}.");
         public static readonly LocString ConfigResetUnsaved = new("plugin.configResetUnsaved", "Your settings could not be read, so Auto GC Supply started with default settings. The old file could not be kept; the log has the details.");
     }

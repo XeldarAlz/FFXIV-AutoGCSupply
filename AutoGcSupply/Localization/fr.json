@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "Tant qu'un champ de texte du jeu a le focus, comme la ligne de discussion, une tournée ne lance aucun nouveau déplacement avant que vous le fermiez. Un déplacement en cours continue.",
   "plugin.commandHelp": "Affiche ou masque la fenêtre d'Auto GC Supply. /gcsupply config | stats | deps | log | changelog | about | start (lance la tournée) | stop (arrête la tournée) | pause (met en pause ou reprend la tournée) | target (affiche le BaseId de la cible actuelle).",
   "plugin.commandHelpAlias": "Alias de /gcsupply.",
+  "plugin.startRefused": "Automatiser n'a pas démarré : {0}.",
   "plugin.configReset": "Vos réglages n'ont pas pu être lus, Auto GC Supply a donc démarré avec les réglages par défaut. L'ancien fichier est conservé sous {0}.",
   "plugin.configResetUnsaved": "Vos réglages n'ont pas pu être lus, Auto GC Supply a donc démarré avec les réglages par défaut. L'ancien fichier n'a pas pu être conservé ; le journal contient les détails.",
   "safety.add": "Ajouter",

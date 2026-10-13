@@ -4,7 +4,9 @@ using AutoGcSupply.Core.Game.Watchers;
 using AutoGcSupply.Core.Localization;
 using AutoGcSupply.Core.Stats;
 using AutoGcSupply.Core.Tasks;
+using AutoGcSupply.Core.Tasks.Model;
 using AutoGcSupply.Windows;
+using AutoGcSupply.Windows.Sections;
 using AutoGcSupply.Windows.Shell;
 using clib;
 using Dalamud.Game.Command;
@@ -189,7 +191,7 @@ public sealed class Plugin : IDalamudPlugin
         }
         else if (trimmed.Equals(StartSubcommand, StringComparison.OrdinalIgnoreCase))
         {
-            Controller.Start();
+            StartFromCommand();
         }
         else if (trimmed.Equals(StopSubcommand, StringComparison.OrdinalIgnoreCase))
         {
@@ -207,6 +209,18 @@ public sealed class Plugin : IDalamudPlugin
         {
             ToggleMainUi();
         }
+    }
+
+    private void StartFromCommand()
+    {
+        appWindow.Show(AppWindow.Page.Today);
+        var block = Controller.Start();
+        if (block == StartBlock.None)
+        {
+            return;
+        }
+
+        Svc.Chat.PrintError($"{GcSupplyConstants.LogPrefix} {Loc.T(L.Plugin.StartRefused, RunLabels.BlockReason(block))}");
     }
 
     private void OnDraw()

@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "Solange ein Textfeld des Spiels den Fokus hat, etwa die Chatzeile, beginnt ein Lauf keine neue Bewegung, bis du es schließt. Eine laufende Bewegung geht weiter.",
   "plugin.commandHelp": "Öffnet oder schließt das Fenster von Auto GC Supply. /gcsupply config | stats | deps | log | changelog | about | start (startet den Lauf) | stop (beendet den Lauf) | pause (pausiert den Lauf oder setzt ihn fort) | target (gibt die BaseId des aktuellen Ziels aus).",
   "plugin.commandHelpAlias": "Alias für /gcsupply.",
+  "plugin.startRefused": "Automatisieren wurde nicht gestartet: {0}.",
   "plugin.configReset": "Deine Einstellungen konnten nicht gelesen werden, daher startet Auto GC Supply mit den Standardeinstellungen. Die alte Datei liegt unter {0}.",
   "plugin.configResetUnsaved": "Deine Einstellungen konnten nicht gelesen werden, daher startet Auto GC Supply mit den Standardeinstellungen. Die alte Datei konnte nicht aufbewahrt werden; das Protokoll enthält die Details.",
   "safety.add": "Hinzufügen",

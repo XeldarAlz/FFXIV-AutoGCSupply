@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "当游戏的文本框（例如聊天输入栏）获得焦点时，运行在你关闭它之前不会开始新的移动。已在进行的移动会继续。",
   "plugin.commandHelp": "打开或关闭 Auto GC Supply 窗口。/gcsupply config | stats | deps | log | changelog | about | start（开始运行） | stop（停止运行） | pause（暂停或继续运行） | target（输出当前目标的 BaseId）。",
   "plugin.commandHelpAlias": "/gcsupply 的别名。",
+  "plugin.startRefused": "自动执行未启动：{0}。",
   "plugin.configReset": "无法读取你的设置，因此 Auto GC Supply 以默认设置启动。旧文件已保存为 {0}。",
   "plugin.configResetUnsaved": "无法读取你的设置，因此 Auto GC Supply 以默认设置启动。旧文件无法保存，详情见日志。",
   "safety.add": "添加",

@@ -437,6 +437,7 @@
   "settings.general.pauseTypingHelp": "While a text box of the game has focus, like the chat line, a run starts no new move until you close it. A move already under way carries on.",
   "plugin.commandHelp": "Toggle the Auto GC Supply window. /gcsupply config | stats | deps | log | changelog | about | start (start the run) | stop (stop the run) | pause (pause or resume the run) | target (dump the current target's BaseId).",
   "plugin.commandHelpAlias": "Alias for /gcsupply.",
+  "plugin.startRefused": "Automate did not start: {0}.",
   "plugin.configReset": "Your settings could not be read, so Auto GC Supply started with default settings. The old file is kept as {0}.",
   "plugin.configResetUnsaved": "Your settings could not be read, so Auto GC Supply started with default settings. The old file could not be kept; the log has the details.",
   "safety.add": "Add",
