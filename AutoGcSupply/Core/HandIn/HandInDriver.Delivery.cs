@@ -11,6 +11,7 @@ internal sealed partial class HandInDriver
     private const int RewardOpenTimeoutMs = 10_000;
     private const int DeliverEnableTimeoutMs = 3_000;
     private const int VerifyTimeoutMs = 10_000;
+    private const int RowCloseTimeoutMs = 10_000;
     private const int SealSettleMs = 2_000;
     private const int PromptCloseTimeoutMs = 3_000;
 
@@ -134,7 +135,7 @@ internal sealed partial class HandInDriver
                 {
                     await WaitForSealsToSettle(target);
                     RecordDelivered(Sample(target));
-                    return Halt.None;
+                    return await AwaitRowClosed(target);
                 }
 
                 if (verdict == DeliveryVerdict.Contradicted)
@@ -150,13 +151,24 @@ internal sealed partial class HandInDriver
         if (DeliveryCheck.Judge(activeBefore, after, target, sealCap, final: true) == DeliveryVerdict.Confirmed)
         {
             RecordDelivered(after);
-            return Halt.None;
+            return await AwaitRowClosed(target);
         }
 
         var rewardState = HandInClicks.RewardOpen() ? ", the reward window is still open" : string.Empty;
         var detail = $"{HandInReads.Describe(target)}: bags {activeBefore.Owned} -> {after.Owned}, seals {activeBefore.Seals} -> {after.Seals}, row {(after.RowOpen ? "still open" : "closed")}{rewardState}";
         MarkActiveRow(HandInRowStatus.Unconfirmed);
         return CancelToken.IsCancellationRequested ? Halt.None : new Halt(HandInPauseReason.DeliveryNotConfirmed, detail);
+    }
+
+    private async Task<Halt> AwaitRowClosed(HandInTarget target)
+    {
+        if (await WaitUntilTimed(() => !SupplyListReader.Read().RowStillOpen(target), RowCloseTimeoutMs, "hand-in-row-closed", ListPollFrames)
+            || CancelToken.IsCancellationRequested)
+        {
+            return Halt.None;
+        }
+
+        return new Halt(HandInPauseReason.ListNotRefreshed, $"the supply list still shows {HandInReads.Describe(target)} as open {RowCloseTimeoutMs / TimeUnits.MillisecondsPerSecond}s after its delivery");
     }
 
     private async Task WaitForSealsToSettle(HandInTarget target)

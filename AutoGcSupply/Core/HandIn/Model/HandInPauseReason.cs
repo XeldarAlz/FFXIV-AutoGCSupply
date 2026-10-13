@@ -18,6 +18,7 @@ internal enum HandInPauseReason : byte
     RewardWindowDidNotOpen,
     DeliverButtonDisabled,
     DeliveryNotConfirmed,
+    ListNotRefreshed,
     InCombatOrDuty,
     Fault,
 }
