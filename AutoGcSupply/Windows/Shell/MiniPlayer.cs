@@ -90,13 +90,20 @@ internal static class MiniPlayer
         TextDraw.At(TextDraw.Truncate(controller.Status, textRight - textX), new Vector2(textX, top + phaseSize.Y + gap), Styling.TextStrong);
 
         var resumeBlocked = controller.Paused && controller.PauseReason == PauseReason.InContent;
-        ImGui.SetCursorScreenPos(new Vector2(end.X - padX - buttonSize * 2f - ButtonGap * scale, midY - buttonSize * 0.5f));
+        var pauseBlocked = !ReadyState.CanPause(controller);
+        var pausePosition = new Vector2(end.X - padX - buttonSize * 2f - ButtonGap * scale, midY - buttonSize * 0.5f);
+        ImGui.SetCursorScreenPos(pausePosition);
         if (IconButton.Draw(controller.Paused ? FontAwesomeIcon.Play : FontAwesomeIcon.Pause, "##agcs_mini_pause", buttonSize,
                 controller.Paused ? Styling.AccentMintSoft : Styling.AccentAmberSoft,
                 resumeBlocked ? Loc.T(L.Shell.ResumeBlocked) : controller.Paused ? Loc.T(L.Common.Resume) : Loc.T(L.Common.Pause),
-                enabled: !resumeBlocked))
+                enabled: !resumeBlocked && !pauseBlocked))
         {
             controller.TogglePause();
+        }
+
+        if ((pauseBlocked || resumeBlocked) && Hit.HoveringRect(pausePosition, pausePosition + new Vector2(buttonSize, buttonSize)))
+        {
+            Tooltip.Show(resumeBlocked ? Loc.T(L.Shell.ResumeBlocked) : Loc.T(L.Automate.PauseInShopperHelp));
         }
 
         ImGui.SetCursorScreenPos(new Vector2(end.X - padX - buttonSize, midY - buttonSize * 0.5f));

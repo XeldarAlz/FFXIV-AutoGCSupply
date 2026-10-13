@@ -11,7 +11,7 @@ namespace AutoGcSupply.Windows.Pages;
 
 internal sealed class SettingsPage
 {
-    private enum Tab { General, Humanizer, Safety }
+    private enum Tab { General, Run, Humanizer, Safety }
 
     private readonly record struct Entry(Tab Tab, LocString Label, FontAwesomeIcon Icon, LocString Subtitle);
 
@@ -19,6 +19,7 @@ internal sealed class SettingsPage
     private static readonly Entry[] entries =
     [
         new(Tab.General, L.Settings.CatGeneral, FontAwesomeIcon.Cog, L.Settings.CatGeneralSub),
+        new(Tab.Run, L.RunSettings.Tab, FontAwesomeIcon.BoxOpen, L.RunSettings.TabSub),
         new(Tab.Humanizer, L.Humanizer.Tab, FontAwesomeIcon.UserClock, L.Humanizer.TabSub),
         new(Tab.Safety, L.Safety.Tab, FontAwesomeIcon.UserSecret, L.Safety.TabSub),
     ];
@@ -106,6 +107,9 @@ internal sealed class SettingsPage
         {
             case Tab.General:
                 GeneralSettings.Draw(configuration);
+                break;
+            case Tab.Run:
+                RunSettings.Draw(configuration);
                 break;
             case Tab.Humanizer:
                 HumanizerSettings.Draw(configuration);
