@@ -33,7 +33,8 @@ internal sealed partial class GcRunTask
 
     private async Task<bool> HandIn(HandInPlan plan)
     {
-        var dryRun = ShopperProbe.Read() == ShopperState.Available && AutoShopperApi.Instance.DryRun();
+        var shopperDryRunNow = ShopperProbe.Read() == ShopperState.Available && AutoShopperApi.Instance.DryRun();
+        var dryRun = shopperDryRunNow || session.ShopperDryRun;
         session.DryRun = dryRun;
         session.Tracker.SetDryRun(dryRun);
         session.DidWork = true;
