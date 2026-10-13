@@ -16,10 +16,12 @@ internal static unsafe class HandInClicks
     private const int TabCallback = 0;
     private const int RowCallback = 1;
     private const int CloseCallback = -1;
+    private const int RewardCancelCallback = 1;
     private const string TabThrottleKey = "AutoGcSupply.HandIn.Tab";
     private const string RowThrottleKey = "AutoGcSupply.HandIn.Row";
     private const string CloseListThrottleKey = "AutoGcSupply.HandIn.CloseList";
     private const string DeliverThrottleKey = "AutoGcSupply.HandIn.Deliver";
+    private const string CancelRewardThrottleKey = "AutoGcSupply.HandIn.CancelReward";
     private const string PromptThrottleKey = "AutoGcSupply.HandIn.Prompt";
 
     public static bool RewardOpen() => AddonReady(RewardAddonName, out _);
@@ -41,7 +43,7 @@ internal static unsafe class HandInClicks
 
     public static bool ChooseRow(int rowIndex)
     {
-        if (!AddonReady(SupplyListReader.AddonName, out var list) || !EzThrottler.Throttle(RowThrottleKey, ClickThrottleMs))
+        if (RewardOpen() || !AddonReady(SupplyListReader.AddonName, out var list) || !EzThrottler.Throttle(RowThrottleKey, ClickThrottleMs))
         {
             return false;
         }
@@ -78,6 +80,18 @@ internal static unsafe class HandInClicks
 
         RunLog.Debug("Hand-in: pressing Deliver");
         master.Deliver();
+        return true;
+    }
+
+    public static bool CancelReward()
+    {
+        if (!AddonReady(RewardAddonName, out var reward) || !EzThrottler.Throttle(CancelRewardThrottleKey, ClickThrottleMs))
+        {
+            return false;
+        }
+
+        RunLog.Debug("Hand-in: pressing Cancel on the reward window");
+        Callback.Fire(reward, true, RewardCancelCallback);
         return true;
     }
 

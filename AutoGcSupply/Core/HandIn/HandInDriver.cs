@@ -2,6 +2,7 @@ using AutoGcSupply.Core.Character;
 using AutoGcSupply.Core.HandIn.Model;
 using AutoGcSupply.Core.Inventory.Model;
 using AutoGcSupply.Core.Tasks;
+using ECommons;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,9 @@ internal sealed partial class HandInDriver : AutoCommon
 
     private const int PollMs = 100;
 
+    private static readonly Func<bool> unloaded = static () => ECommonsMain.Disposed;
+
+    private readonly Func<bool> cancelled;
     private readonly HandInTarget[] targets;
     private readonly HandInRowResult[] rows;
     private readonly OwnedCount[] stocks;
@@ -35,6 +39,7 @@ internal sealed partial class HandInDriver : AutoCommon
         sealCapPolicy = request.SealCapPolicy;
         dryRun = request.DryRun;
         this.cancellation = cancellation;
+        cancelled = () => CancelToken.IsCancellationRequested;
     }
 
     public HandInStep Step { get; private set; } = HandInStep.Starting;
@@ -67,6 +72,7 @@ internal sealed partial class HandInDriver : AutoCommon
             halt = new Halt(HandInPauseReason.Fault, exception.Message);
         }
 
+        await LeaveOfficer();
         Finish(halt);
     }
 
@@ -97,11 +103,6 @@ internal sealed partial class HandInDriver : AutoCommon
         if (!Interrupted(halt))
         {
             halt = await WorkTabs();
-        }
-
-        if (!CancelToken.IsCancellationRequested)
-        {
-            await CloseListAndLeave();
         }
 
         return halt;

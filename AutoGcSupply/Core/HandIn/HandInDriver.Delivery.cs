@@ -9,8 +9,10 @@ namespace AutoGcSupply.Core.HandIn;
 internal sealed partial class HandInDriver
 {
     private const int RewardOpenTimeoutMs = 10_000;
+    private const int RewardReadTimeoutMs = 2_000;
     private const int DeliverEnableTimeoutMs = 3_000;
     private const int VerifyTimeoutMs = 10_000;
+    private const int RowCloseTimeoutMs = 10_000;
     private const int SealSettleMs = 2_000;
     private const int PromptCloseTimeoutMs = 3_000;
 
@@ -51,6 +53,11 @@ internal sealed partial class HandInDriver
         var halt = await AwaitRewardWindow(target);
         if (!Interrupted(halt))
         {
+            halt = await ConfirmRewardWindow(target);
+        }
+
+        if (!Interrupted(halt))
+        {
             halt = await PressDeliver(target);
         }
 
@@ -61,6 +68,22 @@ internal sealed partial class HandInDriver
 
         SettleActiveRow();
         return halt;
+    }
+
+    private async Task<Halt> CloseStaleRewardWindow()
+    {
+        if (!HandInClicks.RewardOpen())
+        {
+            return Halt.None;
+        }
+
+        Warn("Hand-in: a reward window is open before a row was chosen; closing it");
+        if (await OfficerWindows.CloseReward(cancelled) || CancelToken.IsCancellationRequested)
+        {
+            return Halt.None;
+        }
+
+        return new Halt(HandInPauseReason.UnexpectedAddon, HandInClicks.RewardAddonName);
     }
 
     private async Task<Halt> AwaitRewardWindow(HandInTarget target)
@@ -84,6 +107,30 @@ internal sealed partial class HandInDriver
         }
 
         return new Halt(HandInPauseReason.RewardWindowDidNotOpen, $"no reward window within {RewardOpenTimeoutMs / TimeUnits.MillisecondsPerSecond}s for {HandInReads.Describe(target)}");
+    }
+
+    private async Task<Halt> ConfirmRewardWindow(HandInTarget target)
+    {
+        if (!await WaitUntilTimed(RewardWindowReader.Readable, RewardReadTimeoutMs, "hand-in-reward-readable", 1) && CancelToken.IsCancellationRequested)
+        {
+            return Halt.None;
+        }
+
+        var shown = RewardWindowReader.Read();
+        var expectedName = HandInReads.SheetItemName(target.ItemId);
+        Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}");
+        var verdict = RewardWindowCheck.Judge(shown, expectedName, target);
+        if (verdict == RewardWindowVerdict.Matches)
+        {
+            return Halt.None;
+        }
+
+        var detail = verdict == RewardWindowVerdict.Unreadable
+            ? $"the reward window for {HandInReads.Describe(target)} could not be read"
+            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {target.SealReward} seals";
+        Warn($"Hand-in: {detail} ({verdict}); cancelling it");
+        await OfficerWindows.CloseReward(cancelled);
+        return new Halt(HandInPauseReason.RewardWindowMismatch, detail);
     }
 
     private async Task<Halt> PressDeliver(HandInTarget target)
@@ -134,7 +181,7 @@ internal sealed partial class HandInDriver
                 {
                     await WaitForSealsToSettle(target);
                     RecordDelivered(Sample(target));
-                    return Halt.None;
+                    return await AwaitRowClosed(target);
                 }
 
                 if (verdict == DeliveryVerdict.Contradicted)
@@ -150,13 +197,26 @@ internal sealed partial class HandInDriver
         if (DeliveryCheck.Judge(activeBefore, after, target, sealCap, final: true) == DeliveryVerdict.Confirmed)
         {
             RecordDelivered(after);
-            return Halt.None;
+            return await AwaitRowClosed(target);
         }
 
         var rewardState = HandInClicks.RewardOpen() ? ", the reward window is still open" : string.Empty;
         var detail = $"{HandInReads.Describe(target)}: bags {activeBefore.Owned} -> {after.Owned}, seals {activeBefore.Seals} -> {after.Seals}, row {(after.RowOpen ? "still open" : "closed")}{rewardState}";
         MarkActiveRow(HandInRowStatus.Unconfirmed);
         return CancelToken.IsCancellationRequested ? Halt.None : new Halt(HandInPauseReason.DeliveryNotConfirmed, detail);
+    }
+
+    private async Task<Halt> AwaitRowClosed(HandInTarget target)
+    {
+        if (await WaitUntilTimed(() => !SupplyListReader.Read().RowStillOpen(target), RowCloseTimeoutMs, "hand-in-row-closed", ListPollFrames))
+        {
+            listSettlesUntil = Environment.TickCount64 + PostDeliverySettleMs;
+            return Halt.None;
+        }
+
+        return CancelToken.IsCancellationRequested
+            ? Halt.None
+            : new Halt(HandInPauseReason.ListNotRefreshed, $"the supply list still shows {HandInReads.Describe(target)} as open {RowCloseTimeoutMs / TimeUnits.MillisecondsPerSecond}s after its delivery");
     }
 
     private async Task WaitForSealsToSettle(HandInTarget target)
@@ -179,19 +239,19 @@ internal sealed partial class HandInDriver
         var text = NpcInteraction.SelectYesnoText();
         if (!PromptText.Same(text, HighQualityPrompt.Text()))
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.UnexpectedPrompt, text);
         }
 
         if (target.Quality != ItemQuality.High)
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.HighQualityPromptForNormalRow, $"{HandInReads.Describe(target)}: {text}");
         }
 
         if (highQualityAccepted)
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.UnexpectedPrompt, $"a second high-quality confirmation for {HandInReads.Describe(target)}: {text}");
         }
 
@@ -215,7 +275,7 @@ internal sealed partial class HandInDriver
         }
 
         var text = NpcInteraction.SelectYesnoText();
-        await DeclinePrompt();
+        await OfficerWindows.DeclinePrompt(cancelled);
         return new Halt(HandInPauseReason.UnexpectedPrompt, $"a confirmation stayed open after the high-quality one was accepted: {text}");
     }
 

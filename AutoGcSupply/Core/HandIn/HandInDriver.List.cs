@@ -10,10 +10,12 @@ internal sealed partial class HandInDriver
     private const int TabSwitchTimeoutMs = 6_000;
     private const int MaxTabClicks = 3;
     private const int TabReclickMs = 2_000;
+    private const int PostDeliverySettleMs = 5_000;
 
     private static readonly SupplyListTab[] tabOrder = [SupplyListTab.Supply, SupplyListTab.Provisioning];
 
     private int projectedSeals;
+    private long listSettlesUntil;
 
     private async Task<Halt> WorkTabs()
     {
@@ -89,35 +91,25 @@ internal sealed partial class HandInDriver
     {
         for (var pass = 0; pass <= targets.Length; pass++)
         {
-            var unexpected = await HaltOnUnexpected(talkUnexpected: true);
-            if (Interrupted(unexpected))
+            var next = await NextMatch(tab);
+            if (Interrupted(next.Halt))
             {
-                return unexpected;
+                return next.Halt;
             }
 
-            if (!await WaitUntilTimed(() => SupplyListReader.ShowsTab(tab), ListLoadTimeoutMs, "hand-in-list-ready", ListPollFrames))
+            if (!next.Match.Found)
             {
-                return CancelToken.IsCancellationRequested
-                    ? Halt.None
-                    : new Halt(HandInPauseReason.ListClosed, $"the supply list stopped showing the {tab} tab");
-            }
-
-            var list = SupplyListReader.Read();
-            RefreshStocks(tab);
-            var match = RowMatcher.FindNext(list, targets, rows, stocks);
-            if (!match.Found)
-            {
-                SkipUnmatched(list, tab);
+                SkipUnmatched(next.List, tab);
                 return Halt.None;
             }
 
             if (dryRun)
             {
-                RecordDryRun(match);
+                RecordDryRun(next.Match);
                 continue;
             }
 
-            var halt = await DeliverMatch(match);
+            var halt = await DeliverMatch(next.Match);
             if (Interrupted(halt))
             {
                 return halt;
@@ -125,6 +117,59 @@ internal sealed partial class HandInDriver
         }
 
         return Halt.None;
+    }
+
+    private async Task<TabPick> NextMatch(SupplyListTab tab)
+    {
+        var loadDeadline = Environment.TickCount64 + ListLoadTimeoutMs;
+        var reportedMiss = RowMatchStatus.Matched;
+        while (!CancelToken.IsCancellationRequested)
+        {
+            var unexpected = await HaltOnUnexpected(talkUnexpected: true);
+            if (!Interrupted(unexpected))
+            {
+                unexpected = await CloseStaleRewardWindow();
+            }
+
+            if (Interrupted(unexpected))
+            {
+                return TabPick.Stopped(unexpected);
+            }
+
+            if (!await WaitUntilTimed(() => SupplyListReader.ShowsTab(tab), ListLoadTimeoutMs, "hand-in-list-ready", ListPollFrames))
+            {
+                return TabPick.Stopped(CancelToken.IsCancellationRequested
+                    ? Halt.None
+                    : new Halt(HandInPauseReason.ListClosed, $"the supply list stopped showing the {tab} tab"));
+            }
+
+            var list = SupplyListReader.Read();
+            RefreshStocks(tab);
+            var match = RowMatcher.FindNext(list, targets, rows, stocks);
+            if (match.Found || match.Status == RowMatchStatus.NothingPending)
+            {
+                return new TabPick(Halt.None, list, match);
+            }
+
+            var now = Environment.TickCount64;
+            switch (RowMissRule.Decide(match.Status, now < loadDeadline, now < listSettlesUntil))
+            {
+                case RowMissAction.Skip:
+                    return new TabPick(Halt.None, list, match);
+                case RowMissAction.Halt:
+                    return TabPick.Stopped(new Halt(HandInPauseReason.ListClosed, $"the supply list did not finish loading the {tab} tab within {ListLoadTimeoutMs / TimeUnits.MillisecondsPerSecond}s"));
+            }
+
+            if (match.Status != reportedMiss)
+            {
+                reportedMiss = match.Status;
+                Diag($"Hand-in: waiting for the supply list to settle before deciding on {DescribeTarget(match.TargetIndex)} ({match.Status})");
+            }
+
+            await DelayMs(PollMs);
+        }
+
+        return TabPick.Stopped(Halt.None);
     }
 
     private void RefreshStocks(SupplyListTab tab)
@@ -170,6 +215,9 @@ internal sealed partial class HandInDriver
         Diag($"Dry run: would deliver {HandInReads.Describe(target)} from row {match.RowIndex}{(sealsLost > 0 ? $", losing {sealsLost} seals to the cap" : string.Empty)}");
     }
 
+    private string DescribeTarget(int targetIndex)
+        => targetIndex == NoTarget ? "the list" : HandInReads.Describe(targets[targetIndex]);
+
     private static string DescribeMiss(RowMatchStatus status, OwnedCount stock) => status switch
     {
         RowMatchStatus.NotListed => "the supply list does not show it",
@@ -182,4 +230,9 @@ internal sealed partial class HandInDriver
         RowMatchStatus.AgentDisagrees => "the game counts fewer than the bags hold",
         _ => status.ToString(),
     };
+
+    private readonly record struct TabPick(Halt Halt, SupplyListState List, RowMatch Match)
+    {
+        public static TabPick Stopped(in Halt halt) => new(halt, SupplyListState.NotLoaded, RowMatch.Miss(RowMatchStatus.NothingPending, NoTarget));
+    }
 }

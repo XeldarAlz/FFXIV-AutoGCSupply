@@ -6,6 +6,8 @@ internal static class PromptText
 {
     private const char SoftHyphen = '\u00AD';
     private const char ZeroWidthSpace = '\u200B';
+    private const char FirstGameGlyph = '\uE000';
+    private const char LastGameGlyph = '\uF8FF';
     private const char Space = ' ';
 
     public static string Normalize(string text)
@@ -15,7 +17,7 @@ internal static class PromptText
         for (var characterIndex = 0; characterIndex < text.Length; characterIndex++)
         {
             var character = text[characterIndex];
-            if (character is SoftHyphen or ZeroWidthSpace)
+            if (character is SoftHyphen or ZeroWidthSpace or (>= FirstGameGlyph and <= LastGameGlyph))
             {
                 continue;
             }
