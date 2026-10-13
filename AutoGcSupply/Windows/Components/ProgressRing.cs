@@ -118,7 +118,7 @@ internal static class ProgressRing
     // that already covers the target, so the window font scale is never touched.
     public static void CenterIcon(Vector2 center, FontAwesomeIcon icon, Vector4 color, float targetHeight)
     {
-        var glyph = icon.ToIconString();
+        var glyph = TextDraw.Glyph(icon);
         using var font = Fonts.PushIconFor(targetHeight);
         var naturalSize = ImGui.CalcTextSize(glyph);
         if (naturalSize.Y <= 0f)
