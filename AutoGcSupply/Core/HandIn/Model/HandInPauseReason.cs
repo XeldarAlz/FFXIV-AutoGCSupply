@@ -10,6 +10,7 @@ internal enum HandInPauseReason : byte
     MenuTextUnavailable,
     MenuOptionNotFound,
     ListDidNotOpen,
+    ListClosed,
     TabDidNotSwitch,
     UnexpectedPrompt,
     UnexpectedAddon,

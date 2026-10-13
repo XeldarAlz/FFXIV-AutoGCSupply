@@ -59,7 +59,7 @@ internal static class RowMatcher
         return new RowMatch(RowMatchStatus.Matched, targetIndex, row.RowIndex);
     }
 
-    public static RowMatch FindNext(in SupplyListState list, ReadOnlySpan<HandInTarget> targets, ReadOnlySpan<HandInRowStatus> statuses, ReadOnlySpan<BagStock> stocks)
+    public static RowMatch FindNext(in SupplyListState list, ReadOnlySpan<HandInTarget> targets, ReadOnlySpan<HandInRowResult> rows, ReadOnlySpan<BagStock> stocks)
     {
         if (!list.Loaded)
         {
@@ -69,7 +69,7 @@ internal static class RowMatcher
         var firstMiss = RowMatch.Miss(RowMatchStatus.NothingPending, RowMatch.NoTarget);
         for (var targetIndex = 0; targetIndex < targets.Length; targetIndex++)
         {
-            if (statuses[targetIndex] != HandInRowStatus.Pending || targets[targetIndex].Tab != list.Tab)
+            if (rows[targetIndex].Status != HandInRowStatus.Pending || targets[targetIndex].Tab != list.Tab)
             {
                 continue;
             }

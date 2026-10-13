@@ -174,10 +174,10 @@ public sealed class RowMatcherTests
             Target(BlacksmithItem, Blacksmith, 1),
             Target(CulinarianItem, Culinarian, 3),
         ];
-        HandInRowStatus[] statuses = [HandInRowStatus.Delivered, HandInRowStatus.Pending, HandInRowStatus.Pending];
+        var rows = Rows(HandInRowStatus.Delivered, HandInRowStatus.Pending, HandInRowStatus.Pending);
         BagStock[] stocks = [new(Plenty, 0), new(0, 0), new(Plenty, 0)];
 
-        var match = RowMatcher.FindNext(list, targets, statuses, stocks);
+        var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
         Assert.True(match.Found);
         Assert.Equal(2, match.TargetIndex);
@@ -189,10 +189,10 @@ public sealed class RowMatcherTests
     {
         var list = SupplyList(carpenterRow, blacksmithRow with { RowIndex = 1 });
         HandInTarget[] targets = [Target(MinerItem, Miner, 10), Target(CarpenterItem, Carpenter, 1), Target(BlacksmithItem, Blacksmith, 1)];
-        HandInRowStatus[] statuses = [HandInRowStatus.Pending, HandInRowStatus.Pending, HandInRowStatus.Pending];
+        var rows = Rows(HandInRowStatus.Pending, HandInRowStatus.Pending, HandInRowStatus.Pending);
         BagStock[] stocks = [new(Plenty, 0), new(0, 0), new(0, 0)];
 
-        var match = RowMatcher.FindNext(list, targets, statuses, stocks);
+        var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
         Assert.False(match.Found);
         Assert.Equal(1, match.TargetIndex);
@@ -204,10 +204,10 @@ public sealed class RowMatcherTests
     {
         var list = SupplyList(carpenterRow);
         HandInTarget[] targets = [Target(CarpenterItem, Carpenter, 1)];
-        HandInRowStatus[] statuses = [HandInRowStatus.Delivered];
+        var rows = Rows(HandInRowStatus.Delivered);
         BagStock[] stocks = [new(Plenty, 0)];
 
-        var match = RowMatcher.FindNext(list, targets, statuses, stocks);
+        var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
         Assert.Equal(RowMatchStatus.NothingPending, match.Status);
         Assert.Equal(RowMatch.NoTarget, match.TargetIndex);
@@ -217,10 +217,10 @@ public sealed class RowMatcherTests
     public void FindNextWaitsForTheListToLoad()
     {
         HandInTarget[] targets = [Target(MinerItem, Miner, 10)];
-        HandInRowStatus[] statuses = [HandInRowStatus.Pending];
+        var rows = Rows(HandInRowStatus.Pending);
         BagStock[] stocks = [new(Plenty, 0)];
 
-        Assert.Equal(RowMatchStatus.ListNotLoaded, RowMatcher.FindNext(SupplyListState.NotLoaded, targets, statuses, stocks).Status);
+        Assert.Equal(RowMatchStatus.ListNotLoaded, RowMatcher.FindNext(SupplyListState.NotLoaded, targets, rows, stocks).Status);
     }
 
     private static RowMatch Evaluate(in SupplyListState list, in HandInTarget target)
@@ -231,6 +231,17 @@ public sealed class RowMatcherTests
 
     private static HandInTarget Target(uint itemId, byte classJobId, int requested, HandInQuality quality = HandInQuality.Normal)
         => new(itemId, classJobId, requested, quality, 100);
+
+    private static HandInRowResult[] Rows(params HandInRowStatus[] statuses)
+    {
+        var rows = new HandInRowResult[statuses.Length];
+        for (var rowPosition = 0; rowPosition < statuses.Length; rowPosition++)
+        {
+            rows[rowPosition] = HandInRowResult.Pending with { Status = statuses[rowPosition] };
+        }
+
+        return rows;
+    }
 
     private static SupplyAgentItem Agent(uint itemId, int possessed, bool turnInAvailable)
         => new(itemId, 0, possessed, 1, turnInAvailable);

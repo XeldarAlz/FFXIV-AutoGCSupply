@@ -63,18 +63,18 @@ internal readonly record struct SupplyListState(bool Loaded, SupplyListTab Tab, 
         return false;
     }
 
-    public bool RowOpen(uint itemId, byte classJobId)
+    public bool RowStillOpen(in HandInTarget target)
     {
-        if (!Loaded)
+        if (!Loaded || Tab != target.Tab)
         {
             return true;
         }
 
-        if (FindRow(itemId, classJobId) == NoRow)
+        if (FindRow(target.ItemId, target.ClassJobId) == NoRow)
         {
             return false;
         }
 
-        return !TryFindAgentItem(itemId, out var agentItem) || agentItem.TurnInAvailable;
+        return !TryFindAgentItem(target.ItemId, out var agentItem) || agentItem.TurnInAvailable;
     }
 }
