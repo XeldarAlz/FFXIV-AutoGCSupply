@@ -16,6 +16,7 @@
     <Compile Include="..\AutoGcSupply\Core\Character\Model\**\*.cs" Link="Character\Model\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\AutoGcSupply\Core\Inventory\Model\**\*.cs" Link="Inventory\Model\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\AutoGcSupply\Core\Value\Model\**\*.cs" Link="Value\Model\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\AutoGcSupply\Core\Shopper\Model\**\*.cs" Link="Shopper\Model\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
