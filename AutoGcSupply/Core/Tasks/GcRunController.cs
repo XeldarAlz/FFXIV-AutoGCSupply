@@ -14,6 +14,7 @@ internal sealed partial class GcRunController
     private readonly Configuration configuration;
     private readonly RunHistory history;
     private readonly QuoteTracker quotes = new();
+    private readonly TimersPasses timersPasses = new();
     private readonly RowLabels labels = new();
     private readonly RunTracker tracker = new();
 

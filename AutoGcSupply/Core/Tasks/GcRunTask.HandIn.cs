@@ -38,6 +38,7 @@ internal sealed partial class GcRunTask
         session.DryRun = dryRun;
         session.Tracker.SetDryRun(dryRun);
         session.DidWork = true;
+        session.HandInStarted = true;
         var driver = new HandInDriver(new HandInRequest(plan.Targets, session.Authorization.SealCapPolicy, dryRun));
         var seenRevision = -1;
         IFramework.OnUpdateDelegate mirror = _ =>

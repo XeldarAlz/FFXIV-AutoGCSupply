@@ -33,6 +33,7 @@ internal sealed partial class GcRunController
     private bool hasCharacter;
     private CharacterState character;
     private RequestSnapshot snapshot = RequestSnapshot.Unread(DateTime.UtcNow);
+    private bool requestsCurrent;
     private ImmutableArray<OwnedCount> ownedBySlot = ImmutableArray<OwnedCount>.Empty;
     private DecisionSettings settings;
     private long spendCap;
@@ -133,12 +134,14 @@ internal sealed partial class GcRunController
     private void ReadRequests()
     {
         var snapshotNow = GcSupplyReader.Read();
-        if (TodayInputChanges.SameRequests(snapshotNow, snapshot))
+        var currentNow = timersPasses.IsCurrent(snapshotNow.ContentId, day);
+        if (currentNow == requestsCurrent && TodayInputChanges.SameRequests(snapshotNow, snapshot))
         {
             return;
         }
 
         snapshot = snapshotNow;
+        requestsCurrent = currentNow;
         todayDirty = true;
     }
 
@@ -219,7 +222,7 @@ internal sealed partial class GcRunController
         }
 
         var mark = new LoadMark(character.ContentId, day);
-        var automatic = snapshot.LoadState == SnapshotLoadState.NotLoaded && autoLoaded != mark;
+        var automatic = !requestsCurrent && autoLoaded != mark;
         if (!refreshWanted && !rolloverLoadWanted && !automatic)
         {
             return;
@@ -239,7 +242,7 @@ internal sealed partial class GcRunController
 
     private void StartLoader()
     {
-        var task = new TimersLoader(confirmCompletedDay: true);
+        var task = new TimersLoader(timersPasses, forcePass: true);
         loader = task;
         todayDirty = true;
         try
@@ -275,6 +278,7 @@ internal sealed partial class GcRunController
             HasCharacter = hasCharacter,
             Character = character,
             Snapshot = snapshot,
+            RequestsCurrent = requestsCurrent,
             Reading = loader is not null,
             OwnedBySlot = ownedBySlot,
             Settings = settings,

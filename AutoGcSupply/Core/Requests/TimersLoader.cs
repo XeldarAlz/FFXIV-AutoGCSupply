@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AutoGcSupply.Core.Requests;
 
-public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
+public sealed class TimersLoader(TimersPasses passes, bool forcePass) : AutoCommon
 {
     public const int MaxAttempts = 3;
 
@@ -20,7 +20,7 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
     private const int PreCommandSettleMs = 500;
     private const int OpenWaitMs = 5_000;
     private const int DataWaitMs = 3_000;
-    private const int ConfirmSettleMs = 1_500;
+    private const int RefreshSettleMs = 1_500;
     private const int CloseWaitMs = 3_000;
     private const int PassBudgetMs = PlayerFreeWaitMs + PreCommandSettleMs + OpenWaitMs + DataWaitMs + CloseWaitMs;
 
@@ -34,8 +34,8 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
     {
         Status = "Reading today's requests";
         Snapshot = GcSupplyReader.Read();
-        var confirming = confirmCompletedDay && Snapshot.AllDone;
-        for (var attempt = 1; attempt <= MaxAttempts && (confirming || !Snapshot.Loaded); attempt++)
+        var passed = false;
+        for (var attempt = 1; attempt <= MaxAttempts && ((forcePass && !passed) || !Snapshot.Loaded); attempt++)
         {
             if (!await WaitUntilTimed(PlayerFree, PlayerFreeWaitMs, $"timers-player-free#{attempt}"))
             {
@@ -43,7 +43,7 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
                 return;
             }
 
-            await PassThroughTimers(attempt, confirming);
+            var shown = await PassThroughTimers(attempt, Snapshot.Loaded);
             if (CancelToken.IsCancellationRequested)
             {
                 Finish(TimersLoadOutcome.Cancelled);
@@ -51,13 +51,17 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
             }
 
             Snapshot = GcSupplyReader.Read();
-            confirming = false;
+            if (shown && Snapshot.Loaded)
+            {
+                passed = true;
+                passes.Record(Snapshot.ContentId, Snapshot.Day);
+            }
         }
 
-        Finish(OutcomeOf(Snapshot.LoadState));
+        Finish(forcePass && !passed && Snapshot.Loaded ? TimersLoadOutcome.NotLoaded : OutcomeOf(Snapshot.LoadState));
     }
 
-    private async Task PassThroughTimers(int attempt, bool confirming)
+    private async Task<bool> PassThroughTimers(int attempt, bool dataPresent)
     {
         Status = "Loading today's requests from the Timers window";
         var openedHere = !NpcInteraction.IsAddonReady(ContentsInfoAddon);
@@ -65,17 +69,18 @@ public sealed class TimersLoader(bool confirmCompletedDay) : AutoCommon
         {
             if (openedHere && !await OpenTimers(attempt))
             {
-                return;
+                return false;
             }
 
-            if (confirming)
+            if (dataPresent)
             {
-                Diag("Timers loader: no request is open; letting the Timers window refresh the day before trusting it.");
-                await DelayMs(ConfirmSettleMs);
-                return;
+                Diag("Timers loader: letting the Timers window refresh the requests before trusting them.");
+                await DelayMs(RefreshSettleMs);
+                return true;
             }
 
             await WaitUntilTimed(RequestsLoaded, DataWaitMs, $"timers-data#{attempt}");
+            return true;
         }
         finally
         {

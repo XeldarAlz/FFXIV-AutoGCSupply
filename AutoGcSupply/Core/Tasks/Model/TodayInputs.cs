@@ -16,6 +16,8 @@ internal readonly record struct TodayInputs
 
     public required RequestSnapshot Snapshot { get; init; }
 
+    public required bool RequestsCurrent { get; init; }
+
     public required bool Reading { get; init; }
 
     public required ImmutableArray<OwnedCount> OwnedBySlot { get; init; }

@@ -55,6 +55,18 @@ public sealed class TodayBuilderTests
     }
 
     [Fact]
+    public void RequestsWithoutATimersPassTodayAreNotTrusted()
+    {
+        var stale = Build(Inputs() with { RequestsCurrent = false });
+        var staleAllDone = Build(Inputs() with { RequestsCurrent = false, Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.Closed(SupplyFixtures.OpenDayCopy())) });
+
+        Assert.Equal(TodayState.NotLoaded, stale.State);
+        Assert.Empty(stale.Rows);
+        Assert.Equal(StartBlock.NotLoaded, stale.StartBlock);
+        Assert.Equal(TodayState.NotLoaded, staleAllDone.State);
+    }
+
+    [Fact]
     public void ADayWithEveryRequestClosedIsAllDone()
     {
         var model = Build(Inputs() with { Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.Closed(SupplyFixtures.OpenDayCopy())) });
@@ -148,6 +160,7 @@ public sealed class TodayBuilderTests
         HasCharacter = true,
         Character = CharacterFixtures.Standard(),
         Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.OpenDay),
+        RequestsCurrent = true,
         Reading = false,
         OwnedBySlot = ImmutableArray.Create(new OwnedCount[SupplyClasses.Count]),
         Settings = new DecisionSettings(false, true, SupplyQualityPolicy.Automatic, 25, ClassMask.None),

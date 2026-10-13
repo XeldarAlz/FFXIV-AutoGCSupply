@@ -40,6 +40,8 @@ internal sealed class GcRunSession
 
     public bool DidWork { get; set; }
 
+    public bool HandInStarted { get; set; }
+
     public bool DryRun { get; set; }
 
     public bool ShopperDryRun { get; set; }

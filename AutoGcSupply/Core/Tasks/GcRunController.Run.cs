@@ -169,7 +169,7 @@ internal sealed partial class GcRunController
     {
         try
         {
-            var task = new GcRunTask(active, quotes);
+            var task = new GcRunTask(active, quotes, timersPasses);
             currentTask = task;
             ClibServices.Automation.Start(task, OnCompleted: () => _ = Svc.Framework.RunOnFrameworkThread(() => HandOff(task)));
         }
