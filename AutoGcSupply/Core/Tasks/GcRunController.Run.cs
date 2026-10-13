@@ -51,7 +51,7 @@ internal sealed partial class GcRunController
             settings.PriceTolerancePercent,
             configuration.SealCapPolicy,
             decisions);
-        var active = new GcRunSession(authorization, tracker, labels);
+        var active = new GcRunSession(authorization, tracker, labels) { StartedDry = model.ShopperDryRun };
         session = active;
         PauseReason = PauseReason.None;
         tracker.Begin(new RunRow[authorization.Rows.Length], Loc.T(L.Run.StatusReading));

@@ -39,7 +39,7 @@ internal sealed partial class GcRunTask
     {
         var shopperDryRunNow = ShopperProbe.Read() switch
         {
-            ShopperState.Missing => false,
+            ShopperState.Missing => session.StartedDry,
             ShopperState.Available => AutoShopperApi.Instance.DryRun(whenUnknown: true),
             _ => true,
         };
