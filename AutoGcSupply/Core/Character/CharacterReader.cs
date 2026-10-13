@@ -40,6 +40,8 @@ internal static unsafe class CharacterReader
         return true;
     }
 
+    public static uint SealCap() => SealCapFor(PlayerState.Instance()->GetGrandCompanyRank());
+
     private static uint SealCapFor(byte rank)
         => rank == NoRank ? 0u : Svc.Data.GetExcelSheet<GrandCompanyRank>().GetRowOrDefault(rank)?.MaxSeals ?? 0u;
 

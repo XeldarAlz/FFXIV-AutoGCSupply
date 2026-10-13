@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory.Model;
 
 namespace AutoGcSupply.Tests.HandIn;
 
@@ -97,7 +98,7 @@ public sealed class RowMatcherTests
     {
         var list = SupplyList(culinarianRow);
 
-        var match = Evaluate(list, Target(CulinarianItem, Culinarian, 3), new BagStock(normalInBags, 0));
+        var match = Evaluate(list, Target(CulinarianItem, Culinarian, 3), new OwnedCount(normalInBags, 0));
 
         Assert.Equal(expectedFound, match.Found);
         Assert.Equal(expectedFound ? RowMatchStatus.Matched : RowMatchStatus.NotEnoughInBags, match.Status);
@@ -111,9 +112,9 @@ public sealed class RowMatcherTests
     public void CountsOnlyTheChosenQuality(bool high, int normalInBags, int highInBags, bool expectedFound)
     {
         var list = SupplyList(carpenterRow);
-        var quality = high ? HandInQuality.High : HandInQuality.Normal;
+        var quality = high ? ItemQuality.High : ItemQuality.Normal;
 
-        var match = Evaluate(list, Target(CarpenterItem, Carpenter, 1, quality), new BagStock(normalInBags, highInBags));
+        var match = Evaluate(list, Target(CarpenterItem, Carpenter, 1, quality), new OwnedCount(normalInBags, highInBags));
 
         Assert.Equal(expectedFound, match.Found);
     }
@@ -158,7 +159,7 @@ public sealed class RowMatcherTests
     [InlineData(MinerItem, 16, 10, true)]
     public void RefusesAMalformedTarget(uint itemId, int classJobId, int requested, bool provisioningHigh)
     {
-        var quality = provisioningHigh ? HandInQuality.High : HandInQuality.Normal;
+        var quality = provisioningHigh ? ItemQuality.High : ItemQuality.Normal;
         var list = SupplyList(carpenterRow);
 
         Assert.Equal(RowMatchStatus.InvalidTarget, Evaluate(list, Target(itemId, (byte)classJobId, requested, quality)).Status);
@@ -175,7 +176,7 @@ public sealed class RowMatcherTests
             Target(CulinarianItem, Culinarian, 3),
         ];
         var rows = Rows(HandInRowStatus.Delivered, HandInRowStatus.Pending, HandInRowStatus.Pending);
-        BagStock[] stocks = [new(Plenty, 0), new(0, 0), new(Plenty, 0)];
+        OwnedCount[] stocks = [new(Plenty, 0), new(0, 0), new(Plenty, 0)];
 
         var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
@@ -190,7 +191,7 @@ public sealed class RowMatcherTests
         var list = SupplyList(carpenterRow, blacksmithRow with { RowIndex = 1 });
         HandInTarget[] targets = [Target(MinerItem, Miner, 10), Target(CarpenterItem, Carpenter, 1), Target(BlacksmithItem, Blacksmith, 1)];
         var rows = Rows(HandInRowStatus.Pending, HandInRowStatus.Pending, HandInRowStatus.Pending);
-        BagStock[] stocks = [new(Plenty, 0), new(0, 0), new(0, 0)];
+        OwnedCount[] stocks = [new(Plenty, 0), new(0, 0), new(0, 0)];
 
         var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
@@ -205,7 +206,7 @@ public sealed class RowMatcherTests
         var list = SupplyList(carpenterRow);
         HandInTarget[] targets = [Target(CarpenterItem, Carpenter, 1)];
         var rows = Rows(HandInRowStatus.Delivered);
-        BagStock[] stocks = [new(Plenty, 0)];
+        OwnedCount[] stocks = [new(Plenty, 0)];
 
         var match = RowMatcher.FindNext(list, targets, rows, stocks);
 
@@ -218,18 +219,18 @@ public sealed class RowMatcherTests
     {
         HandInTarget[] targets = [Target(MinerItem, Miner, 10)];
         var rows = Rows(HandInRowStatus.Pending);
-        BagStock[] stocks = [new(Plenty, 0)];
+        OwnedCount[] stocks = [new(Plenty, 0)];
 
         Assert.Equal(RowMatchStatus.ListNotLoaded, RowMatcher.FindNext(SupplyListState.NotLoaded, targets, rows, stocks).Status);
     }
 
     private static RowMatch Evaluate(in SupplyListState list, in HandInTarget target)
-        => RowMatcher.Evaluate(list, target, new BagStock(Plenty, Plenty), 0);
+        => RowMatcher.Evaluate(list, target, new OwnedCount(Plenty, Plenty), 0);
 
-    private static RowMatch Evaluate(in SupplyListState list, in HandInTarget target, BagStock stock)
+    private static RowMatch Evaluate(in SupplyListState list, in HandInTarget target, OwnedCount stock)
         => RowMatcher.Evaluate(list, target, stock, 0);
 
-    private static HandInTarget Target(uint itemId, byte classJobId, int requested, HandInQuality quality = HandInQuality.Normal)
+    private static HandInTarget Target(uint itemId, byte classJobId, int requested, ItemQuality quality = ItemQuality.Normal)
         => new(itemId, classJobId, requested, quality, 100);
 
     private static HandInRowResult[] Rows(params HandInRowStatus[] statuses)

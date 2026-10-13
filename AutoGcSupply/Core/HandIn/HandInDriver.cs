@@ -1,4 +1,6 @@
+using AutoGcSupply.Core.Character;
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory.Model;
 using AutoGcSupply.Core.Tasks;
 using System.Text;
 using System.Threading;
@@ -15,7 +17,7 @@ internal sealed partial class HandInDriver : AutoCommon
 
     private readonly HandInTarget[] targets;
     private readonly HandInRowResult[] rows;
-    private readonly BagStock[] stocks;
+    private readonly OwnedCount[] stocks;
     private readonly SealCapPolicy sealCapPolicy;
     private readonly bool dryRun;
     private readonly CancellationToken cancellation;
@@ -29,7 +31,7 @@ internal sealed partial class HandInDriver : AutoCommon
         targets = (HandInTarget[])request.Targets.Clone();
         rows = new HandInRowResult[targets.Length];
         Array.Fill(rows, HandInRowResult.Pending);
-        stocks = new BagStock[targets.Length];
+        stocks = new OwnedCount[targets.Length];
         sealCapPolicy = request.SealCapPolicy;
         dryRun = request.DryRun;
         this.cancellation = cancellation;
@@ -84,7 +86,7 @@ internal sealed partial class HandInDriver : AutoCommon
             return new Halt(HandInPauseReason.NotInGrandCompany, $"the character belongs to Grand Company {grandCompany}");
         }
 
-        sealCap = HandInReads.SealCap();
+        sealCap = (int)CharacterReader.SealCap();
         var halt = await ReachOfficer();
         if (Interrupted(halt))
         {

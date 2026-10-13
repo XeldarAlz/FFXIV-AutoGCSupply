@@ -1,5 +1,7 @@
 using AutoGcSupply.Core.Game.Ops;
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory;
+using AutoGcSupply.Core.Inventory.Model;
 using System.Threading.Tasks;
 
 namespace AutoGcSupply.Core.HandIn;
@@ -181,7 +183,7 @@ internal sealed partial class HandInDriver
             return new Halt(HandInPauseReason.UnexpectedPrompt, text);
         }
 
-        if (target.Quality != HandInQuality.High)
+        if (target.Quality != ItemQuality.High)
         {
             await DeclinePrompt();
             return new Halt(HandInPauseReason.HighQualityPromptForNormalRow, $"{HandInReads.Describe(target)}: {text}");
@@ -218,7 +220,7 @@ internal sealed partial class HandInDriver
     }
 
     private DeliverySample Sample(in HandInTarget target)
-        => new(HandInReads.CountInBags(target.ItemId).Of(target.Quality), HandInReads.Seals(grandCompany), SupplyListReader.Read().RowStillOpen(target));
+        => new(BagCounter.Count(target.ItemId).Of(target.Quality), HandInReads.Seals(grandCompany), SupplyListReader.Read().RowStillOpen(target));
 
     private void SettleActiveRow()
     {

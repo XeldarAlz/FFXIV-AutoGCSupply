@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory.Model;
 
 namespace AutoGcSupply.Tests.HandIn;
 
@@ -7,8 +8,8 @@ public sealed class DeliveryCheckTests
     private const int SealCap = 10_000;
     private const int Reward = 300;
 
-    private static readonly HandInTarget singleItem = new(2_001, 8, 1, HandInQuality.High, Reward);
-    private static readonly HandInTarget threeItems = new(2_003, 15, 3, HandInQuality.Normal, Reward);
+    private static readonly HandInTarget singleItem = new(2_001, 8, 1, ItemQuality.High, Reward);
+    private static readonly HandInTarget threeItems = new(2_003, 15, 3, ItemQuality.Normal, Reward);
 
     [Fact]
     public void ConfirmsWhenTheItemLeavesAndTheSealsRise()

@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory.Model;
 
 namespace AutoGcSupply.Tests.HandIn;
 
@@ -7,7 +8,7 @@ public sealed class SupplyListStateTests
     private const uint CarpenterItem = 2_001;
     private const uint MinerItem = 2_004;
 
-    private static readonly HandInTarget carpenterTarget = new(CarpenterItem, 8, 1, HandInQuality.High, 200);
+    private static readonly HandInTarget carpenterTarget = new(CarpenterItem, 8, 1, ItemQuality.High, 200);
     private static readonly SupplyListRow carpenterRow = new(0, CarpenterItem, 8, 1, false);
 
     [Fact]

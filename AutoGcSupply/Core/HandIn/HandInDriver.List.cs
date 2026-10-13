@@ -1,4 +1,6 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Inventory;
+using AutoGcSupply.Core.Inventory.Model;
 using System.Threading.Tasks;
 
 namespace AutoGcSupply.Core.HandIn;
@@ -131,7 +133,7 @@ internal sealed partial class HandInDriver
         {
             if (rows[targetIndex].Status == HandInRowStatus.Pending && targets[targetIndex].Tab == tab)
             {
-                stocks[targetIndex] = HandInReads.CountInBags(targets[targetIndex].ItemId);
+                stocks[targetIndex] = BagCounter.Count(targets[targetIndex].ItemId);
             }
         }
     }
@@ -168,7 +170,7 @@ internal sealed partial class HandInDriver
         Diag($"Dry run: would deliver {HandInReads.Describe(target)} from row {match.RowIndex}{(sealsLost > 0 ? $", losing {sealsLost} seals to the cap" : string.Empty)}");
     }
 
-    private static string DescribeMiss(RowMatchStatus status, BagStock stock) => status switch
+    private static string DescribeMiss(RowMatchStatus status, OwnedCount stock) => status switch
     {
         RowMatchStatus.NotListed => "the supply list does not show it",
         RowMatchStatus.ClassMismatch => "the supply list shows the item for another class",
