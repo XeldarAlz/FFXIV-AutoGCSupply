@@ -194,7 +194,7 @@ internal sealed partial class GcRunController
     private void ReadShopper()
     {
         var shopperNow = ShopperProbe.Read();
-        var dryRunNow = shopperNow == ShopperState.Available && AutoShopperApi.Instance.DryRun();
+        var dryRunNow = shopperNow == ShopperState.Available && AutoShopperApi.Instance.DryRun(whenUnknown: false);
         var setupReadyNow = ExternalPlugins.AllRequiredInstalled();
         if (shopperNow == shopper && dryRunNow == shopperDryRun && setupReadyNow == setupReady)
         {

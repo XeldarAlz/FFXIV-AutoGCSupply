@@ -21,7 +21,7 @@ internal enum RowRunState : byte { Waiting, Buying, Bought, NotBought, HandingIn
 
 internal readonly record struct RunRow(byte ClassJobId, RowRunState State, string Detail);
 
-internal readonly record struct RunSummary(int Delivered, int Planned, long Experience, long Seals, long SealsLost, long GilSpent, TimeSpan Duration, bool DryRun);
+internal readonly record struct RunSummary(int Delivered, int Planned, long Experience, long Seals, long SealsLost, long GilSpent, bool DrySpend, TimeSpan Duration, bool DryRun);
 
 internal sealed class RunModel
 {

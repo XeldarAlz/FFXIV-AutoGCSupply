@@ -242,9 +242,10 @@ internal sealed partial class GcRunController
         RunPlanRules.ReleaseHandingIn(active.Progress);
         active.PublishRows();
         var authorization = active.Authorization;
-        var summary = RunOutcomeRule.Summarize(authorization.Rows.AsSpan(), active.Progress, active.GilSpent, DateTime.UtcNow - authorization.StartedAtUtc, active.DryRun);
+        var authorized = authorization.Rows.AsSpan();
+        var summary = RunOutcomeRule.Summarize(authorized, active.Progress, active.GilSpent, active.ShopperDryRun, DateTime.UtcNow - authorization.StartedAtUtc, active.DryRun);
         tracker.Finish(active.End, summary, RunText.Ended(active.End, summary, active.Failure));
-        Record(active, summary);
+        Record(active, RunOutcomeRule.ForHistory(authorized, active.Progress, summary));
         todayDirty = true;
         lastPollMs = 0;
         RunLog.Info(

@@ -41,7 +41,7 @@ internal static class RunOutcomeRule
         return new RunVerdict(end, NeedsPlayerReason.None);
     }
 
-    public static RunSummary Summarize(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, long gilSpent, TimeSpan duration, bool dryRun)
+    public static RunSummary Summarize(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, long gilSpent, bool drySpend, TimeSpan duration, bool dryRun)
     {
         var delivered = 0;
         var experience = 0L;
@@ -60,7 +60,23 @@ internal static class RunOutcomeRule
             sealsLost = Gil.SaturatingAdd(sealsLost, progress[index].SealsLost);
         }
 
-        return new RunSummary(delivered, authorized.Length, experience, seals, sealsLost, gilSpent, duration, dryRun);
+        return new RunSummary(delivered, authorized.Length, experience, seals, sealsLost, gilSpent, drySpend, duration, dryRun);
+    }
+
+    public static RunSummary ForHistory(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, in RunSummary shown)
+    {
+        if (!shown.DryRun)
+        {
+            return shown;
+        }
+
+        var realSpend = shown.DrySpend ? 0 : shown.GilSpent;
+        if (realSpend == 0 && !Any(progress, RowRunState.Delivered))
+        {
+            return shown;
+        }
+
+        return Summarize(authorized, progress, realSpend, drySpend: false, shown.Duration, dryRun: false);
     }
 
     private static bool Counts(in RowProgress progress, bool dryRun)

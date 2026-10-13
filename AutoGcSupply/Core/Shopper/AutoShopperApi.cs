@@ -51,8 +51,8 @@ internal sealed class AutoShopperApi
     public int ApiVersion()
         => IpcGate.Invoke(apiVersion.HasFunction, apiVersionCall, 0, ApiVersionFailed);
 
-    public bool DryRun()
-        => IpcGate.Invoke(dryRun.HasFunction, dryRunCall, false, DryRunFailed);
+    public bool DryRun(bool whenUnknown)
+        => IpcGate.Invoke(dryRun.HasFunction, dryRunCall, whenUnknown, DryRunFailed);
 
     public ShopperAcceptance QuoteStart(ReadOnlySpan<ShopperQuoteLine> lines)
     {
