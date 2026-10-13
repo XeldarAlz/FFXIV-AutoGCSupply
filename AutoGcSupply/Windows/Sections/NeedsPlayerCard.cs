@@ -28,14 +28,14 @@ internal static class NeedsPlayerCard
     public static void Draw(GcRunController controller, RunModel run)
     {
         var reason = run.NeedsPlayer;
-        var shopperOwned = reason is NeedsPlayerReason.ShopperConsent or NeedsPlayerReason.ShopperUncertainPurchase or NeedsPlayerReason.ShopperInterrupted;
+        var shopperOwned = ShopperSettlementRule.OwnedByShopper(reason);
         var detail = run.NeedsPlayerDetail.Length > 0 ? run.NeedsPlayerDetail : null;
         var (title, body, facts) = reason switch
         {
             NeedsPlayerReason.ShopperConsent => (Loc.T(L.Running.ConsentTitle), Loc.T(L.Running.ConsentBody), detail),
             NeedsPlayerReason.ShopperUncertainPurchase => (Loc.T(L.Running.UncertainTitle), Loc.T(L.Running.UncertainBody), detail),
             NeedsPlayerReason.ShopperInterrupted => (Loc.T(L.Running.InterruptedTitle), Loc.T(L.Running.InterruptedBody), detail),
-            NeedsPlayerReason.ShopperRefused => (Loc.T(L.Running.RefusedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
+            NeedsPlayerReason.ShopperRefused or NeedsPlayerReason.ShopperNotReady => (Loc.T(L.Running.RefusedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
             NeedsPlayerReason.HandInPaused => (Loc.T(L.Running.HandInPausedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
             _ => (Loc.T(L.Running.UnconfirmedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
         };

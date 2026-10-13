@@ -48,9 +48,26 @@ internal static class ShopperSettlementRule
             return ShopperSettlement.Continue;
         }
 
-        return view.Refusal == ShopperRefusal.None ? ShopperSettlement.Stopped : ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperRefused);
+        return view.Refusal == ShopperRefusal.None ? ShopperSettlement.Stopped : ShopperSettlement.NeedsPlayer(ReasonForRefusal(view.Refusal));
     }
 
-    public static NeedsPlayerReason ReasonForRefusal(ShopperRefusal refusal)
-        => refusal == ShopperRefusal.ConsentRequired ? NeedsPlayerReason.ShopperConsent : NeedsPlayerReason.ShopperRefused;
+    public static NeedsPlayerReason ReasonForRefusal(ShopperRefusal refusal) => refusal switch
+    {
+        ShopperRefusal.ConsentRequired or ShopperRefusal.ConsentDenied => NeedsPlayerReason.ShopperConsent,
+        ShopperRefusal.NeedsReconciliation => NeedsPlayerReason.ShopperUncertainPurchase,
+        ShopperRefusal.InterruptedRun => NeedsPlayerReason.ShopperInterrupted,
+        ShopperRefusal.SetupNeeded
+            or ShopperRefusal.JournalDamaged
+            or ShopperRefusal.JournalWriteFailed
+            or ShopperRefusal.Busy
+            or ShopperRefusal.ReadingUnavailable
+            or ShopperRefusal.BuyingUnavailable => NeedsPlayerReason.ShopperNotReady,
+        _ => NeedsPlayerReason.ShopperRefused,
+    };
+
+    public static bool OwnedByShopper(NeedsPlayerReason reason)
+        => reason is NeedsPlayerReason.ShopperConsent
+            or NeedsPlayerReason.ShopperUncertainPurchase
+            or NeedsPlayerReason.ShopperInterrupted
+            or NeedsPlayerReason.ShopperNotReady;
 }

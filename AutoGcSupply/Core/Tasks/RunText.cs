@@ -46,21 +46,11 @@ internal static class RunText
             return Loc.T(L.Run.NeedsNoAnswer);
         }
 
-        if (reason == NeedsPlayerReason.ShopperConsent)
-        {
-            return Loc.T(L.Run.NeedsConsent);
-        }
-
-        return acceptance.Message.Length > 0 ? acceptance.Message : Loc.T(L.Run.NeedsRefused, acceptance.RefusalName);
+        return ShopperNeeds(reason, acceptance.Refusal, acceptance.Message.Length > 0 ? acceptance.Message : Loc.T(L.Run.NeedsRefused, acceptance.RefusalName));
     }
 
-    public static string ShopperNeeds(NeedsPlayerReason reason, in ShopperRunView view) => reason switch
-    {
-        NeedsPlayerReason.ShopperConsent => Loc.T(L.Run.NeedsConsent),
-        NeedsPlayerReason.ShopperUncertainPurchase => Loc.T(L.Run.NeedsUncertain),
-        NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
-        _ => view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName),
-    };
+    public static string ShopperNeeds(NeedsPlayerReason reason, in ShopperRunView view)
+        => ShopperNeeds(reason, view.Refusal, view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName));
 
     public static string ShopperPaused(ShopperPauseReason reason)
         => Loc.T(reason == ShopperPauseReason.InContent ? L.Run.StatusShopperPausedInContent : L.Run.StatusShopperPaused);
@@ -84,6 +74,15 @@ internal static class RunText
         RunEnd.NeedsPlayer => Loc.T(L.Run.StatusNeedsPlayer),
         RunEnd.Failed => failure,
         _ => Loc.T(L.Run.StatusStopped),
+    };
+
+    private static string ShopperNeeds(NeedsPlayerReason reason, ShopperRefusal refusal, string shopperText) => reason switch
+    {
+        NeedsPlayerReason.ShopperConsent => Loc.T(refusal == ShopperRefusal.ConsentDenied ? L.Run.NeedsConsentDenied : L.Run.NeedsConsent),
+        NeedsPlayerReason.ShopperUncertainPurchase => Loc.T(L.Run.NeedsUncertain),
+        NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
+        NeedsPlayerReason.ShopperNotReady => string.Concat(shopperText, " ", Loc.T(L.Run.NeedsInShopper)),
+        _ => WithTryAgain(shopperText),
     };
 
     private static string HandInPause(HandInPauseReason reason, string detail) => reason switch
