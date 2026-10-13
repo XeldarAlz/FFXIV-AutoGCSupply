@@ -136,6 +136,11 @@ internal static partial class L
         public static readonly LocString New = new("changelog.new", "New");
         public static readonly LocPlural Changes = new("changelog.changes", "{0} change", "{0} changes");
 
+        public static readonly LocString[] Release1001 =
+        [
+            new("changelog.r1001.1", "Hand-ins no longer pause on every row when the delivery window is laid out differently than expected; each delivery is still confirmed from your bags"),
+        ];
+
         public static readonly LocString[] Release1000 =
         [
             new("changelog.r1000.1", "Today page: the day's 8 supply and 3 provisioning requests with item, quantity, owned stock, cost, XP, seals and gil per 1,000 XP"),

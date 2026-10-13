@@ -355,6 +355,7 @@
   "changelog.new": "Neu",
   "changelog.changes.one": "{0} Änderung",
   "changelog.changes.other": "{0} Änderungen",
+  "changelog.r1001.1": "Abgaben pausieren nicht mehr bei jeder Zeile, wenn das Abgabefenster anders aufgebaut ist als erwartet; jede Abgabe wird weiterhin über dein Inventar bestätigt",
   "changelog.r1000.1": "Seite Heute: die 8 Versorgungs- und 3 Proviantanfragen des Tages mit Gegenstand, Menge, Besitz, Kosten, EP, Staatstalern und Gil pro 1.000 EP",
   "changelog.r1000.2": "Liest die Anfragen, indem es kurz das Timer-Fenster öffnet, und nach dem täglichen Reset um 20:00 UTC erneut",
   "changelog.r1000.3": "Klicke auf eine Zeile, um zu wählen, was abgegeben wird, pro Charakter gespeichert; Klassen auf Höchststufe bleiben außen vor, bis du sie in den Einstellungen für Staatstaler einbeziehst",

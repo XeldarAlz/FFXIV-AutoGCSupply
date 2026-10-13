@@ -355,6 +355,7 @@
   "changelog.new": "Nuevo",
   "changelog.changes.one": "{0} cambio",
   "changelog.changes.other": "{0} cambios",
+  "changelog.r1001.1": "Las entregas ya no se pausan en cada fila cuando la ventana de entrega tiene otra disposición de la esperada; cada entrega se sigue confirmando con tu inventario",
   "changelog.r1000.1": "Página Hoy: las 8 peticiones de suministro y las 3 de aprovisionamiento del día con objeto, cantidad, existencias, coste, EXP, sellos y guiles por 1000 EXP",
   "changelog.r1000.2": "Lee las peticiones abriendo un momento la ventana de temporizadores, y de nuevo tras el reinicio diario de las 20:00 UTC",
   "changelog.r1000.3": "Haz clic en una fila para elegir qué entregar, guardado por personaje; las clases de nivel máximo quedan fuera salvo que las incluyas por los sellos en Ajustes",

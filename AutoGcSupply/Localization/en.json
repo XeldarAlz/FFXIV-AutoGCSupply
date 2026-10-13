@@ -355,6 +355,7 @@
   "changelog.new": "New",
   "changelog.changes.one": "{0} change",
   "changelog.changes.other": "{0} changes",
+  "changelog.r1001.1": "Hand-ins no longer pause on every row when the delivery window is laid out differently than expected; each delivery is still confirmed from your bags",
   "changelog.r1000.1": "Today page: the day's 8 supply and 3 provisioning requests with item, quantity, owned stock, cost, XP, seals and gil per 1,000 XP",
   "changelog.r1000.2": "Reads the requests by opening the Timers window for a moment, and again after the daily reset at 20:00 UTC",
   "changelog.r1000.3": "Click a row to choose what to deliver, kept per character; max-level classes stay out unless you include them for seals in Settings",
