@@ -14,6 +14,8 @@ internal static class RunLabels
         StartBlock.SetupNeeded => Loc.T(L.Automate.BlockSetup),
         StartBlock.NotLoggedIn => Loc.T(L.Automate.BlockLoggedOut),
         StartBlock.NoGrandCompany => Loc.T(L.Automate.BlockNoGrandCompany),
+        StartBlock.NotOnHomeWorld => Loc.T(L.Automate.BlockNotOnHomeWorld),
+        StartBlock.InDuty => Loc.T(L.Automate.BlockInDuty),
         StartBlock.NotLoaded => Loc.T(L.Automate.BlockNotLoaded),
         StartBlock.NothingSelected => Loc.T(L.Automate.BlockNothingSelected),
         StartBlock.NothingToDo => Loc.T(L.Automate.BlockNothingToDo),

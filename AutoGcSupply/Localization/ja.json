@@ -167,6 +167,8 @@
   "automate.block.setup": "必要なプラグインを導入してください",
   "automate.block.loggedOut": "まずログインしてください",
   "automate.block.noGrandCompany": "まずグランドカンパニーに入隊してください",
+  "automate.block.notOnHomeWorld": "まずホームワールドに戻ってください",
+  "automate.block.inDuty": "まずコンテンツから出てください",
   "automate.block.notLoaded": "まず本日の依頼を読み込んでください",
   "automate.block.nothingSelected": "依頼を1つ以上選んでください",
   "automate.block.nothingToDo": "本日納品できるものはありません",

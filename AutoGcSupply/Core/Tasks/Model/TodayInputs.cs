@@ -14,6 +14,8 @@ internal readonly record struct TodayInputs
 
     public required CharacterState Character { get; init; }
 
+    public required bool InDuty { get; init; }
+
     public required RequestSnapshot Snapshot { get; init; }
 
     public required bool RequestsCurrent { get; init; }

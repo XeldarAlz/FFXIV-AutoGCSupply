@@ -16,6 +16,8 @@ internal enum StartBlock : byte
     SetupNeeded,
     NotLoggedIn,
     NoGrandCompany,
+    NotOnHomeWorld,
+    InDuty,
     NotLoaded,
     NothingSelected,
     NothingToDo,

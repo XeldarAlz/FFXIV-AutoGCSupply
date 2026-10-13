@@ -13,6 +13,8 @@ public sealed class StartBlockRuleTests
         SetupReady: true,
         LoggedIn: true,
         InGrandCompany: true,
+        OnHomeWorld: true,
+        InDuty: false,
         Loaded: true,
         Pricing: PricingState.Ready,
         Shopper: ShopperState.Available,
@@ -31,12 +33,14 @@ public sealed class StartBlockRuleTests
     [Fact]
     public void BlocksFollowTheEnumPriority()
     {
-        var everythingWrong = new StartFacts(true, false, false, false, false, PricingState.Pending, ShopperState.Missing, 0);
+        var everythingWrong = new StartFacts(true, false, false, false, false, true, false, PricingState.Pending, ShopperState.Missing, 0);
 
         Assert.Equal(StartBlock.Running, StartBlockRule.Evaluate(everythingWrong, []));
         Assert.Equal(StartBlock.SetupNeeded, StartBlockRule.Evaluate(everythingWrong with { Running = false }, []));
         Assert.Equal(StartBlock.NotLoggedIn, StartBlockRule.Evaluate(everythingWrong with { Running = false, SetupReady = true }, []));
-        Assert.Equal(StartBlock.NoGrandCompany, StartBlockRule.Evaluate(ready with { InGrandCompany = false, Loaded = false }, []));
+        Assert.Equal(StartBlock.NoGrandCompany, StartBlockRule.Evaluate(ready with { InGrandCompany = false, OnHomeWorld = false, Loaded = false }, []));
+        Assert.Equal(StartBlock.NotOnHomeWorld, StartBlockRule.Evaluate(ready with { OnHomeWorld = false, InDuty = true, Loaded = false }, []));
+        Assert.Equal(StartBlock.InDuty, StartBlockRule.Evaluate(ready with { InDuty = true, Loaded = false }, []));
         Assert.Equal(StartBlock.NotLoaded, StartBlockRule.Evaluate(ready with { Loaded = false }, []));
         Assert.Equal(StartBlock.NothingSelected, StartBlockRule.Evaluate(ready with { Pricing = PricingState.Pending, SpendCap = 0 }, []));
     }

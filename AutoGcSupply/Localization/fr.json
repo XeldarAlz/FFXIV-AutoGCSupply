@@ -167,6 +167,8 @@
   "automate.block.setup": "installez les plugins requis",
   "automate.block.loggedOut": "connectez-vous d'abord",
   "automate.block.noGrandCompany": "engagez-vous d'abord dans une Grande Compagnie",
+  "automate.block.notOnHomeWorld": "retournez d'abord sur votre monde d'origine",
+  "automate.block.inDuty": "quittez d'abord l'instance",
   "automate.block.notLoaded": "chargez d'abord les demandes du jour",
   "automate.block.nothingSelected": "choisissez au moins une demande",
   "automate.block.nothingToDo": "rien à remettre aujourd'hui",

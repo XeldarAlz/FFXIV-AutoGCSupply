@@ -1,6 +1,7 @@
 using AutoGcSupply.Core.Character;
 using AutoGcSupply.Core.Character.Model;
 using AutoGcSupply.Core.External;
+using AutoGcSupply.Core.Game.Watchers;
 using AutoGcSupply.Core.Inventory;
 using AutoGcSupply.Core.Inventory.Model;
 using AutoGcSupply.Core.Requests;
@@ -32,6 +33,7 @@ internal sealed partial class GcRunController
     private bool loggedIn;
     private bool hasCharacter;
     private CharacterState character;
+    private bool inDuty;
     private RequestSnapshot snapshot = RequestSnapshot.Unread(DateTime.UtcNow);
     private bool requestsCurrent;
     private ImmutableArray<OwnedCount> ownedBySlot = ImmutableArray<OwnedCount>.Empty;
@@ -92,6 +94,7 @@ internal sealed partial class GcRunController
         ReadDay(DateTime.UtcNow);
         DropOutdatedQuotes();
         ReadCharacter();
+        ReadDuty();
         ReadRequests();
         RecountBags();
         ReadSettings();
@@ -141,6 +144,18 @@ internal sealed partial class GcRunController
         loggedIn = loggedInNow;
         hasCharacter = hasCharacterNow;
         character = characterNow;
+        todayDirty = true;
+    }
+
+    private void ReadDuty()
+    {
+        var inDutyNow = DutyWatcher.InContent();
+        if (inDutyNow == inDuty)
+        {
+            return;
+        }
+
+        inDuty = inDutyNow;
         todayDirty = true;
     }
 
@@ -290,6 +305,7 @@ internal sealed partial class GcRunController
             LoggedIn = loggedIn,
             HasCharacter = hasCharacter,
             Character = character,
+            InDuty = inDuty,
             Snapshot = snapshot,
             RequestsCurrent = requestsCurrent,
             Reading = loader is not null,

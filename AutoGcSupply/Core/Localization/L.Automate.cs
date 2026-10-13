@@ -10,6 +10,8 @@ internal static partial class L
         public static readonly LocString BlockSetup = new("automate.block.setup", "install the required plugins");
         public static readonly LocString BlockLoggedOut = new("automate.block.loggedOut", "log in first");
         public static readonly LocString BlockNoGrandCompany = new("automate.block.noGrandCompany", "join a Grand Company first");
+        public static readonly LocString BlockNotOnHomeWorld = new("automate.block.notOnHomeWorld", "return to your home world first");
+        public static readonly LocString BlockInDuty = new("automate.block.inDuty", "leave the duty first");
         public static readonly LocString BlockNotLoaded = new("automate.block.notLoaded", "load today's requests first");
         public static readonly LocString BlockNothingSelected = new("automate.block.nothingSelected", "choose at least one request");
         public static readonly LocString BlockNothingToDo = new("automate.block.nothingToDo", "nothing to hand in today");

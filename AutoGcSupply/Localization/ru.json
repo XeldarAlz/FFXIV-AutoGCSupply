@@ -167,6 +167,8 @@
   "automate.block.setup": "установите необходимые плагины",
   "automate.block.loggedOut": "сначала войдите в игру",
   "automate.block.noGrandCompany": "сначала вступите в Великую компанию",
+  "automate.block.notOnHomeWorld": "сначала вернитесь в родной мир",
+  "automate.block.inDuty": "сначала покиньте контент",
   "automate.block.notLoaded": "сначала загрузите сегодняшние запросы",
   "automate.block.nothingSelected": "выберите хотя бы один запрос",
   "automate.block.nothingToDo": "сегодня нечего сдавать",

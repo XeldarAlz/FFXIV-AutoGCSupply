@@ -7,6 +7,8 @@ internal readonly record struct StartFacts(
     bool SetupReady,
     bool LoggedIn,
     bool InGrandCompany,
+    bool OnHomeWorld,
+    bool InDuty,
     bool Loaded,
     PricingState Pricing,
     ShopperState Shopper,
@@ -34,6 +36,16 @@ internal static class StartBlockRule
         if (!facts.InGrandCompany)
         {
             return StartBlock.NoGrandCompany;
+        }
+
+        if (!facts.OnHomeWorld)
+        {
+            return StartBlock.NotOnHomeWorld;
+        }
+
+        if (facts.InDuty)
+        {
+            return StartBlock.InDuty;
         }
 
         if (!facts.Loaded)

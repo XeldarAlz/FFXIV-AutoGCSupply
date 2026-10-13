@@ -167,6 +167,8 @@
   "automate.block.setup": "instale os plugins necessários",
   "automate.block.loggedOut": "entre no jogo primeiro",
   "automate.block.noGrandCompany": "entre em uma Grande Companhia primeiro",
+  "automate.block.notOnHomeWorld": "volte ao seu mundo de origem primeiro",
+  "automate.block.inDuty": "saia do conteúdo primeiro",
   "automate.block.notLoaded": "carregue os pedidos de hoje primeiro",
   "automate.block.nothingSelected": "escolha pelo menos um pedido",
   "automate.block.nothingToDo": "nada para entregar hoje",

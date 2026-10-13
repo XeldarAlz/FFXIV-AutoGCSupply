@@ -167,6 +167,8 @@
   "automate.block.setup": "installiere die benötigten Plugins",
   "automate.block.loggedOut": "melde dich zuerst an",
   "automate.block.noGrandCompany": "tritt zuerst einer Staatsgesellschaft bei",
+  "automate.block.notOnHomeWorld": "kehre zuerst in deine Heimatwelt zurück",
+  "automate.block.inDuty": "verlasse zuerst den Inhalt",
   "automate.block.notLoaded": "lade zuerst die heutigen Anfragen",
   "automate.block.nothingSelected": "wähle mindestens eine Anfrage",
   "automate.block.nothingToDo": "heute gibt es nichts abzugeben",

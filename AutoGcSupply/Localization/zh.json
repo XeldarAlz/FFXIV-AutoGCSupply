@@ -167,6 +167,8 @@
   "automate.block.setup": "请先安装所需插件",
   "automate.block.loggedOut": "请先登录",
   "automate.block.noGrandCompany": "请先加入大国防联军",
+  "automate.block.notOnHomeWorld": "请先返回主世界",
+  "automate.block.inDuty": "请先离开副本",
   "automate.block.notLoaded": "请先加载今日需求",
   "automate.block.nothingSelected": "请至少选择一项需求",
   "automate.block.nothingToDo": "今日没有可交纳的物品",

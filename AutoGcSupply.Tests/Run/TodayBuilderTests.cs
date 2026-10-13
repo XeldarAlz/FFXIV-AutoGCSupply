@@ -36,6 +36,17 @@ public sealed class TodayBuilderTests
     }
 
     [Fact]
+    public void StartWaitsForTheHomeWorldAndTheEndOfADuty()
+    {
+        var visiting = Build(Inputs() with { Character = CharacterFixtures.Standard() with { CurrentWorldId = CharacterFixtures.HomeWorldId + 1 } });
+        var inDuty = Build(Inputs() with { InDuty = true });
+
+        Assert.Equal(TodayState.Ready, visiting.State);
+        Assert.Equal(StartBlock.NotOnHomeWorld, visiting.StartBlock);
+        Assert.Equal(StartBlock.InDuty, inDuty.StartBlock);
+    }
+
+    [Fact]
     public void ReadingWhileTheTimersLoaderRuns()
     {
         var model = Build(Inputs() with { Reading = true });
@@ -159,6 +170,7 @@ public sealed class TodayBuilderTests
         LoggedIn = true,
         HasCharacter = true,
         Character = CharacterFixtures.Standard(),
+        InDuty = false,
         Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.OpenDay),
         RequestsCurrent = true,
         Reading = false,

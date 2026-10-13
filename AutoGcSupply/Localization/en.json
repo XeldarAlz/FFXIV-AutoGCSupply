@@ -167,6 +167,8 @@
   "automate.block.setup": "install the required plugins",
   "automate.block.loggedOut": "log in first",
   "automate.block.noGrandCompany": "join a Grand Company first",
+  "automate.block.notOnHomeWorld": "return to your home world first",
+  "automate.block.inDuty": "leave the duty first",
   "automate.block.notLoaded": "load today's requests first",
   "automate.block.nothingSelected": "choose at least one request",
   "automate.block.nothingToDo": "nothing to hand in today",

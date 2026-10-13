@@ -23,6 +23,8 @@ internal static class TodayBuilder
             inputs.SetupReady,
             loggedIn,
             loggedIn && inputs.Character.InGrandCompany,
+            loggedIn && inputs.Character.OnHomeWorld,
+            inputs.InDuty,
             requestsLoaded && !inputs.Reading,
             pricing,
             inputs.Shopper,

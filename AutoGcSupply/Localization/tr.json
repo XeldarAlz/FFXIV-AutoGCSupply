@@ -167,6 +167,8 @@
   "automate.block.setup": "gerekli eklentileri kurun",
   "automate.block.loggedOut": "önce giriş yapın",
   "automate.block.noGrandCompany": "önce bir Grand Company'ye katılın",
+  "automate.block.notOnHomeWorld": "önce ana dünyanıza dönün",
+  "automate.block.inDuty": "önce içerikten çıkın",
   "automate.block.notLoaded": "önce bugünün taleplerini yükleyin",
   "automate.block.nothingSelected": "en az bir talep seçin",
   "automate.block.nothingToDo": "bugün teslim edilecek bir şey yok",
