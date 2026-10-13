@@ -355,6 +355,7 @@
   "changelog.new": "Nouveau",
   "changelog.changes.one": "{0} changement",
   "changelog.changes.other": "{0} changements",
+  "changelog.r1001.1": "Les remises ne se mettent plus en pause à chaque ligne quand la fenêtre de remise est disposée autrement que prévu ; chaque remise reste confirmée par votre inventaire",
   "changelog.r1000.1": "Page Aujourd'hui : les 8 demandes d'approvisionnement et les 3 de ravitaillement du jour, avec objet, quantité, stock, coût, EXP, sceaux et gils pour 1 000 EXP",
   "changelog.r1000.2": "Lit les demandes en ouvrant un instant la fenêtre des minuteurs, puis de nouveau après la réinitialisation quotidienne de 20:00 UTC",
   "changelog.r1000.3": "Cliquez sur une ligne pour choisir quoi remettre, mémorisé par personnage ; les classes au niveau maximum restent exclues tant que vous ne les incluez pas pour les sceaux dans les Réglages",

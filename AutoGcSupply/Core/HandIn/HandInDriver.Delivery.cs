@@ -119,24 +119,34 @@ internal sealed partial class HandInDriver
         var shown = RewardWindowReader.Read();
         var expectedName = HandInReads.SheetItemName(target.ItemId);
         Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}");
-        var verdict = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
+        var judgment = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
+        var verdict = judgment.Verdict;
         if (verdict == RewardWindowVerdict.Matches)
         {
-            WarnIfCapHidesQuality(target, sealsBefore);
+            WarnAboutUncheckedSeals(judgment.SealsUnverified, target, sealsBefore);
             return Halt.None;
         }
 
         var mismatch = RewardWindowCheck.Mismatch(verdict, shown, expectedName, target, sealsBefore, sealCap);
-        var detail = verdict == RewardWindowVerdict.Unreadable
-            ? $"the reward window for {HandInReads.Describe(target)} could not be read"
-            : $"the reward window shows '{mismatch.ShownItemName}' for {mismatch.ShownSeals} seals where {HandInReads.Describe(target)} expects '{mismatch.ExpectedItemName}' for {mismatch.LowestSeals} to {mismatch.HighestSeals} seals";
+        var detail = verdict switch
+        {
+            RewardWindowVerdict.Unreadable => $"the reward window for {HandInReads.Describe(target)} could not be read",
+            RewardWindowVerdict.OtherItem => $"the reward window shows '{mismatch.ShownItemName}' where {HandInReads.Describe(target)} expects '{mismatch.ExpectedItemName}'",
+            _ => $"the reward window shows '{mismatch.ShownItemName}' for {mismatch.ShownSeals} seals where {HandInReads.Describe(target)} expects '{mismatch.ExpectedItemName}' for {mismatch.LowestSeals} to {mismatch.HighestSeals} seals",
+        };
         Warn($"Hand-in: {detail} ({verdict}); cancelling it");
         await OfficerWindows.CloseReward(cancelled);
         return new Halt(HandInPauseReason.RewardWindowMismatch, detail) { RewardWindow = mismatch };
     }
 
-    private void WarnIfCapHidesQuality(in HandInTarget target, int sealsBefore)
+    private void WarnAboutUncheckedSeals(bool sealsUnverified, in HandInTarget target, int sealsBefore)
     {
+        if (sealsUnverified)
+        {
+            Warn($"Hand-in: the reward window's seal value could not be located for {HandInReads.Describe(target)}; relying on the delivery check");
+            return;
+        }
+
         if (!RewardWindowCheck.CapHidesQuality(target, sealsBefore, sealCap))
         {
             return;

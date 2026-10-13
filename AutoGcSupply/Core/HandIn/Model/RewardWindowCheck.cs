@@ -5,37 +5,41 @@ namespace AutoGcSupply.Core.HandIn.Model;
 
 internal static class RewardWindowCheck
 {
+    public const int ItemNameIndex = 4;
+    public const int SealRewardIndex = 9;
     public const int BonusAllowanceNumerator = 5;
     public const int BonusAllowanceDenominator = 2;
 
-    public static RewardWindowVerdict Judge(in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
+    private const int NoText = -1;
+    private const string AnyText = "";
+
+    public static RewardWindowJudgment Judge(in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
     {
-        if (!shown.Readable || PromptText.Normalize(shown.ItemName).Length == 0 || PromptText.Normalize(expectedItemName).Length == 0)
+        var expected = PromptText.Normalize(expectedItemName);
+        if (!shown.Readable || expected.Length == 0)
         {
-            return RewardWindowVerdict.Unreadable;
+            return RewardWindowJudgment.Refuses(RewardWindowVerdict.Unreadable);
         }
 
-        if (!PromptText.Same(shown.ItemName, expectedItemName))
+        if (FindText(shown.Texts, expected) == NoText)
         {
-            return RewardWindowVerdict.OtherItem;
+            return RewardWindowJudgment.Refuses(FindText(shown.Texts, AnyText) == NoText ? RewardWindowVerdict.Unreadable : RewardWindowVerdict.OtherItem);
         }
 
-        if (target.SealReward == 0)
-        {
-            return RewardWindowVerdict.Matches;
-        }
-
-        return SealsFit(shown.Seals, target.SealReward, sealsBefore, sealCap) ? RewardWindowVerdict.Matches : RewardWindowVerdict.OtherSeals;
+        return target.SealReward == 0 ? RewardWindowJudgment.Matches : JudgeSeals(shown, target, sealsBefore, sealCap);
     }
 
     public static RewardWindowMismatch Mismatch(RewardWindowVerdict verdict, in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
-        => new(
+    {
+        var expected = PromptText.Normalize(expectedItemName);
+        return new RewardWindowMismatch(
             verdict,
-            PromptText.Normalize(shown.ItemName),
-            shown.Seals,
-            PromptText.Normalize(expectedItemName),
+            ShownItemName(shown.Texts, expected),
+            shown.TryFindInteger(SealRewardIndex, out var shownSeals) ? shownSeals : 0,
+            expected,
             LowestSeals(target.SealReward, sealsBefore, sealCap),
             HighestSeals(target.SealReward));
+    }
 
     public static bool CapHidesQuality(in HandInTarget target, int sealsBefore, int sealCap)
         => target.Quality == ItemQuality.High
@@ -67,4 +71,84 @@ internal static class RewardWindowCheck
         var highest = ((long)expectedSeals * BonusAllowanceNumerator + BonusAllowanceDenominator - 1) / BonusAllowanceDenominator;
         return (int)Math.Min(int.MaxValue, highest);
     }
+
+    private static RewardWindowJudgment JudgeSeals(in RewardWindowSample shown, in HandInTarget target, int sealsBefore, int sealCap)
+    {
+        if (!shown.TryFindInteger(SealRewardIndex, out var shownSeals))
+        {
+            return RewardWindowJudgment.SealsNotLocated;
+        }
+
+        if (SealsFit(shownSeals, target.SealReward, sealsBefore, sealCap))
+        {
+            return RewardWindowJudgment.Matches;
+        }
+
+        return target.Quality == ItemQuality.High && LooksLikeNormalQuality(shownSeals, LowestSeals(target.SealReward, sealsBefore, sealCap))
+            ? RewardWindowJudgment.Refuses(RewardWindowVerdict.OtherSeals)
+            : RewardWindowJudgment.SealsNotLocated;
+    }
+
+    private static bool LooksLikeNormalQuality(int shownSeals, int lowestSeals)
+        => shownSeals < lowestSeals && shownSeals >= LowestNormalQualitySeals(lowestSeals);
+
+    private static int LowestNormalQualitySeals(int lowestSeals)
+        => (int)(((long)lowestSeals + RewardMath.HighQualitySupplyFactor - 1) / RewardMath.HighQualitySupplyFactor);
+
+    private static string ShownItemName(RewardWindowText[] texts, string expected)
+    {
+        var textPosition = FindText(texts, expected);
+        if (textPosition == NoText)
+        {
+            textPosition = FindText(texts, AnyText);
+        }
+
+        return textPosition == NoText ? string.Empty : PromptText.Normalize(texts[textPosition].Text);
+    }
+
+    private static int FindText(RewardWindowText[] texts, string phrase)
+    {
+        var firstFound = NoText;
+        for (var textPosition = 0; textPosition < texts.Length; textPosition++)
+        {
+            var text = PromptText.Normalize(texts[textPosition].Text);
+            if (text.Length == 0 || !ContainsPhrase(text, phrase))
+            {
+                continue;
+            }
+
+            if (texts[textPosition].ValueIndex == ItemNameIndex)
+            {
+                return textPosition;
+            }
+
+            if (firstFound == NoText)
+            {
+                firstFound = textPosition;
+            }
+        }
+
+        return firstFound;
+    }
+
+    private static bool ContainsPhrase(string text, string phrase)
+    {
+        if (phrase.Length == 0)
+        {
+            return true;
+        }
+
+        for (var start = text.IndexOf(phrase, StringComparison.OrdinalIgnoreCase); start >= 0; start = text.IndexOf(phrase, start + 1, StringComparison.OrdinalIgnoreCase))
+        {
+            if (SeparatesWords(text, start - 1) && SeparatesWords(text, start + phrase.Length))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool SeparatesWords(string text, int characterIndex)
+        => characterIndex < 0 || characterIndex >= text.Length || !char.IsLetterOrDigit(text[characterIndex]);
 }
