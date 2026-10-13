@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Hand in matching items from your bags before buying any. Equipped gear, the armoury chest, retainers and saddlebags are never used.",
   "runSettings.group.buying": "Buying",
   "runSettings.quality": "Supply quality",
-  "runSettings.qualityHelp": "Which quality to buy and hand in for crafter supply requests. Provisioning takes any quality.",
+  "runSettings.qualityHelp": "Which quality to buy and hand in for crafter supply requests. Provisioning is always bought and handed in as NQ.",
   "runSettings.quality.automatic": "Automatic",
   "runSettings.quality.automaticDetail": "HQ when it costs at most twice NQ; HQ supply pays double.",
   "runSettings.quality.high": "Always HQ",

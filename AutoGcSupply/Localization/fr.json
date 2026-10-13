@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Remettre les objets correspondants de vos sacs avant d'en acheter. L'équipement porté, l'arsenal, les servants et les sacoches ne sont jamais utilisés.",
   "runSettings.group.buying": "Achats",
   "runSettings.quality": "Qualité d'approvisionnement",
-  "runSettings.qualityHelp": "La qualité à acheter et remettre pour les demandes d'approvisionnement des artisans. Le ravitaillement accepte toute qualité.",
+  "runSettings.qualityHelp": "La qualité à acheter et remettre pour les demandes d'approvisionnement des artisans. Le ravitaillement est toujours acheté et remis en NQ.",
   "runSettings.quality.automatic": "Automatique",
   "runSettings.quality.automaticDetail": "HQ quand il coûte au plus le double du NQ ; l'approvisionnement HQ rapporte le double.",
   "runSettings.quality.high": "Toujours HQ",

@@ -13,7 +13,7 @@ internal static partial class L
         public static readonly LocString UseOwnedHelp = new("runSettings.useOwnedHelp", "Hand in matching items from your bags before buying any. Equipped gear, the armoury chest, retainers and saddlebags are never used.");
         public static readonly LocString GroupBuying = new("runSettings.group.buying", "Buying");
         public static readonly LocString Quality = new("runSettings.quality", "Supply quality");
-        public static readonly LocString QualityHelp = new("runSettings.qualityHelp", "Which quality to buy and hand in for crafter supply requests. Provisioning takes any quality.");
+        public static readonly LocString QualityHelp = new("runSettings.qualityHelp", "Which quality to buy and hand in for crafter supply requests. Provisioning is always bought and handed in as NQ.");
         public static readonly LocString QualityAutomatic = new("runSettings.quality.automatic", "Automatic");
         public static readonly LocString QualityAutomaticDetail = new("runSettings.quality.automaticDetail", "HQ when it costs at most twice NQ; HQ supply pays double.");
         public static readonly LocString QualityHigh = new("runSettings.quality.high", "Always HQ");

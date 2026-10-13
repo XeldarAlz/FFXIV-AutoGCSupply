@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Сдавать подходящие предметы из сумок до покупок. Надетое снаряжение, арсенал, помощники и седельные сумки не используются.",
   "runSettings.group.buying": "Покупки",
   "runSettings.quality": "Качество снабжения",
-  "runSettings.qualityHelp": "Какое качество покупать и сдавать в запросах снабжения ремесленников. Провизия принимает любое качество.",
+  "runSettings.qualityHelp": "Какое качество покупать и сдавать в запросах снабжения ремесленников. Провизия всегда покупается и сдаётся в NQ.",
   "runSettings.quality.automatic": "Автоматически",
   "runSettings.quality.automaticDetail": "HQ, если стоит не больше двух NQ; снабжение HQ даёт вдвое больше.",
   "runSettings.quality.high": "Всегда HQ",

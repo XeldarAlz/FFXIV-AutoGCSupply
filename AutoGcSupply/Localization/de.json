@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Gib passende Gegenstände aus deinem Inventar ab, bevor etwas gekauft wird. Angelegte Ausrüstung, das Arsenal, Gehilfen und Satteltaschen werden nie genutzt.",
   "runSettings.group.buying": "Einkauf",
   "runSettings.quality": "Qualität für Versorgung",
-  "runSettings.qualityHelp": "Welche Qualität für Versorgungsanfragen der Handwerker gekauft und abgegeben wird. Proviant nimmt jede Qualität.",
+  "runSettings.qualityHelp": "Welche Qualität für Versorgungsanfragen der Handwerker gekauft und abgegeben wird. Proviant wird immer in NQ gekauft und abgegeben.",
   "runSettings.quality.automatic": "Automatisch",
   "runSettings.quality.automaticDetail": "HQ, wenn es höchstens doppelt so viel wie NQ kostet; HQ-Versorgung zahlt doppelt.",
   "runSettings.quality.high": "Immer HQ",

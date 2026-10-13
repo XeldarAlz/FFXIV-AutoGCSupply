@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Entregar os itens correspondentes das suas bolsas antes de comprar. Equipamento em uso, arsenal, ajudantes e alforjes nunca são usados.",
   "runSettings.group.buying": "Compra",
   "runSettings.quality": "Qualidade do suprimento",
-  "runSettings.qualityHelp": "Qual qualidade comprar e entregar nos pedidos de suprimento dos artesãos. Provisão aceita qualquer qualidade.",
+  "runSettings.qualityHelp": "Qual qualidade comprar e entregar nos pedidos de suprimento dos artesãos. Provisão é sempre comprada e entregue em NQ.",
   "runSettings.quality.automatic": "Automática",
   "runSettings.quality.automaticDetail": "HQ quando custa no máximo o dobro do NQ; suprimento HQ rende o dobro.",
   "runSettings.quality.high": "Sempre HQ",

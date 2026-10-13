@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "購入する前に、所持品の該当アイテムを納品します。装備中の装備、アーマリーチェスト、リテイナー、チョコボかばんは使いません。",
   "runSettings.group.buying": "購入",
   "runSettings.quality": "補給の品質",
-  "runSettings.qualityHelp": "クラフターの補給任務で購入・納品する品質です。調達任務は品質を問いません。",
+  "runSettings.qualityHelp": "クラフターの補給任務で購入・納品する品質です。調達任務は常に NQ で購入・納品します。",
   "runSettings.quality.automatic": "自動",
   "runSettings.quality.automaticDetail": "HQ が NQ の2倍以下の価格なら HQ。補給任務の HQ は報酬が2倍です。",
   "runSettings.quality.high": "常に HQ",

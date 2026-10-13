@@ -275,7 +275,7 @@
   "runSettings.useOwnedHelp": "Satın almadan önce çantalarınızdaki uygun eşyaları teslim et. Kuşanılmış ekipman, cephanelik, hizmetkârlar ve heybeler asla kullanılmaz.",
   "runSettings.group.buying": "Satın alma",
   "runSettings.quality": "Tedarik kalitesi",
-  "runSettings.qualityHelp": "Zanaatkâr tedarik talepleri için hangi kalitenin alınıp teslim edileceği. Erzak her kaliteyi kabul eder.",
+  "runSettings.qualityHelp": "Zanaatkâr tedarik talepleri için hangi kalitenin alınıp teslim edileceği. Erzak her zaman NQ olarak alınır ve teslim edilir.",
   "runSettings.quality.automatic": "Otomatik",
   "runSettings.quality.automaticDetail": "HQ, NQ'nun en fazla iki katına mal oluyorsa; HQ tedarik iki kat kazandırır.",
   "runSettings.quality.high": "Her zaman HQ",
