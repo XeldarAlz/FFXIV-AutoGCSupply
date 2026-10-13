@@ -38,6 +38,7 @@ public sealed partial class Configuration : IPluginConfiguration
     public bool Migrate()
     {
         var changed = RepairSafetySettings();
+        changed |= RepairRunSettings();
         if (Version >= CurrentVersion)
         {
             return changed;

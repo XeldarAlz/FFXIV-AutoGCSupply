@@ -1,4 +1,6 @@
 using AutoGcSupply.Core.Ipc;
+using AutoGcSupply.Core.Requests.Model;
+using AutoGcSupply.Core.Tasks.Model;
 using clib.Services;
 
 namespace AutoGcSupply.Core.Tasks;
@@ -30,6 +32,38 @@ internal sealed class GcRunController
         PauseReason.Manual => "Paused",
         _ => Svc.Automation.CurrentTask?.Status ?? "Idle",
     };
+
+    public TodayModel Today { get; private set; } = TodayModel.Empty;
+
+    public RunModel Run { get; private set; } = RunModel.Idle;
+
+    public void Refresh()
+    {
+    }
+
+    public void SetIncluded(byte classJobId, bool included)
+    {
+    }
+
+    public void SetAllIncluded(SupplyMissionKind kind, bool included)
+    {
+    }
+
+    public void SetSpendCap(long gil)
+    {
+    }
+
+    public void UseSuggestedSpendCap()
+    {
+    }
+
+    public void Dismiss()
+    {
+    }
+
+    public void OpenAutoShopper()
+    {
+    }
 
     public void Start()
     {
