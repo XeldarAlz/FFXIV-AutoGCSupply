@@ -8,7 +8,7 @@ internal sealed partial class HandInDriver
 {
     private const int ClickWaitMs = 3_000;
 
-    private async Task<Halt> HaltOnUnexpected(bool talkUnexpected)
+    private async Task<Halt> HaltOnUnexpected(bool talkUnexpected, bool requestExpected = false)
     {
         if (UnexpectedAddons.CombatOrDutyPop())
         {
@@ -22,12 +22,16 @@ internal sealed partial class HandInDriver
             return new Halt(HandInPauseReason.UnexpectedPrompt, text);
         }
 
-        if (!UnexpectedAddons.TryFind(talkUnexpected, out var addonName))
+        if (!UnexpectedAddons.TryFind(talkUnexpected, out var addonName, requestExpected))
         {
             return Halt.None;
         }
 
-        if (addonName != UnexpectedAddons.TalkAddonName)
+        if (addonName == RequestHandover.AddonName)
+        {
+            await OfficerWindows.CloseRequest(cancelled);
+        }
+        else if (addonName != UnexpectedAddons.TalkAddonName)
         {
             await OfficerWindows.CloseAddon(addonName, cancelled);
         }

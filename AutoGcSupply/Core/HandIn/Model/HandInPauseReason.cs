@@ -22,4 +22,5 @@ internal enum HandInPauseReason : byte
     ListNotRefreshed,
     InCombatOrDuty,
     Fault,
+    RequestWindowMismatch,
 }

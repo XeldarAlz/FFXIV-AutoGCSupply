@@ -75,6 +75,6 @@ internal readonly record struct SupplyListState(bool Loaded, SupplyListTab Tab, 
             return false;
         }
 
-        return !TryFindAgentItem(target.ItemId, out var agentItem) || agentItem.TurnInAvailable;
+        return !TryFindAgentItem(target.ItemId, out var agentItem) || agentItem.RequestOpen;
     }
 }

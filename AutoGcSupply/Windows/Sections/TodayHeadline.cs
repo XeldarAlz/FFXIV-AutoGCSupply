@@ -49,8 +49,10 @@ internal static class TodayHeadline
 
         var detailHeight = ImGui.GetTextLineHeight();
         var blockMidY = y + (titleHeight + DetailGap * scale + detailHeight) * 0.5f;
-        var rightWidth = DrawRightColumn(today, history, origin.X + width, blockMidY, out var openPlugins);
-        var maxTextWidth = width - rightWidth - RightGap * scale;
+        var stacked = width < 640f * scale;
+        var openPlugins = false;
+        var rightWidth = stacked ? 0f : DrawRightColumn(today, history, origin.X + width, blockMidY, out openPlugins);
+        var maxTextWidth = stacked ? width : width - rightWidth - RightGap * scale;
 
         using (Fonts.PushTitle())
         {
@@ -65,8 +67,15 @@ internal static class TodayHeadline
             detail = detailText.Set(detailKey, Detail(today));
         }
 
-        TextDraw.At(TextDraw.Truncate(detail, maxTextWidth), new Vector2(origin.X, y), Styling.TextDim);
-        y += detailHeight;
+        TextDraw.Wrapped(detail, new Vector2(origin.X, y), maxTextWidth, Styling.TextDim);
+        y += TextDraw.MeasureWrapped(detail, maxTextWidth).Y;
+        if (stacked)
+        {
+            y += 12f * scale;
+            var rightHeight = today.StartBlock == StartBlock.SetupNeeded ? PluginsButtonHeight * scale : TextDraw.CaptionLineHeight() * 2f + 3f * scale;
+            DrawRightColumn(today, history, origin.X + width, y + rightHeight * 0.5f, out openPlugins);
+            y += rightHeight;
+        }
 
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(new Vector2(width, y - origin.Y));

@@ -19,6 +19,24 @@ public sealed class RewardWindowCheckTests
     private static readonly HandInTarget normalQualityRow = new(5_361, 8, 1, ItemQuality.Normal, NormalSeals);
 
     [Fact]
+    public void BaseSealsRequireIndependentHighQualityVerification()
+    {
+        var shown = Window(MapleLumber, NormalSeals);
+        Assert.Equal(RewardWindowVerdict.OtherSeals, RewardWindowCheck.Judge(shown, MapleLumber, highQualityRow, NoSealsYet, RankCap, qualityVerified: false).Verdict);
+        var judgment = RewardWindowCheck.Judge(shown, MapleLumber, highQualityRow, NoSealsYet, RankCap, qualityVerified: true);
+        Assert.Equal(RewardWindowVerdict.Matches, judgment.Verdict);
+        Assert.True(judgment.BaseSealsShown);
+        Assert.False(judgment.SealsUnverified);
+    }
+
+    [Fact]
+    public void VerifiedQualityNeverAllowsTheWrongItem()
+    {
+        var judgment = RewardWindowCheck.Judge(Window("Spruce Lumber", NormalSeals), MapleLumber, highQualityRow, NoSealsYet, RankCap, qualityVerified: true);
+        Assert.Equal(RewardWindowVerdict.OtherItem, judgment.Verdict);
+    }
+
+    [Fact]
     public void MatchesAWindowForTheRowsItemAndSeals()
     {
         Assert.Equal(RewardWindowJudgment.Matches, JudgeWithoutCap(Window(MapleLumber, HighSeals), highQualityRow));

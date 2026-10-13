@@ -56,21 +56,38 @@ internal static class HeroButton
         var iconSize = TextDraw.IconSize(glyph);
         TextDraw.Icon(glyph, new Vector2(min.X + padX, midY - iconSize.Y * 0.5f), textColor);
         var titleX = min.X + padX + iconSize.X + 12f * scale;
+        var textWidth = max.X - padX - titleX;
+        var sub = enabled ? sublabel : disabledReason ?? sublabel;
         float titleWidth;
+        float titleHeight;
         using (Fonts.PushHeadline())
         {
-            var titleSize = TextDraw.Measure(title);
+            var titleSize = TextDraw.Measure(TextDraw.Truncate(title, textWidth));
             titleWidth = titleSize.X;
-            TextDraw.At(title, new Vector2(titleX, midY - titleSize.Y * 0.5f), textColor);
+            titleHeight = titleSize.Y;
         }
 
-        var sub = enabled ? sublabel : disabledReason ?? sublabel;
+        var stacked = !string.IsNullOrEmpty(sub) && titleWidth + SublabelGap * scale + TextDraw.Measure(sub).X > textWidth;
+        var titleTop = midY - (stacked ? titleHeight + 3f * scale + TextDraw.CaptionLineHeight() : titleHeight) * 0.5f;
+        using (Fonts.PushHeadline())
+        {
+            TextDraw.At(TextDraw.Truncate(title, textWidth), new Vector2(titleX, titleTop), textColor);
+        }
+
         if (!string.IsNullOrEmpty(sub))
         {
-            sub = TextDraw.Truncate(sub, max.X - padX - (titleX + titleWidth + SublabelGap * scale));
-            var subSize = TextDraw.Measure(sub);
-            TextDraw.At(sub, new Vector2(max.X - padX - subSize.X, midY - subSize.Y * 0.5f),
-                enabled ? Styling.WithAlpha(textColor, 0.8f) : Styling.TextDim);
+            var color = enabled ? Styling.WithAlpha(textColor, 0.8f) : Styling.TextDim;
+            if (stacked)
+            {
+                using (Fonts.PushCaption())
+                {
+                    TextDraw.At(TextDraw.Truncate(sub, textWidth), new Vector2(titleX, titleTop + titleHeight + 3f * scale), color);
+                }
+            }
+            else
+            {
+                TextDraw.Right(sub, max.X - padX, midY - ImGui.GetTextLineHeight() * 0.5f, color);
+            }
         }
 
         return hit.Clicked;

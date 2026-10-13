@@ -21,10 +21,10 @@ internal static class PillButton
     }
 
     public static bool Draw(string id, string label, Vector4 accent, Emphasis emphasis = Emphasis.Tinted,
-        FontAwesomeIcon? icon = null, bool enabled = true, float height = DefaultHeight, string? tooltip = null)
+        FontAwesomeIcon? icon = null, bool enabled = true, float height = DefaultHeight, string? tooltip = null, float maxWidth = float.MaxValue)
     {
         var scale = ImGuiHelpers.GlobalScale;
-        var size = new Vector2(Width(label, icon), height * scale);
+        var size = new Vector2(MathF.Max(1f, MathF.Min(Width(label, icon), maxWidth)), height * scale);
         var origin = ImGui.GetCursorScreenPos();
         var hit = Hit.Area(id, size, enabled);
         var hover = Motion.Hover(Motion.Key(id), hit.Hovered);
@@ -46,10 +46,11 @@ internal static class PillButton
             x += iconSize.X + IconGap * scale;
         }
 
-        var labelSize = TextDraw.Measure(label);
-        TextDraw.At(label, new Vector2(x, midY - labelSize.Y * 0.5f), text);
+        var shown = TextDraw.Truncate(label, end.X - PadX * scale - x);
+        var labelSize = TextDraw.Measure(shown);
+        TextDraw.At(shown, new Vector2(x, midY - labelSize.Y * 0.5f), text);
 
-        if (hit.Hovered && tooltip is not null) Tooltip.Show(tooltip);
+        if (hit.Hovered && (tooltip is not null || shown != label)) Tooltip.Show(tooltip ?? label);
         return hit.Clicked;
     }
 

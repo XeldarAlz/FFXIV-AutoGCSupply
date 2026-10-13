@@ -16,7 +16,6 @@ internal static class ShopperStrip
     private const float DotGap = 10f;
     private const float LabelGap = 8f;
     private const float ItemGap = 10f;
-    private const float PricingGap = 18f;
     private const float SpinnerRadius = 5f;
     private const float SpinnerThickness = 2f;
     private const float PillHeight = 24f;
@@ -45,76 +44,78 @@ internal static class ShopperStrip
         x += labelSize.X + LabelGap * scale;
 
         var pricingWidth = PricingWidth(today.Pricing);
-        var right = origin.X + width - (pricingWidth > 0f ? pricingWidth + PricingGap * scale : 0f);
-        var openPlugins = today.Shopper switch
+        var right = origin.X + width;
+        var openPlugins = false;
+        var gap = ItemGap * scale;
+
+        void Place(float needed)
         {
-            ShopperState.Available => DrawAvailable(controller, today.ShopperDryRun, x, right, midY),
-            ShopperState.Outdated => DrawOutdated(x, right, midY),
-            ShopperState.Newer => DrawNewer(x, right, midY),
-            _ => DrawMissing(x, right, midY),
-        };
+            if (x > origin.X && x + needed > right)
+            {
+                x = origin.X;
+                midY += height + 6f * scale;
+            }
+        }
+
+        if (today.Shopper == ShopperState.Available)
+        {
+            var chip = Loc.T(today.ShopperDryRun ? L.Requests.DryRunOn : L.Requests.DryRunOff);
+            var chipWidth = Badge.Width(chip);
+            Place(chipWidth);
+            Badge.DrawLeft(drawList, chip, today.ShopperDryRun ? Styling.AccentBlue : Styling.AccentAmber, x, midY);
+            if (Hit.HoveringRect(new Vector2(x, midY - height * 0.5f), new Vector2(x + chipWidth, midY + height * 0.5f)))
+            {
+                Tooltip.Show(Loc.T(today.ShopperDryRun ? L.Requests.DryRunOnHelp : L.Requests.DryRunOffHelp));
+            }
+
+            x += chipWidth + gap;
+            var change = Loc.T(L.Requests.ChangeInShopper);
+            var buttonWidth = PillButton.Width(change, FontAwesomeIcon.ExternalLinkAlt);
+            Place(buttonWidth);
+            if (Pill("##agcs_shopper_change", change, Styling.AccentGlow, PillButton.Emphasis.Ghost, FontAwesomeIcon.ExternalLinkAlt, x, midY, null, right - x))
+            {
+                controller.OpenAutoShopper();
+            }
+
+            x += MathF.Min(buttonWidth, right - x) + gap;
+        }
+        else
+        {
+            if (today.Shopper != ShopperState.Newer)
+            {
+                var outdated = today.Shopper == ShopperState.Outdated;
+                var action = Loc.T(outdated ? L.Requests.ShopperUpdate : L.Requests.ShopperInstall);
+                var buttonWidth = PillButton.Width(action, FontAwesomeIcon.Plug);
+                Place(buttonWidth);
+                openPlugins = Pill("##agcs_shopper_setup", action, accent, PillButton.Emphasis.Tinted, FontAwesomeIcon.Plug,
+                    x, midY, outdated ? Loc.T(L.Requests.ShopperUpdateHelp) : null, right - x);
+                x += MathF.Min(buttonWidth, right - x) + gap;
+            }
+
+            var detail = Loc.T(today.Shopper == ShopperState.Newer ? L.Requests.ShopperNewer
+                : today.Shopper == ShopperState.Outdated ? L.Requests.ShopperOutdated : L.Requests.ShopperMissing);
+            float detailWidth;
+            using (Fonts.PushCaption()) detailWidth = TextDraw.Measure(detail).X;
+            Place(detailWidth);
+            Caption(detail, x, right, midY, Styling.TextDim);
+            x += MathF.Min(detailWidth, right - x) + gap;
+        }
 
         if (pricingWidth > 0f)
         {
-            DrawPricing(controller, today.Pricing, origin.X + width - pricingWidth, midY);
+            Place(pricingWidth);
+            DrawPricing(controller, today.Pricing, x, midY);
         }
 
         ImGui.SetCursorScreenPos(origin);
-        ImGui.Dummy(new Vector2(width, height));
+        ImGui.Dummy(new Vector2(width, midY - origin.Y + height * 0.5f));
         return openPlugins;
-    }
-
-    private static bool DrawMissing(float x, float right, float midY)
-    {
-        var label = Loc.T(L.Requests.ShopperInstall);
-        var clicked = Pill("##agcs_shopper_install", label, Styling.AccentRose, PillButton.Emphasis.Tinted, FontAwesomeIcon.Plug, x, midY, null);
-        var textX = x + PillButton.Width(label, FontAwesomeIcon.Plug) + ItemGap * ImGuiHelpers.GlobalScale;
-        Caption(Loc.T(L.Requests.ShopperMissing), textX, right, midY, Styling.TextDim);
-        return clicked;
-    }
-
-    private static bool DrawOutdated(float x, float right, float midY)
-    {
-        var label = Loc.T(L.Requests.ShopperUpdate);
-        var clicked = Pill("##agcs_shopper_update", label, Styling.AccentAmber, PillButton.Emphasis.Tinted, FontAwesomeIcon.Plug, x, midY, Loc.T(L.Requests.ShopperUpdateHelp));
-        var textX = x + PillButton.Width(label, FontAwesomeIcon.Plug) + ItemGap * ImGuiHelpers.GlobalScale;
-        Caption(Loc.T(L.Requests.ShopperOutdated), textX, right, midY, Styling.AccentAmberSoft);
-        return clicked;
-    }
-
-    private static bool DrawNewer(float x, float right, float midY)
-    {
-        Caption(Loc.T(L.Requests.ShopperNewer), x, right, midY, Styling.AccentAmberSoft);
-        return false;
-    }
-
-    private static bool DrawAvailable(GcRunController controller, bool dryRun, float x, float right, float midY)
-    {
-        var scale = ImGuiHelpers.GlobalScale;
-        var drawList = ImGui.GetWindowDrawList();
-        var chip = Loc.T(dryRun ? L.Requests.DryRunOn : L.Requests.DryRunOff);
-        var chipColor = dryRun ? Styling.AccentBlue : Styling.AccentAmber;
-        var chipWidth = Badge.DrawLeft(drawList, chip, chipColor, x, midY);
-        if (Hit.HoveringRect(new Vector2(x, midY - LineHeight * scale * 0.5f), new Vector2(x + chipWidth, midY + LineHeight * scale * 0.5f)))
-        {
-            Tooltip.Show(Loc.T(dryRun ? L.Requests.DryRunOnHelp : L.Requests.DryRunOffHelp));
-        }
-
-        x += chipWidth + ItemGap * scale;
-        var change = Loc.T(L.Requests.ChangeInShopper);
-        if (Pill("##agcs_shopper_change", change, Styling.AccentGlow, PillButton.Emphasis.Ghost, FontAwesomeIcon.ExternalLinkAlt, x, midY, null))
-        {
-            controller.OpenAutoShopper();
-        }
-
-        x += PillButton.Width(change, FontAwesomeIcon.ExternalLinkAlt) + ItemGap * scale;
-        Caption(Loc.T(L.Requests.ShopperReady), x, right, midY, Styling.TextDim);
-        return false;
     }
 
     private static float PricingWidth(PricingState pricing)
     {
         var scale = ImGuiHelpers.GlobalScale;
+        var retryWidth = pricing == PricingState.Failed ? PillButton.Width(Loc.T(L.Requests.PricingRetry), FontAwesomeIcon.Redo) : 0f;
         using (Fonts.PushCaption())
         {
             return pricing switch
@@ -122,7 +123,7 @@ internal static class ShopperStrip
                 PricingState.Pending => (SpinnerRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingPending)).X,
                 PricingState.Queued => (SpinnerRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingQueued)).X,
                 PricingState.Ready => (DotRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingReady)).X,
-                PricingState.Failed => TextDraw.Measure(Loc.T(L.Requests.PricingFailed)).X + ItemGap * scale + PillButton.Width(Loc.T(L.Requests.PricingRetry), FontAwesomeIcon.Redo),
+                PricingState.Failed => TextDraw.Measure(Loc.T(L.Requests.PricingFailed)).X + ItemGap * scale + retryWidth,
                 _ => 0f,
             };
         }
@@ -190,10 +191,10 @@ internal static class ShopperStrip
         }
     }
 
-    private static bool Pill(string id, string label, Vector4 accent, PillButton.Emphasis emphasis, FontAwesomeIcon icon, float x, float midY, string? tooltip)
+    private static bool Pill(string id, string label, Vector4 accent, PillButton.Emphasis emphasis, FontAwesomeIcon icon, float x, float midY, string? tooltip, float maxWidth = float.MaxValue)
     {
         ImGui.SetCursorScreenPos(new Vector2(x, midY - PillHeight * ImGuiHelpers.GlobalScale * 0.5f));
-        return PillButton.Draw(id, label, accent, emphasis, icon, height: PillHeight, tooltip: tooltip);
+        return PillButton.Draw(id, label, accent, emphasis, icon, height: PillHeight, tooltip: tooltip, maxWidth: maxWidth);
     }
 
     private static void Caption(string text, float x, float right, float midY, Vector4 color)

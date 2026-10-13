@@ -149,13 +149,15 @@ internal static class TextDraw
 
     private static string Cut(string text, float maxWidth)
     {
-        var budget = maxWidth - Measure(Ellipsis).X;
+        var ellipsisWidth = Measure(Ellipsis).X;
+        if (maxWidth < ellipsisWidth) return string.Empty;
+        var budget = maxWidth - ellipsisWidth;
         if (budget <= 0f)
         {
             return Ellipsis;
         }
 
-        var low = 1;
+        var low = 0;
         var high = text.Length - 1;
         while (low < high)
         {

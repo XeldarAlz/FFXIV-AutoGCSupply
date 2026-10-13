@@ -77,6 +77,7 @@ internal static partial class L
         public static readonly LocString NeedsAddon = new("run.needs.addon", "An unexpected window appeared: {0}");
         public static readonly LocString NeedsHighQualityPrompt = new("run.needs.highQualityPrompt", "The game asked to trade a high-quality item for a normal-quality request.");
         public static readonly LocString NeedsReward = new("run.needs.reward", "The delivery window did not respond.");
+        public static readonly LocString NeedsRequestMismatch = new("run.needs.requestMismatch", "The hand-in window contained a different item, quantity, or quality and was cancelled. Check other plugins that fill hand-ins.");
         public static readonly LocString NeedsRewardMismatch = new("run.needs.rewardMismatch", "The delivery window did not match the request and was cancelled: {0}");
         public static readonly LocString NeedsRewardOtherItem = new("run.needs.rewardOtherItem", "it showed {0} instead of {1}.");
         public static readonly LocString NeedsRewardOtherSeals = new("run.needs.rewardOtherSeals", "it offered {0} seals for {1} instead of {2} to {3}.");

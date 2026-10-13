@@ -43,7 +43,7 @@ internal static class RowMatcher
             return RowMatch.Miss(RowMatchStatus.AgentMissing, targetIndex);
         }
 
-        if (!agentItem.TurnInAvailable)
+        if (!agentItem.RequestOpen)
         {
             return RowMatch.Miss(RowMatchStatus.Closed, targetIndex);
         }

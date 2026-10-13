@@ -32,7 +32,8 @@ internal static class TotalsTiles
         var scale = ImGuiHelpers.GlobalScale;
         var gap = TileGap * scale;
         var width = ImGui.GetContentRegionAvail().X;
-        var perRow = (width - gap * (TileCount - 1)) / TileCount >= MinimumTileWidth * scale ? TileCount : TileCount / 2;
+        var perRow = width >= TileCount * MinimumTileWidth * scale + gap * (TileCount - 1) ? TileCount
+            : width >= 3f * MinimumTileWidth * scale + gap * 2f ? 3 : 2;
         var tileWidth = (width - gap * (perRow - 1)) / perRow;
 
         StatTile.Draw(Loc.T(L.Requests.TileSelected), selected, selectedSub, Styling.AccentGlow, tileWidth);

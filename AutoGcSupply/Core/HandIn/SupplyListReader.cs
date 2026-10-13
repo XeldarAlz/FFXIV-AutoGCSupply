@@ -1,4 +1,5 @@
 using AutoGcSupply.Core.HandIn.Model;
+using AutoGcSupply.Core.Requests;
 using ECommons;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -76,7 +77,7 @@ internal static unsafe class SupplyListReader
         for (var itemPosition = 0; itemPosition < state.AgentItems.Length; itemPosition++)
         {
             var item = state.AgentItems[itemPosition];
-            builder.Append($"; agent {item.Position}: {item.ItemId} possessed {item.NumPossessed}/{item.NumRequested}{(item.TurnInAvailable ? string.Empty : " closed")}");
+            builder.Append($"; agent {item.Position}: {item.ItemId} possessed {item.NumPossessed}/{item.NumRequested}, request {(item.RequestOpen ? "open" : "closed")}, raw turn-in flag {item.RawTurnInFlag}");
         }
 
         return builder.ToString();
@@ -120,12 +121,19 @@ internal static unsafe class SupplyListReader
     private static int CollectAgentItems(Span<SupplyAgentItem> found)
     {
         var agent = AgentGrandCompanySupply.Instance();
-        if (!agent->IsAgentActive() || agent->ItemArray == null)
+        if (agent == null || !agent->IsAgentActive() || agent->ItemArray == null)
+        {
+            return 0;
+        }
+
+        var requests = GcSupplyReader.Read();
+        if (!requests.Loaded)
         {
             return 0;
         }
 
         var foundCount = 0;
+        var positions = 0;
         var entries = Math.Min(agent->NumItems, MaxAgentEntries);
         for (var entryIndex = 0; entryIndex < entries && foundCount < found.Length; entryIndex++)
         {
@@ -135,7 +143,15 @@ internal static unsafe class SupplyListReader
                 continue;
             }
 
-            found[foundCount++] = new SupplyAgentItem(entry.ItemId, entry.Position, entry.NumPossessed, entry.NumRequested, entry.IsTurnInAvailable);
+            if ((positions & (1 << entry.Position)) != 0
+                || !SupplyAgentItem.TryCreate(entry.ItemId, entry.Position, entry.NumPossessed, entry.NumRequested,
+                    entry.TurnInAvailable, requests, out var item))
+            {
+                return 0;
+            }
+
+            positions |= 1 << entry.Position;
+            found[foundCount++] = item;
         }
 
         return foundCount;

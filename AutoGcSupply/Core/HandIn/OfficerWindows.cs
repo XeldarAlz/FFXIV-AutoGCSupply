@@ -62,6 +62,7 @@ internal static class OfficerWindows
             await DeclinePrompt(stopped);
         }
 
+        await CloseRequest(stopped);
         await CloseReward(stopped);
         if (stopped() || !SupplyListReader.IsOpen() || await RepeatUntil(HandInClicks.CloseList, ListClosed, ClickWaitMs, stopped))
         {
@@ -70,6 +71,17 @@ internal static class OfficerWindows
 
         RunLog.Warning("Hand-in: the supply list did not close through its own callback; closing the window");
         await CloseAddon(SupplyListReader.AddonName, stopped);
+    }
+
+    public static async Task CloseRequest(Func<bool> stopped)
+    {
+        await CloseAddon(RequestHandover.ContextAddonName, stopped);
+        if (!RequestHandover.IsOpen()) return;
+        RunLog.Info("Hand-in: cancelling the item request");
+        if (!await RepeatUntil(RequestHandover.Cancel, static () => !RequestHandover.IsOpen(), ClickWaitMs, stopped))
+        {
+            await CloseAddon(RequestHandover.AddonName, stopped);
+        }
     }
 
     public static async Task LeaveOfficer(bool listOpened, Func<bool> stopped)

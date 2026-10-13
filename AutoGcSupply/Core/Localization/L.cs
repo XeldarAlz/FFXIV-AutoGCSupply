@@ -136,6 +136,14 @@ internal static partial class L
         public static readonly LocString New = new("changelog.new", "New");
         public static readonly LocPlural Changes = new("changelog.changes", "{0} change", "{0} changes");
 
+        public static readonly LocString[] Release1003 =
+        [
+            new("changelog.r1003.1", "Narrow Today windows now stack request details and wrap controls and status text to keep labels readable"),
+            new("changelog.r1003.2", "Fixed open daily requests being mistaken for missions already handed in"),
+            new("changelog.r1003.3", "Hand-ins now fill the item request with the selected quality and quantity, then press Hand Over; items filled by another plugin are checked too"),
+            new("changelog.r1003.4", "HQ deliveries now accept a base seal reward only after the item quality is verified, fixing false reward mismatches while still confirming every delivery from your bags and seals"),
+        ];
+
         public static readonly LocString[] Release1002 =
         [
             new("changelog.r1002.1", "Fixed the trip to the Personnel Officer never starting after the purchases: the market board window left open held the character in place, and the run ended as needing you. The windows are closed before the trip now"),

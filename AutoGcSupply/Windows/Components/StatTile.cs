@@ -24,16 +24,21 @@ internal static class StatTile
         var labelSize = TextDraw.SmallCapsSize(label);
         var dotRadius = 3f * scale;
         dl.AddCircleFilled(new Vector2(origin.X + padX + dotRadius, origin.Y + padY + labelSize.Y * 0.5f), dotRadius, Paint.Col(accent));
-        TextDraw.SmallCaps(label, new Vector2(origin.X + padX + dotRadius * 2f + 6f * scale, origin.Y + padY), Styling.TextDim);
+        var labelX = origin.X + padX + dotRadius * 2f + 6f * scale;
+        using (Fonts.PushCaption())
+        {
+            TextDraw.At(TextDraw.Truncate(TextDraw.Upper(label), end.X - padX - labelX), new Vector2(labelX, origin.Y + padY), Styling.TextDim);
+        }
 
         var subWidth = 0f;
         if (!string.IsNullOrEmpty(sub))
         {
             using (Fonts.PushCaption())
             {
-                var subSize = TextDraw.Measure(sub);
+                var shownSub = TextDraw.Truncate(sub, (width - padX * 2f) * 0.6f);
+                var subSize = TextDraw.Measure(shownSub);
                 subWidth = subSize.X + 8f * scale;
-                TextDraw.At(sub, new Vector2(end.X - padX - subSize.X, end.Y - padY - subSize.Y - 1f * scale), Styling.TextDim);
+                TextDraw.At(shownSub, new Vector2(end.X - padX - subSize.X, end.Y - padY - subSize.Y - 1f * scale), Styling.TextDim);
             }
         }
 

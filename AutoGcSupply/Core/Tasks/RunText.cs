@@ -106,6 +106,7 @@ internal static class RunText
         HandInPauseReason.UnexpectedAddon => Loc.T(L.Run.NeedsAddon, detail),
         HandInPauseReason.HighQualityPromptForNormalRow => Loc.T(L.Run.NeedsHighQualityPrompt),
         HandInPauseReason.RewardWindowDidNotOpen or HandInPauseReason.DeliverButtonDisabled => Loc.T(L.Run.NeedsReward),
+        HandInPauseReason.RequestWindowMismatch => Loc.T(L.Run.NeedsRequestMismatch),
         HandInPauseReason.InCombatOrDuty => Loc.T(L.Run.NeedsCombat),
         _ => Loc.T(L.Run.NeedsHandInFault),
     };

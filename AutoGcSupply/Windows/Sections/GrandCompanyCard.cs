@@ -32,14 +32,16 @@ internal static class GrandCompanyCard
     public static void Draw(GcRunController controller, in TodayHeader header)
     {
         var scale = ImGuiHelpers.GlobalScale;
-        var size = new Vector2(ImGui.GetContentRegionAvail().X, CardHeight * scale);
+        var width = ImGui.GetContentRegionAvail().X;
+        var stacked = width < 600f * scale;
+        var size = new Vector2(width, (stacked ? 126f : CardHeight) * scale);
         var origin = ImGui.GetCursorScreenPos();
         var end = origin + size;
         var drawList = ImGui.GetWindowDrawList();
         Paint.Glass(drawList, origin, end, Styling.CardRounding * scale, Styling.AccentNebula, 0.05f);
 
         var padX = PadX * scale;
-        var midY = origin.Y + size.Y * 0.5f;
+        var midY = origin.Y + CardHeight * scale * 0.5f;
         var iconBox = IconBox * scale;
         var iconCenter = new Vector2(origin.X + padX + iconBox * 0.5f, midY);
         drawList.AddCircleFilled(iconCenter, iconBox * 0.5f, Paint.Col(Styling.WithAlpha(Styling.AccentNebula, 0.18f)));
@@ -62,18 +64,28 @@ internal static class GrandCompanyCard
             controller.Refresh();
         }
 
-        var resetRight = refreshX - RefreshGap * scale;
-        DrawReset(header, resetRight, midY);
+        var resetRight = stacked ? end.X - padX : refreshX - RefreshGap * scale;
+        DrawReset(header, resetRight, stacked ? origin.Y + 98f * scale : midY);
 
         var contentX = iconCenter.X + iconBox * 0.5f + ColumnGap * scale;
-        var contentRight = resetRight - ResetColumnWidth * scale - ColumnGap * scale;
-        DrawIdentity(drawList, header, contentX, contentRight, midY);
+        var contentRight = stacked ? refreshX - RefreshGap * scale : resetRight - ResetColumnWidth * scale - ColumnGap * scale;
+        DrawIdentity(drawList, header, contentX, contentRight, midY, stacked);
+
+        if (stacked)
+        {
+            var rank = GrandCompanyText.RankName(header.GrandCompany, header.Rank);
+            using (Fonts.PushCaption())
+            {
+                Badge.DrawLeft(drawList, TextDraw.Truncate(rank, width - (PadX * 2f + ResetColumnWidth + ColumnGap + 14f) * scale),
+                    Styling.AccentNebula, origin.X + padX, origin.Y + 98f * scale);
+            }
+        }
 
         ImGui.SetCursorScreenPos(origin);
         ImGui.Dummy(size);
     }
 
-    private static void DrawIdentity(ImDrawListPtr drawList, in TodayHeader header, float x, float right, float midY)
+    private static void DrawIdentity(ImDrawListPtr drawList, in TodayHeader header, float x, float right, float midY, bool stacked)
     {
         var scale = ImGuiHelpers.GlobalScale;
         var width = MathF.Max(0f, right - x);
@@ -90,7 +102,7 @@ internal static class GrandCompanyCard
         float nameWidth;
         using (Fonts.PushHeadline())
         {
-            var shown = TextDraw.Truncate(name, width * 0.6f);
+            var shown = TextDraw.Truncate(name, stacked ? width : width * 0.6f);
             nameWidth = TextDraw.Measure(shown).X;
             TextDraw.At(shown, new Vector2(x, top), Styling.TextStrong);
         }
@@ -98,7 +110,7 @@ internal static class GrandCompanyCard
         var rank = GrandCompanyText.RankName(header.GrandCompany, header.Rank);
         var badgeX = x + nameWidth + 10f * scale;
         var badgeRoom = x + width - badgeX;
-        if (badgeRoom > 40f * scale)
+        if (!stacked && badgeRoom > 40f * scale)
         {
             using (Fonts.PushCaption())
             {

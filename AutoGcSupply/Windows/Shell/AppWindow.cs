@@ -29,7 +29,7 @@ public sealed class AppWindow : Window, IDisposable
     };
     private static readonly WindowSizeConstraints ExpandedConstraints = new()
     {
-        MinimumSize = new Vector2(HeaderBar.MinimumWidth, Layout.HeaderHeight + Layout.DockHeight + MinimumBodyHeight),
+        MinimumSize = new Vector2(520f, Layout.HeaderHeight + Layout.DockHeight + MinimumBodyHeight),
         MaximumSize = Unbounded,
     };
 
@@ -221,7 +221,7 @@ public sealed class AppWindow : Window, IDisposable
         Paint.Hairline(dl, new Vector2(windowPos.X + railWidth, bodyTop + 10f * scale), new Vector2(windowPos.X + railWidth, bodyTop + bodyHeight - 10f * scale));
 
         ImGui.SetCursorScreenPos(new Vector2(windowPos.X + railWidth, bodyTop));
-        var padding = Layout.ContentPadding * scale;
+        var padding = (windowSize.X < 760f * scale ? 16f : Layout.ContentPadding) * scale;
         var rightInset = Layout.ContentRightInset * scale;
         using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(padding, padding * 0.8f)))
         using (var content = ImRaii.Child("##agcs_page", new Vector2(windowSize.X - railWidth - rightInset, bodyHeight), false, ImGuiWindowFlags.AlwaysUseWindowPadding))

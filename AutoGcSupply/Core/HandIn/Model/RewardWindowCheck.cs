@@ -13,7 +13,7 @@ internal static class RewardWindowCheck
     private const int NoText = -1;
     private const string AnyText = "";
 
-    public static RewardWindowJudgment Judge(in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
+    public static RewardWindowJudgment Judge(in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap, bool qualityVerified = false)
     {
         var expected = PromptText.Normalize(expectedItemName);
         if (!shown.Readable || expected.Length == 0)
@@ -26,7 +26,7 @@ internal static class RewardWindowCheck
             return RewardWindowJudgment.Refuses(FindText(shown.Texts, AnyText) == NoText ? RewardWindowVerdict.Unreadable : RewardWindowVerdict.OtherItem);
         }
 
-        return target.SealReward == 0 ? RewardWindowJudgment.Matches : JudgeSeals(shown, target, sealsBefore, sealCap);
+        return target.SealReward == 0 ? RewardWindowJudgment.Matches : JudgeSeals(shown, target, sealsBefore, sealCap, qualityVerified);
     }
 
     public static RewardWindowMismatch Mismatch(RewardWindowVerdict verdict, in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
@@ -72,7 +72,7 @@ internal static class RewardWindowCheck
         return (int)Math.Min(int.MaxValue, highest);
     }
 
-    private static RewardWindowJudgment JudgeSeals(in RewardWindowSample shown, in HandInTarget target, int sealsBefore, int sealCap)
+    private static RewardWindowJudgment JudgeSeals(in RewardWindowSample shown, in HandInTarget target, int sealsBefore, int sealCap, bool qualityVerified)
     {
         if (!shown.TryFindInteger(SealRewardIndex, out var shownSeals))
         {
@@ -82,6 +82,15 @@ internal static class RewardWindowCheck
         if (SealsFit(shownSeals, target.SealReward, sealsBefore, sealCap))
         {
             return RewardWindowJudgment.Matches;
+        }
+
+        // The daily reward window can still show the base reward for an HQ hand-in.
+        // Only accept that when the submitted item or the HQ prompt independently
+        // establishes quality; the seal number alone cannot distinguish an NQ swap.
+        if (qualityVerified && target.Quality == ItemQuality.High
+            && SealsFit(shownSeals, NormalQualitySeals(target.SealReward), sealsBefore, sealCap))
+        {
+            return RewardWindowJudgment.Matches with { BaseSealsShown = true };
         }
 
         return target.Quality == ItemQuality.High && LooksLikeNormalQuality(shownSeals, LowestSeals(target.SealReward, sealsBefore, sealCap))

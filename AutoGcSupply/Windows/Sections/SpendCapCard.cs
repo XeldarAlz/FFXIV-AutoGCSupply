@@ -30,7 +30,18 @@ internal static class SpendCapCard
     public static void Draw(GcRunController controller, TodayModel today)
     {
         var scale = ImGuiHelpers.GlobalScale;
-        var size = new Vector2(ImGui.GetContentRegionAvail().X, CardHeight * scale);
+        var width = ImGui.GetContentRegionAvail().X;
+        var suggest = Loc.T(L.Requests.UseSuggested);
+        var suggestWidth = PillButton.Width(suggest, FontAwesomeIcon.Magic);
+        var showSuggest = today.SuggestedSpendCap > 0;
+        var title = Loc.T(L.Requests.SpendCap);
+        var status = Status(today.SpendCap, today.Totals.EstimatedSpend);
+        var textWidth = TextDraw.Measure(title).X;
+        using (Fonts.PushCaption()) textWidth = MathF.Max(textWidth, TextDraw.Measure(status).X);
+        var stacked = width < (PadX * 2f + IconBox + 28f + FieldWidth) * scale + textWidth
+            + (showSuggest ? suggestWidth + ButtonGap * scale : 0f);
+        var wrapSuggest = stacked && showSuggest && width < (PadX * 2f + FieldWidth + ButtonGap) * scale + suggestWidth;
+        var size = new Vector2(width, (stacked ? wrapSuggest ? 148f : 108f : CardHeight) * scale);
         var origin = ImGui.GetCursorScreenPos();
         var end = origin + size;
         var drawList = ImGui.GetWindowDrawList();
@@ -41,45 +52,43 @@ internal static class SpendCapCard
         Paint.Glass(drawList, origin, end, Styling.CardRounding * scale, accent, 0.04f);
 
         var padX = PadX * scale;
-        var midY = origin.Y + size.Y * 0.5f;
+        var midY = origin.Y + CardHeight * scale * 0.5f;
         var iconBox = IconBox * scale;
         var iconCenter = new Vector2(origin.X + padX + iconBox * 0.5f, midY);
         drawList.AddCircleFilled(iconCenter, iconBox * 0.5f, Paint.Col(Styling.WithAlpha(accent, 0.14f)));
         TextDraw.IconCentered(FontAwesomeIcon.Coins, iconCenter, Styling.Lighten(accent, 0.3f));
 
         var fieldWidth = FieldWidth * scale;
-        var fieldX = end.X - padX - fieldWidth;
-        ImGui.SetCursorScreenPos(new Vector2(fieldX, midY - ImGui.GetFrameHeight() * 0.5f));
+        var fieldX = stacked ? origin.X + padX : end.X - padX - fieldWidth;
+        var controlMidY = stacked ? origin.Y + 80f * scale : midY;
+        ImGui.SetCursorScreenPos(new Vector2(fieldX, controlMidY - ImGui.GetFrameHeight() * 0.5f));
         if (GilField.Draw(FieldId, buffer, cap, Configuration.MaximumRunSpendCap, Loc.T(L.Requests.SpendCapHint), FieldWidth, out var value, Loc.T(L.Requests.SpendCapHelp)))
         {
             controller.SetSpendCap(value);
         }
 
-        var suggest = Loc.T(L.Requests.UseSuggested);
-        var suggestWidth = PillButton.Width(suggest, FontAwesomeIcon.Magic);
-        var suggestX = fieldX - ButtonGap * scale - suggestWidth;
-        var showSuggest = today.SuggestedSpendCap > 0;
+        var suggestX = stacked ? wrapSuggest ? fieldX : fieldX + fieldWidth + ButtonGap * scale
+            : fieldX - ButtonGap * scale - suggestWidth;
         if (showSuggest)
         {
-            ImGui.SetCursorScreenPos(new Vector2(suggestX, midY - Layout.ActionPillHeight * scale * 0.5f));
+            var suggestMidY = wrapSuggest ? controlMidY + 40f * scale : controlMidY;
+            ImGui.SetCursorScreenPos(new Vector2(suggestX, suggestMidY - Layout.ActionPillHeight * scale * 0.5f));
             var help = suggestionText.Get(today.SuggestedSpendCap, static gil => Loc.T(L.Requests.UseSuggestedHelp, Formatting.Gil(gil)));
             if (PillButton.Draw("##agcs_today_suggest_cap", suggest, Styling.AccentGlow, PillButton.Emphasis.Tinted, FontAwesomeIcon.Magic,
-                    height: Layout.ActionPillHeight, tooltip: help))
+                    height: Layout.ActionPillHeight, tooltip: help, maxWidth: end.X - padX - suggestX))
             {
                 controller.UseSuggestedSpendCap();
             }
         }
 
         var contentX = iconCenter.X + iconBox * 0.5f + 14f * scale;
-        var contentRight = (showSuggest ? suggestX : fieldX) - 14f * scale;
+        var contentRight = stacked ? end.X - padX : (showSuggest ? suggestX : fieldX) - 14f * scale;
         var contentWidth = MathF.Max(0f, contentRight - contentX);
         var lineHeight = ImGui.GetTextLineHeight();
         var captionHeight = TextDraw.CaptionLineHeight();
 
         var top = midY - (lineHeight + LineGap * scale + captionHeight) * 0.5f;
-        var title = Loc.T(L.Requests.SpendCap);
         TextDraw.At(TextDraw.Truncate(title, contentWidth), new Vector2(contentX, top), Styling.TextStrong);
-        var status = Status(cap, today.Totals.EstimatedSpend);
         using (Fonts.PushCaption())
         {
             TextDraw.At(TextDraw.Truncate(status, contentWidth), new Vector2(contentX, top + lineHeight + LineGap * scale), statusColor);

@@ -15,6 +15,7 @@ namespace AutoGcSupply.Windows.Sections;
 internal static class RequestTable
 {
     private const float RowHeight = 54f;
+    private const float CardHeight = 144f;
     private const float RowGap = 4f;
     private const float HeaderRowHeight = 24f;
     private const float GroupGap = 18f;
@@ -52,7 +53,10 @@ internal static class RequestTable
 
     private readonly record struct Columns(
         float Left, float Check, float ClassIcon, float ClassText, float ItemIcon, float Name, float NameRight,
-        float Status, float CostRight, float ExperienceRight, float SealsRight, float ValueRight, bool ShowValue, float Right);
+        float Status, float CostRight, float ExperienceRight, float SealsRight, float ValueRight, bool ShowValue, float Right)
+    {
+        public bool Stacked => NameRight - Name < MinimumNameWidth * ImGuiHelpers.GlobalScale;
+    }
 
     public static void Draw(GcRunController controller, TodayModel today)
     {
@@ -84,11 +88,11 @@ internal static class RequestTable
 
         DrawGroupTitle(controller, kind, columns);
         Styling.VSpace(GroupTitleGap);
-        DrawColumnHeader(columns);
+        if (!columns.Stacked) DrawColumnHeader(columns);
 
         var scale = ImGuiHelpers.GlobalScale;
         var top = ImGui.GetCursorScreenPos();
-        var height = RowHeight * scale;
+        var height = (columns.Stacked ? CardHeight : RowHeight) * scale;
         var stride = height + RowGap * scale;
         var rows = today.Rows;
         for (var position = 0; position < indices.Length; position++)
@@ -206,6 +210,13 @@ internal static class RequestTable
         }
 
         DrawSurface(drawList, min, max, hover, on, hit.Held);
+        if (columns.Stacked)
+        {
+            DrawCard(drawList, row, text, min, max, on, muted);
+            if (hovered) Tooltip.Show(text.Tooltip);
+            return;
+        }
+
         var midY = (min.Y + max.Y) * 0.5f;
         DrawCheck(drawList, coverage, on, new Vector2(columns.Check, midY));
 
@@ -228,7 +239,10 @@ internal static class RequestTable
         DrawRequest(drawList, row, text, columns, midY, strong, secondary, muted);
 
         var chipColor = RunLabels.CoverageColor(coverage);
-        Badge.DrawLeft(drawList, TextDraw.Truncate(text.Status, StatusWidth * scale), chipColor, columns.Status, midY);
+        using (Fonts.PushCaption())
+        {
+            Badge.DrawLeft(drawList, TextDraw.Truncate(text.Status, (StatusWidth - 14f) * scale), chipColor, columns.Status, midY);
+        }
 
         var lineY = midY - ImGui.GetTextLineHeight() * 0.5f;
         TextDraw.Right(text.Cost, columns.CostRight, lineY, coverage == RowCoverage.ToBuy ? Styling.TextSecondary : Styling.TextMuted);
@@ -242,6 +256,65 @@ internal static class RequestTable
         if (hovered)
         {
             Tooltip.Show(text.Tooltip);
+        }
+    }
+
+    private static void DrawCard(ImDrawListPtr drawList, in TodayRow row, in RowText text, Vector2 min, Vector2 max, float on, bool muted)
+    {
+        var scale = ImGuiHelpers.GlobalScale;
+        var decision = row.Decision;
+        var strong = muted ? Styling.TextDim : Styling.TextStrong;
+        var secondary = muted ? Styling.TextMuted : Styling.TextDim;
+        var left = min.X + (PadX + RailWidth) * scale;
+        var right = max.X - PadX * scale;
+        var midY = min.Y + 24f * scale;
+        DrawCheck(drawList, decision.Coverage, on, new Vector2(left, midY));
+        var classIconMin = new Vector2(left + (CheckSize + CellGap) * scale, midY - ClassIconSize * scale * 0.5f);
+        ItemIcon.Draw(drawList, SupplyClasses.IconId(decision.Request.ClassJobId), classIconMin, ClassIconSize * scale);
+        if (muted) Mute(drawList, classIconMin, ClassIconSize * scale);
+
+        float badgeWidth;
+        using (Fonts.PushCaption())
+        {
+            var status = TextDraw.Truncate(text.Status, (right - left) * 0.35f - 14f * scale);
+            badgeWidth = Badge.Draw(drawList, status, RunLabels.CoverageColor(decision.Coverage), right, midY);
+        }
+
+        var classX = classIconMin.X + (ClassIconSize + 8f) * scale;
+        TwoLines(row.ClassName, text.Level, classX, right - badgeWidth - CellGap * scale - classX, midY, strong, secondary);
+
+        var itemMidY = min.Y + 66f * scale;
+        var itemMin = new Vector2(left, itemMidY - ItemIconSize * scale * 0.5f);
+        var highQuality = decision.Request.Kind == SupplyMissionKind.Supply && decision.ChosenQuality == ItemQuality.High && decision.Coverage != RowCoverage.Delivered;
+        ItemIcon.Draw(drawList, row.ItemIconId, itemMin, ItemIconSize * scale, highQuality);
+        if (muted) Mute(drawList, itemMin, ItemIconSize * scale);
+        var requestColumns = default(Columns) with { Name = left + (ItemIconSize + CellGap) * scale, NameRight = right };
+        DrawRequest(drawList, row, text, requestColumns, itemMidY, strong, secondary, muted);
+
+        var gap = CellGap * scale;
+        var cellWidth = (right - left - 2f * gap) / 3f;
+        var top = min.Y + 92f * scale;
+        CardMetric(L.Requests.ColumnCost, text.Cost, string.Empty, left, top, cellWidth, secondary);
+        CardMetric(L.Requests.ColumnExperience, text.Experience, text.Share, left + cellWidth + gap, top, cellWidth, secondary);
+        CardMetric(L.Requests.ColumnSeals, text.Seals, string.Empty, left + 2f * (cellWidth + gap), top, cellWidth, secondary);
+    }
+
+    private static void CardMetric(LocString label, string value, string detail, float x, float top, float width, Vector4 color)
+    {
+        using (Fonts.PushCaption())
+        {
+            TextDraw.At(TextDraw.Truncate(TextDraw.Upper(Loc.T(label)), width), new Vector2(x, top), Styling.TextMuted);
+        }
+
+        top += TextDraw.CaptionLineHeight() + 3f * ImGuiHelpers.GlobalScale;
+        TextDraw.At(TextDraw.Truncate(value, width), new Vector2(x, top), color);
+        if (detail.Length > 0)
+        {
+            top += ImGui.GetTextLineHeight() + ImGuiHelpers.GlobalScale;
+            using (Fonts.PushCaption())
+            {
+                TextDraw.At(TextDraw.Truncate(detail, width), new Vector2(x, top), Styling.TextMuted);
+            }
         }
     }
 
@@ -444,7 +517,7 @@ internal static class RequestTable
             experience > 0 && decision.LevelShare > 0d ? Loc.T(L.Requests.LevelShare, (decision.LevelShare * 100d).ToString("0.#", culture)) : string.Empty,
             decision.Seals > 0 ? decision.Seals.ToString("N0", culture) : NoValue,
             decision.GilPerThousandExperience > 0 ? decision.GilPerThousandExperience.ToString("N0", culture) : NoValue,
-            RowTooltip(decision, shopperAvailable));
+            string.Concat(row.ClassName, "\n", row.ItemName, " ", Loc.T(L.Requests.Quantity, decision.Request.Requested), "\n", RowTooltip(decision, shopperAvailable)));
     }
 
     private static string RowTooltip(in RowDecision decision, bool shopperAvailable)

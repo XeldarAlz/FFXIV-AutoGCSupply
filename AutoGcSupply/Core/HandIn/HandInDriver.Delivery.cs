@@ -8,7 +8,7 @@ namespace AutoGcSupply.Core.HandIn;
 
 internal sealed partial class HandInDriver
 {
-    private const int RewardOpenTimeoutMs = 10_000;
+    private const int RewardOpenTimeoutMs = 20_000;
     private const int RewardReadTimeoutMs = 2_000;
     private const int DeliverEnableTimeoutMs = 3_000;
     private const int VerifyTimeoutMs = 10_000;
@@ -20,6 +20,8 @@ internal sealed partial class HandInDriver
     private SealCapDecision activeDecision;
     private bool highQualityAccepted;
     private bool deliverPressed;
+    private bool requestSubmitted;
+    private bool requestQualityVerified;
 
     private async Task<Halt> DeliverMatch(RowMatch match)
     {
@@ -38,6 +40,8 @@ internal sealed partial class HandInDriver
         activeDecision = decision;
         highQualityAccepted = false;
         deliverPressed = false;
+        requestSubmitted = false;
+        requestQualityVerified = false;
         CurrentTargetIndex = targetIndex;
         SetRow(targetIndex, rows[targetIndex] with { Status = HandInRowStatus.Delivering, SealCap = decision.Action });
         EnterStep(HandInStep.PickingRow, $"Handing in {HandInReads.ItemName(target.ItemId)}");
@@ -51,6 +55,11 @@ internal sealed partial class HandInDriver
         }
 
         var halt = await AwaitRewardWindow(target);
+        if (!Interrupted(halt) && DeliveryCheck.Judge(activeBefore, Sample(target), target, sealCap, final: false) == DeliveryVerdict.Confirmed)
+        {
+            return await VerifyDelivery();
+        }
+
         if (!Interrupted(halt))
         {
             halt = await ConfirmRewardWindow(target, sealsBefore);
@@ -88,29 +97,80 @@ internal sealed partial class HandInDriver
 
     private async Task<Halt> AwaitRewardWindow(HandInTarget target)
     {
-        EnterStep(HandInStep.Confirming, $"Waiting for the reward window for {HandInReads.ItemName(target.ItemId)}");
+        EnterStep(HandInStep.Confirming, $"Preparing the requested {HandInReads.ItemName(target.ItemId)}");
         var deadline = Environment.TickCount64 + RewardOpenTimeoutMs;
+        RequestWindowVerdict? lastRequestVerdict = null;
         while (Environment.TickCount64 < deadline)
         {
-            if (CancelToken.IsCancellationRequested || HandInClicks.RewardOpen())
+            if (CancelToken.IsCancellationRequested)
             {
                 return Halt.None;
             }
 
-            var halt = await HandlePrompts(target);
+            if (HandInClicks.RewardOpen() && !RequestHandover.IsOpen())
+            {
+                // Another helper may have filled and submitted Request between our polls.
+                requestQualityVerified |= RequestWindowCheck.CheckOffered(RequestHandover.ReadOffered(), target) == RequestWindowVerdict.Ready;
+                return Halt.None;
+            }
+
+            if (!RequestHandover.IsOpen() && DeliveryCheck.Judge(activeBefore, Sample(target), target, sealCap, final: false) == DeliveryVerdict.Confirmed)
+            {
+                return Halt.None;
+            }
+
+            var halt = await HandlePrompts(target, requestExpected: true);
             if (halt.Stopped)
             {
                 return halt;
             }
 
+            if (RequestHandover.IsOpen())
+            {
+                var shown = RequestHandover.Read();
+                var verdict = RequestWindowCheck.Judge(shown, target);
+                if (verdict != lastRequestVerdict)
+                {
+                    Diag($"Hand-in: Request {verdict}: {RequestHandover.Describe(shown)}");
+                    lastRequestVerdict = verdict;
+                }
+
+                if (verdict is RequestWindowVerdict.OtherRequest or RequestWindowVerdict.OtherItem
+                    or RequestWindowVerdict.OtherQuality or RequestWindowVerdict.OtherQuantity)
+                {
+                    var detail = $"Request {verdict} for {HandInReads.Describe(target)}: {RequestHandover.Describe(shown)}";
+                    await OfficerWindows.CloseRequest(cancelled);
+                    return new Halt(HandInPauseReason.RequestWindowMismatch, detail);
+                }
+
+                requestQualityVerified |= RequestWindowCheck.CheckOffered(shown.Offered, target) == RequestWindowVerdict.Ready;
+                if (!requestSubmitted && verdict == RequestWindowVerdict.Ready && RequestHandover.Submit(target))
+                {
+                    requestQualityVerified = true;
+                    requestSubmitted = true;
+                    deliverPressed = true;
+                }
+                else if (!requestSubmitted && verdict == RequestWindowVerdict.NeedsItems)
+                {
+                    if (RequestHandover.Fill(target))
+                    {
+                        requestQualityVerified |= RequestWindowCheck.CheckOffered(RequestHandover.ReadOffered(), target) == RequestWindowVerdict.Ready;
+                    }
+                }
+            }
+
             await DelayMs(PollMs);
         }
 
-        return new Halt(HandInPauseReason.RewardWindowDidNotOpen, $"no reward window within {RewardOpenTimeoutMs / TimeUnits.MillisecondsPerSecond}s for {HandInReads.Describe(target)}");
+        return new Halt(HandInPauseReason.RewardWindowDidNotOpen,
+            $"no reward window within {RewardOpenTimeoutMs / TimeUnits.MillisecondsPerSecond}s for {HandInReads.Describe(target)}; {RequestHandover.Describe(RequestHandover.Read())}");
     }
 
     private async Task<Halt> ConfirmRewardWindow(HandInTarget target, int sealsBefore)
     {
+        var prompt = await HandlePrompts(target);
+        if (Interrupted(prompt)) return prompt;
+
         if (!await WaitUntilTimed(RewardWindowReader.Readable, RewardReadTimeoutMs, "hand-in-reward-readable", 1) && CancelToken.IsCancellationRequested)
         {
             return Halt.None;
@@ -118,11 +178,26 @@ internal sealed partial class HandInDriver
 
         var shown = RewardWindowReader.Read();
         var expectedName = HandInReads.SheetItemName(target.ItemId);
-        Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}");
-        var judgment = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
+        var offered = RequestHandover.ReadOffered();
+        var offeredVerdict = RequestWindowCheck.CheckOffered(offered, target);
+        if (offered.Length > 0 && offeredVerdict != RequestWindowVerdict.Ready)
+        {
+            await OfficerWindows.CloseReward(cancelled);
+            return new Halt(HandInPauseReason.RequestWindowMismatch, $"the offered items changed before Deliver for {HandInReads.Describe(target)} ({offeredVerdict})");
+        }
+
+        requestQualityVerified |= offeredVerdict == RequestWindowVerdict.Ready;
+        var qualityVerified = requestQualityVerified || highQualityAccepted;
+        Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}; submitted quality verified {qualityVerified}");
+        var judgment = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap, qualityVerified);
         var verdict = judgment.Verdict;
         if (verdict == RewardWindowVerdict.Matches)
         {
+            if (judgment.BaseSealsShown)
+            {
+                Diag($"Hand-in: reward window shows the base seals for {HandInReads.Describe(target)}; HQ was verified independently, delivery will be checked against the HQ bag count");
+            }
+
             WarnAboutUncheckedSeals(judgment.SealsUnverified, target, sealsBefore);
             return Halt.None;
         }
@@ -254,11 +329,11 @@ internal sealed partial class HandInDriver
         await WaitUntilTimed(() => HandInReads.Seals(grandCompany) != activeBefore.Seals, SealSettleMs, "hand-in-seals-settle", 1);
     }
 
-    private async Task<Halt> HandlePrompts(HandInTarget target)
+    private async Task<Halt> HandlePrompts(HandInTarget target, bool requestExpected = false)
     {
         if (!NpcInteraction.SelectYesnoOpen())
         {
-            return await HaltOnUnexpected(talkUnexpected: true);
+            return await HaltOnUnexpected(talkUnexpected: true, requestExpected: requestExpected);
         }
 
         var text = NpcInteraction.SelectYesnoText();

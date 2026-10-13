@@ -11,12 +11,17 @@ internal static unsafe class UnexpectedAddons
 
     private const string DutyPopAddonName = "ContentsFinderConfirm";
 
-    private static readonly string[] alwaysUnexpected = ["Request", "SelectIconString", "InputNumeric", "SelectOk"];
+    private static readonly string[] alwaysUnexpected = ["Request", "ContextIconMenu", "SelectIconString", "InputNumeric", "SelectOk"];
 
-    public static bool TryFind(bool talkUnexpected, out string addonName)
+    public static bool TryFind(bool talkUnexpected, out string addonName, bool requestExpected = false)
     {
         for (var addonIndex = 0; addonIndex < alwaysUnexpected.Length; addonIndex++)
         {
+            if (requestExpected && alwaysUnexpected[addonIndex] is RequestHandover.AddonName or RequestHandover.ContextAddonName)
+            {
+                continue;
+            }
+
             if (!AddonReady(alwaysUnexpected[addonIndex]))
             {
                 continue;
