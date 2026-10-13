@@ -29,7 +29,7 @@ internal sealed partial class GcRunTask
         var shopper = ShopperProbe.Read();
         if (shopper != ShopperState.Available)
         {
-            Unbought(UnboughtNote(shopper), $"Auto Shopper is {shopper}");
+            Unbought(RunPlanRules.ShopperNote(shopper), $"Auto Shopper is {shopper}");
             return true;
         }
 
@@ -56,13 +56,6 @@ internal sealed partial class GcRunTask
         Unbought(RowNote.DayChanged, "a new supply day began after Start");
         return false;
     }
-
-    private static RowNote UnboughtNote(ShopperState shopper) => shopper switch
-    {
-        ShopperState.Missing => RowNote.ShopperMissing,
-        ShopperState.Newer => RowNote.ShopperNewer,
-        _ => RowNote.ShopperOutdated,
-    };
 
     private void Unbought(RowNote note, string reason)
     {

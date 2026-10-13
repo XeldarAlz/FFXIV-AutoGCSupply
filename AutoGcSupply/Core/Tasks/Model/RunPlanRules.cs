@@ -22,6 +22,37 @@ internal static class RunPlanRules
         return progress;
     }
 
+    public static int NoteUnpriced(ReadOnlySpan<RowDecision> plan, Span<RowProgress> progress, ShopperState shopper)
+    {
+        var note = ShopperNote(shopper);
+        if (note == RowNote.NoPrice)
+        {
+            return 0;
+        }
+
+        var noted = 0;
+        for (var index = 0; index < plan.Length; index++)
+        {
+            if (plan[index].Coverage != RowCoverage.Unpriced || progress[index].Note != RowNote.NoPrice)
+            {
+                continue;
+            }
+
+            progress[index] = progress[index].With(RowRunState.NotBought, note);
+            noted++;
+        }
+
+        return noted;
+    }
+
+    public static RowNote ShopperNote(ShopperState shopper) => shopper switch
+    {
+        ShopperState.Missing => RowNote.ShopperMissing,
+        ShopperState.Outdated => RowNote.ShopperOutdated,
+        ShopperState.Newer => RowNote.ShopperNewer,
+        _ => RowNote.NoPrice,
+    };
+
     public static int DropChanged(Span<RowDecision> plan, Span<RowProgress> progress, in RequestSnapshot snapshot)
     {
         var dropped = 0;
