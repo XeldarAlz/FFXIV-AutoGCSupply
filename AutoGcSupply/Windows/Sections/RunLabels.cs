@@ -23,6 +23,7 @@ internal static class RunLabels
         StartBlock.PricesFailed => Loc.T(L.Automate.BlockPricesFailed),
         StartBlock.NeedsSpendCap => Loc.T(L.Automate.BlockNeedsSpendCap),
         StartBlock.ShopperNeeded => Loc.T(L.Automate.BlockShopperNeeded),
+        StartBlock.UpdateNeeded => Loc.T(L.Automate.BlockUpdateNeeded),
         _ => string.Empty,
     };
 

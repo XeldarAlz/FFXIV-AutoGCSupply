@@ -36,6 +36,7 @@ internal static partial class L
         public static readonly LocString RowNoListings = new("run.row.noListings", "No listings were found");
         public static readonly LocString RowShopperMissing = new("run.row.shopperMissing", "Install Auto Shopper to buy it");
         public static readonly LocString RowShopperOutdated = new("run.row.shopperOutdated", "Update Auto Shopper to buy it");
+        public static readonly LocString RowShopperNewer = new("run.row.shopperNewer", "Update Auto GC Supply to buy it");
         public static readonly LocString RowPriceCap = new("run.row.priceCap", "Every listing cost more than the cap");
         public static readonly LocString RowNoStock = new("run.row.noStock", "Not enough was listed");
         public static readonly LocString RowInventoryFull = new("run.row.inventoryFull", "Your inventory was full");

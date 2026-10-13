@@ -43,6 +43,7 @@ internal static partial class L
         public static readonly LocString ShopperOutdated = new("requests.shopper.outdated", "This version cannot take orders. Update it to buy missing items.");
         public static readonly LocString ShopperUpdate = new("requests.shopper.update", "Update");
         public static readonly LocString ShopperUpdateHelp = new("requests.shopper.updateHelp", "Update Auto Shopper from /xlplugins, then come back here.");
+        public static readonly LocString ShopperNewer = new("requests.shopper.newer", "Newer than this Auto GC Supply can use. Update Auto GC Supply to buy missing items.");
         public static readonly LocString ShopperReady = new("requests.shopper.ready", "Buys what is missing, within your caps.");
         public static readonly LocString DryRunOn = new("requests.dryRun.on", "Dry run on");
         public static readonly LocString DryRunOff = new("requests.dryRun.off", "Dry run off");

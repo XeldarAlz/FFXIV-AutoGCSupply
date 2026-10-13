@@ -8,11 +8,7 @@ internal static class ShopperProbe
 {
     public static ShopperState Read()
     {
-        if (AutoShopperApi.Instance.IsAvailable)
-        {
-            return ShopperState.Available;
-        }
-
-        return ExternalPlugins.IsInstalled(ExternalPlugin.AutoShopper) ? ShopperState.Outdated : ShopperState.Missing;
+        var api = AutoShopperApi.Instance;
+        return ShopperStateRule.Classify(ExternalPlugins.IsInstalled(ExternalPlugin.AutoShopper), api.GatesPresent(), api.ApiVersion());
     }
 }

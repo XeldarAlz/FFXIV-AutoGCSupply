@@ -46,8 +46,6 @@ internal sealed class AutoShopperApi
 
     public static AutoShopperApi Instance => instance ??= new AutoShopperApi();
 
-    public bool IsAvailable => GatesPresent() && ApiVersion() == ShopperContract.ApiVersion;
-
     public int ApiVersion()
         => IpcGate.Invoke(apiVersion.HasFunction, apiVersionCall, 0, ApiVersionFailed);
 
@@ -85,7 +83,7 @@ internal sealed class AutoShopperApi
     public bool StopRun(string runId)
         => IpcGate.Invoke(stopRun.HasFunction, () => stopRun.InvokeFunc(runId), false, StopRunFailed);
 
-    private bool GatesPresent()
+    public bool GatesPresent()
     {
         return apiVersion.HasFunction
             && dryRun.HasFunction

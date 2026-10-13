@@ -11,6 +11,7 @@ internal enum RowNote : byte
     NoListings,
     ShopperMissing,
     ShopperOutdated,
+    ShopperNewer,
     PriceCapExceeded,
     NoStock,
     InventoryFull,

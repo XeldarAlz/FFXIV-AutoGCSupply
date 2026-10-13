@@ -32,7 +32,7 @@ internal static class ShopperStrip
         var accent = today.Shopper switch
         {
             ShopperState.Available => Styling.AccentMint,
-            ShopperState.Outdated => Styling.AccentAmber,
+            ShopperState.Outdated or ShopperState.Newer => Styling.AccentAmber,
             _ => Styling.AccentRose,
         };
 
@@ -50,6 +50,7 @@ internal static class ShopperStrip
         {
             ShopperState.Available => DrawAvailable(controller, today.ShopperDryRun, x, right, midY),
             ShopperState.Outdated => DrawOutdated(x, right, midY),
+            ShopperState.Newer => DrawNewer(x, right, midY),
             _ => DrawMissing(x, right, midY),
         };
 
@@ -79,6 +80,12 @@ internal static class ShopperStrip
         var textX = x + PillButton.Width(label, FontAwesomeIcon.Plug) + ItemGap * ImGuiHelpers.GlobalScale;
         Caption(Loc.T(L.Requests.ShopperOutdated), textX, right, midY, Styling.AccentAmberSoft);
         return clicked;
+    }
+
+    private static bool DrawNewer(float x, float right, float midY)
+    {
+        Caption(Loc.T(L.Requests.ShopperNewer), x, right, midY, Styling.AccentAmberSoft);
+        return false;
     }
 
     private static bool DrawAvailable(GcRunController controller, bool dryRun, float x, float right, float midY)

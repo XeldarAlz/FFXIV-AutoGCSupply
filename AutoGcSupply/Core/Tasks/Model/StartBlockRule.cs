@@ -74,7 +74,12 @@ internal static class StartBlockRule
             return StartBlock.NeedsSpendCap;
         }
 
-        return counts.Actionable == 0 ? StartBlock.ShopperNeeded : StartBlock.None;
+        if (counts.Actionable > 0)
+        {
+            return StartBlock.None;
+        }
+
+        return facts.Shopper == ShopperState.Newer ? StartBlock.UpdateNeeded : StartBlock.ShopperNeeded;
     }
 
     private static RowCounts Count(in StartFacts facts, ReadOnlySpan<TodayRow> rows)

@@ -96,6 +96,14 @@ public sealed class StartBlockRuleTests
     }
 
     [Fact]
+    public void ANewerAutoShopperAsksForAnUpdateOfThisPlugin()
+    {
+        var rows = TodayRows(Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
+
+        Assert.Equal(StartBlock.UpdateNeeded, StartBlockRule.Evaluate(ready with { Shopper = ShopperState.Newer, Pricing = PricingState.Unavailable }, rows));
+    }
+
+    [Fact]
     public void WithoutAutoShopperOwnedRowsStillStart()
     {
         var rows = TodayRows(Owned(SupplyClasses.Carpenter, CarpenterItem, 1), Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
