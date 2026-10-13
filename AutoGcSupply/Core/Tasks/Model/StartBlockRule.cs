@@ -66,7 +66,7 @@ internal static class StartBlockRule
 
         if (counts.AwaitingPrice > 0)
         {
-            return StartBlock.PricesPending;
+            return facts.Pricing == PricingState.Failed ? StartBlock.PricesFailed : StartBlock.PricesPending;
         }
 
         if (counts.Purchases > 0 && facts.SpendCap <= 0)

@@ -62,13 +62,13 @@ public sealed class StartBlockRuleTests
     }
 
     [Theory]
-    [InlineData((int)PricingState.Pending)]
-    [InlineData((int)PricingState.Failed)]
-    public void UnpricedRowsWaitForTheirPrices(int pricing)
+    [InlineData((int)PricingState.Pending, (int)StartBlock.PricesPending)]
+    [InlineData((int)PricingState.Failed, (int)StartBlock.PricesFailed)]
+    public void UnpricedRowsWaitForTheirPricesOrSayTheyFailed(int pricing, int expected)
     {
         var rows = TodayRows(Owned(SupplyClasses.Carpenter, CarpenterItem, 1), Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
 
-        Assert.Equal(StartBlock.PricesPending, StartBlockRule.Evaluate(ready with { Pricing = (PricingState)pricing, SpendCap = 0 }, rows));
+        Assert.Equal((StartBlock)expected, StartBlockRule.Evaluate(ready with { Pricing = (PricingState)pricing, SpendCap = 0 }, rows));
     }
 
     [Fact]

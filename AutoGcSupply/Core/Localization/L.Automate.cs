@@ -16,6 +16,7 @@ internal static partial class L
         public static readonly LocString BlockNothingSelected = new("automate.block.nothingSelected", "choose at least one request");
         public static readonly LocString BlockNothingToDo = new("automate.block.nothingToDo", "nothing to hand in today");
         public static readonly LocString BlockPricesPending = new("automate.block.pricesPending", "waiting for prices");
+        public static readonly LocString BlockPricesFailed = new("automate.block.pricesFailed", "prices failed: retry them or leave out the items to buy");
         public static readonly LocString BlockNeedsSpendCap = new("automate.block.needsSpendCap", "set a run spend cap");
         public static readonly LocString BlockShopperNeeded = new("automate.block.shopperNeeded", "Auto Shopper is needed to buy");
         public static readonly LocString DryRun = new("automate.dryRun", "Dry run");

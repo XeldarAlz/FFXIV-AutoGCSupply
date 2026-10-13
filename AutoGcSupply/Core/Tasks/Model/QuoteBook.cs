@@ -105,6 +105,18 @@ internal sealed class QuoteBook
         return true;
     }
 
+    public void Retry()
+    {
+        if (Status != QuoteStatus.Failed)
+        {
+            return;
+        }
+
+        failedLines = [];
+        ExpiredCount = 0;
+        Settle(QuoteStatus.Idle);
+    }
+
     public void Clear()
     {
         pendingLines = [];

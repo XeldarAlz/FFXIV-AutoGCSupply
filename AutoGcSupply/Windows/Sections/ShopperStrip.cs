@@ -159,7 +159,7 @@ internal static class ShopperStrip
 
                 if (Pill("##agcs_pricing_retry", Loc.T(L.Requests.PricingRetry), Styling.AccentRose, PillButton.Emphasis.Ghost, FontAwesomeIcon.Redo, x, midY, null))
                 {
-                    controller.Refresh();
+                    controller.RetryPrices();
                 }
 
                 return;

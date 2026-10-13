@@ -148,6 +148,25 @@ public sealed class TodayBuilderTests
         Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
     }
 
+    [Theory]
+    [InlineData((int)ShopperState.Missing)]
+    [InlineData((int)ShopperState.Outdated)]
+    public void PricesDoNotOutliveAutoShopper(int shopper)
+    {
+        var quotes = new QuoteBook();
+        var needed = Needed();
+        quotes.Begin("quote", needed, 0);
+        quotes.Land(PricesFor(needed), nowUtc);
+
+        var model = Build(Inputs() with { Shopper = (ShopperState)shopper }, quotes, out _);
+
+        Assert.Equal(PricingState.Unavailable, model.Pricing);
+        Assert.Equal(RowCoverage.Unpriced, model.Rows[8].Decision.Coverage);
+        Assert.Equal(0, model.Totals.ToBuy);
+        Assert.Equal(0, model.Totals.EstimatedSpend);
+        Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
+    }
+
     [Fact]
     public void DryRunMirrorsAnAvailableAutoShopper()
     {

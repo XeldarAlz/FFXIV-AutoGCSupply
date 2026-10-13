@@ -22,6 +22,7 @@ internal enum StartBlock : byte
     NothingSelected,
     NothingToDo,
     PricesPending,
+    PricesFailed,
     NeedsSpendCap,
     ShopperNeeded,
 }

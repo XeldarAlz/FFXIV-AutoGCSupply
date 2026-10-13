@@ -60,6 +60,8 @@ internal sealed class QuoteTracker
 
     public void Clear() => Book.Clear();
 
+    public void Retry() => Book.Retry();
+
     private void Restart()
     {
         var lines = Book.PendingLines;

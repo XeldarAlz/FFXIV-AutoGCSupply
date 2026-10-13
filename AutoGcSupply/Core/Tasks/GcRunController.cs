@@ -94,6 +94,19 @@ internal sealed partial class GcRunController
         RunLog.Info("Refresh: reading the requests and pricing them again.");
     }
 
+    public void RetryPrices()
+    {
+        if (session is not null)
+        {
+            return;
+        }
+
+        quotes.Retry();
+        lastPollMs = 0;
+        todayDirty = true;
+        RunLog.Info("Retrying the prices of today's items.");
+    }
+
     public void SetIncluded(byte classJobId, bool included)
     {
         var contentId = Svc.PlayerState.ContentId;

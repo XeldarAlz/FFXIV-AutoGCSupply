@@ -11,10 +11,10 @@ internal static class TodayBuilder
     public static TodayModel Build(in TodayInputs inputs, QuoteBook quotes, IRowLabels labels, int revision, out ShopperQuoteLine[] neededQuote)
     {
         var requestsLoaded = inputs.Snapshot.Loaded && inputs.RequestsCurrent;
-        var decisions = DecisionsOf(inputs, requestsLoaded, quotes.Prices);
+        var shopperAvailable = inputs.Shopper == ShopperState.Available;
+        var decisions = DecisionsOf(inputs, requestsLoaded, shopperAvailable ? quotes.Prices : ReadOnlySpan<ItemPrice>.Empty);
         var rows = RowsOf(inputs, decisions, labels);
         neededQuote = QuoteLines.ForDecisions(decisions);
-        var shopperAvailable = inputs.Shopper == ShopperState.Available;
         var pricing = quotes.StateFor(neededQuote, shopperAvailable);
         var totals = TodayTotalsRule.Sum(rows.AsSpan(), inputs.Character.Seals, inputs.Character.SealCap);
         var loggedIn = inputs.LoggedIn && inputs.HasCharacter;
