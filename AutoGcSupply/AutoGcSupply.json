@@ -1,0 +1,18 @@
+{
+  "Author": "XeldarAlz",
+  "Name": "Auto GC Supply",
+  "InternalName": "AutoGcSupply",
+  "Punchline": "Grand Company supply and provisioning, delivered for you.",
+  "Description": "Completes your daily Grand Company supply and provisioning missions: reads the day's requests, buys what is missing through Auto Shopper, travels to your Grand Company and hands everything in, confirming every delivery.",
+  "ApplicableVersion": "any",
+  "RepoUrl": "https://github.com/XeldarAlz/FFXIV-AutoGCSupply",
+  "IconUrl": "https://raw.githubusercontent.com/XeldarAlz/FFXIV-AutoGCSupply/master/AutoGcSupply/Images/Icon.png",
+  "Tags": [
+    "Grand Company",
+    "Supply",
+    "Provisioning",
+    "Crafting",
+    "Gathering",
+    "Automation"
+  ]
+}
