@@ -54,7 +54,7 @@ internal static partial class L
         public static readonly LocString StatePaused = new("dock.state.paused", "paused");
     }
 
-    internal static class Run
+    internal static partial class Run
     {
         public static readonly LocString PhasePreparing = new("run.phase.preparing", "Getting ready");
         public static readonly LocString PhaseStandingBy = new("run.phase.standingBy", "Standing by");
