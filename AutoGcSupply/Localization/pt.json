@@ -546,6 +546,7 @@
   "run.needs.addon": "Uma janela inesperada apareceu: {0}",
   "run.needs.highQualityPrompt": "O jogo pediu para entregar um item de alta qualidade em um pedido de qualidade normal.",
   "run.needs.reward": "A janela de entrega não respondeu.",
+  "run.needs.rewardMismatch": "A janela de entrega não correspondia ao pedido e foi cancelada: {0}",
   "run.needs.combat": "Um combate ou um conteúdo interrompeu a entrega.",
   "run.needs.handInFault": "A entrega parou por um erro inesperado. O log tem os detalhes.",
   "run.needs.handInTimeout": "A entrega demorou demais e foi interrompida.",

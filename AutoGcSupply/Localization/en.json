@@ -546,6 +546,7 @@
   "run.needs.addon": "An unexpected window appeared: {0}",
   "run.needs.highQualityPrompt": "The game asked to trade a high-quality item for a normal-quality request.",
   "run.needs.reward": "The delivery window did not respond.",
+  "run.needs.rewardMismatch": "The delivery window did not match the request and was cancelled: {0}",
   "run.needs.combat": "Combat or a duty interrupted the hand-in.",
   "run.needs.handInFault": "The hand-in stopped on an unexpected error. The log has the details.",
   "run.needs.handInTimeout": "The hand-in took too long and was stopped.",

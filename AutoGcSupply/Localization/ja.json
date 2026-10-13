@@ -546,6 +546,7 @@
   "run.needs.addon": "想定外のウィンドウが表示されました：{0}",
   "run.needs.highQualityPrompt": "通常品質の依頼に対してHQアイテムの納品を求められました。",
   "run.needs.reward": "納品ウィンドウが応答しませんでした。",
+  "run.needs.rewardMismatch": "納品ウィンドウの内容が依頼と一致しなかったため、キャンセルしました: {0}",
   "run.needs.combat": "戦闘またはコンテンツにより納品が中断されました。",
   "run.needs.handInFault": "予期しないエラーで納品が停止しました。詳細はログにあります。",
   "run.needs.handInTimeout": "納品に時間がかかりすぎたため停止しました。",

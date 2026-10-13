@@ -93,11 +93,12 @@ internal static class RunText
         HandInPauseReason.OfficerNotFound => Loc.T(L.Run.NeedsOfficerNotFound),
         HandInPauseReason.OfficerUnreachable => Loc.T(L.Run.NeedsOfficerUnreachable),
         HandInPauseReason.MenuTextUnavailable or HandInPauseReason.MenuOptionNotFound => Loc.T(L.Run.NeedsMenu),
-        HandInPauseReason.ListDidNotOpen or HandInPauseReason.ListClosed or HandInPauseReason.TabDidNotSwitch => Loc.T(L.Run.NeedsList),
+        HandInPauseReason.ListDidNotOpen or HandInPauseReason.ListClosed or HandInPauseReason.TabDidNotSwitch or HandInPauseReason.ListNotRefreshed => Loc.T(L.Run.NeedsList),
         HandInPauseReason.UnexpectedPrompt => Loc.T(L.Run.NeedsPrompt, detail),
         HandInPauseReason.UnexpectedAddon => Loc.T(L.Run.NeedsAddon, detail),
         HandInPauseReason.HighQualityPromptForNormalRow => Loc.T(L.Run.NeedsHighQualityPrompt),
         HandInPauseReason.RewardWindowDidNotOpen or HandInPauseReason.DeliverButtonDisabled => Loc.T(L.Run.NeedsReward),
+        HandInPauseReason.RewardWindowMismatch => Loc.T(L.Run.NeedsRewardMismatch, detail),
         HandInPauseReason.InCombatOrDuty => Loc.T(L.Run.NeedsCombat),
         _ => Loc.T(L.Run.NeedsHandInFault),
     };

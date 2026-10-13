@@ -546,6 +546,7 @@
   "run.needs.addon": "Ein unerwartetes Fenster erschien: {0}",
   "run.needs.highQualityPrompt": "Das Spiel wollte einen hochwertigen Gegenstand für einen Auftrag normaler Qualität abgeben.",
   "run.needs.reward": "Das Abgabefenster hat nicht reagiert.",
+  "run.needs.rewardMismatch": "Das Abgabefenster passte nicht zur Anfrage und wurde abgebrochen: {0}",
   "run.needs.combat": "Ein Kampf oder ein Inhalt hat die Abgabe unterbrochen.",
   "run.needs.handInFault": "Die Abgabe wurde wegen eines unerwarteten Fehlers beendet. Das Protokoll enthält die Details.",
   "run.needs.handInTimeout": "Die Abgabe hat zu lange gedauert und wurde beendet.",

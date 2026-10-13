@@ -546,6 +546,7 @@
   "run.needs.addon": "Une fenêtre inattendue est apparue : {0}",
   "run.needs.highQualityPrompt": "Le jeu a demandé de remettre un objet de haute qualité pour une demande de qualité normale.",
   "run.needs.reward": "La fenêtre de remise n'a pas répondu.",
+  "run.needs.rewardMismatch": "La fenêtre de remise ne correspondait pas à la demande et a été annulée : {0}",
   "run.needs.combat": "Un combat ou une instance a interrompu la remise.",
   "run.needs.handInFault": "La remise s'est arrêtée sur une erreur inattendue. Le journal contient les détails.",
   "run.needs.handInTimeout": "La remise a pris trop de temps et a été arrêtée.",

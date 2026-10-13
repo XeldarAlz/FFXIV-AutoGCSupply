@@ -546,6 +546,7 @@
   "run.needs.addon": "出现了意外的窗口：{0}",
   "run.needs.highQualityPrompt": "游戏要求为普通品质的需求交纳高品质物品。",
   "run.needs.reward": "交纳窗口没有响应。",
+  "run.needs.rewardMismatch": "交纳窗口与委托不符，已取消：{0}",
   "run.needs.combat": "战斗或副本打断了交纳。",
   "run.needs.handInFault": "交纳因意外错误而停止。详情见日志。",
   "run.needs.handInTimeout": "交纳耗时过长，已停止。",
