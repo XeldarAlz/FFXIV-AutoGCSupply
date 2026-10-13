@@ -46,7 +46,8 @@ public abstract partial class AutoCommon
         new("jump", [ConditionFlag.Jumping, ConditionFlag.Jumping61]),
         new("moved", [ConditionFlag.BeingMoved]),
         new("zoning", [ConditionFlag.BetweenAreas, ConditionFlag.BetweenAreas51]),
-        new("occupied", [ConditionFlag.Occupied33, ConditionFlag.Occupied38, ConditionFlag.Occupied39]),
+        new("occupied", [ConditionFlag.Occupied, ConditionFlag.Occupied30, ConditionFlag.OccupiedInEvent, ConditionFlag.OccupiedInQuestEvent, ConditionFlag.Occupied33, ConditionFlag.OccupiedInCutSceneEvent, ConditionFlag.Occupied38, ConditionFlag.Occupied39, ConditionFlag.OccupiedSummoningBell]),
+        new("cutscene", [ConditionFlag.WatchingCutscene, ConditionFlag.WatchingCutscene78]),
     ];
 
     internal static string ConditionTag()
@@ -220,6 +221,7 @@ public abstract partial class AutoCommon
                 else if (!completed)
                 {
                     stalls++;
+                    Diag($"{scope}: the teleport did not start ({ConditionTag()})");
                 }
             }
 

@@ -34,6 +34,7 @@ internal sealed partial class HandInDriver
     {
         var cityName = TerritoryNames.Of(officer.TerritoryId);
         EnterStep(HandInStep.Travelling, $"Travelling to the Personnel Officer in {cityName}");
+        await MarketWindows.CloseAll(cancelled);
         if (!OfficerWithinReach())
         {
             await HoldWhileTyping("the trip to the Personnel Officer");
