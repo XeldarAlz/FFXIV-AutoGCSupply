@@ -53,7 +53,7 @@ internal sealed partial class HandInDriver
         var halt = await AwaitRewardWindow(target);
         if (!Interrupted(halt))
         {
-            halt = await ConfirmRewardWindow(target);
+            halt = await ConfirmRewardWindow(target, sealsBefore);
         }
 
         if (!Interrupted(halt))
@@ -109,7 +109,7 @@ internal sealed partial class HandInDriver
         return new Halt(HandInPauseReason.RewardWindowDidNotOpen, $"no reward window within {RewardOpenTimeoutMs / TimeUnits.MillisecondsPerSecond}s for {HandInReads.Describe(target)}");
     }
 
-    private async Task<Halt> ConfirmRewardWindow(HandInTarget target)
+    private async Task<Halt> ConfirmRewardWindow(HandInTarget target, int sealsBefore)
     {
         if (!await WaitUntilTimed(RewardWindowReader.Readable, RewardReadTimeoutMs, "hand-in-reward-readable", 1) && CancelToken.IsCancellationRequested)
         {
@@ -119,7 +119,7 @@ internal sealed partial class HandInDriver
         var shown = RewardWindowReader.Read();
         var expectedName = HandInReads.SheetItemName(target.ItemId);
         Diag($"Hand-in: the reward window for {HandInReads.Describe(target)} holds {RewardWindowReader.Describe()}");
-        var verdict = RewardWindowCheck.Judge(shown, expectedName, target);
+        var verdict = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
         if (verdict == RewardWindowVerdict.Matches)
         {
             return Halt.None;
@@ -127,7 +127,7 @@ internal sealed partial class HandInDriver
 
         var detail = verdict == RewardWindowVerdict.Unreadable
             ? $"the reward window for {HandInReads.Describe(target)} could not be read"
-            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {target.SealReward} seals";
+            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {RewardWindowCheck.LowestSeals(target.SealReward, sealsBefore, sealCap)} to {RewardWindowCheck.HighestSeals(target.SealReward)} seals";
         Warn($"Hand-in: {detail} ({verdict}); cancelling it");
         await OfficerWindows.CloseReward(cancelled);
         return new Halt(HandInPauseReason.RewardWindowMismatch, detail);
