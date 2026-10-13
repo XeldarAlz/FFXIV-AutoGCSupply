@@ -122,15 +122,30 @@ internal sealed partial class HandInDriver
         var verdict = RewardWindowCheck.Judge(shown, expectedName, target, sealsBefore, sealCap);
         if (verdict == RewardWindowVerdict.Matches)
         {
+            WarnIfCapHidesQuality(target, sealsBefore);
             return Halt.None;
         }
 
+        var mismatch = RewardWindowCheck.Mismatch(verdict, shown, expectedName, target, sealsBefore, sealCap);
         var detail = verdict == RewardWindowVerdict.Unreadable
             ? $"the reward window for {HandInReads.Describe(target)} could not be read"
-            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {RewardWindowCheck.LowestSeals(target.SealReward, sealsBefore, sealCap)} to {RewardWindowCheck.HighestSeals(target.SealReward)} seals";
+            : $"the reward window shows '{mismatch.ShownItemName}' for {mismatch.ShownSeals} seals where {HandInReads.Describe(target)} expects '{mismatch.ExpectedItemName}' for {mismatch.LowestSeals} to {mismatch.HighestSeals} seals";
         Warn($"Hand-in: {detail} ({verdict}); cancelling it");
         await OfficerWindows.CloseReward(cancelled);
-        return new Halt(HandInPauseReason.RewardWindowMismatch, detail);
+        return new Halt(HandInPauseReason.RewardWindowMismatch, detail) { RewardWindow = mismatch };
+    }
+
+    private void WarnIfCapHidesQuality(in HandInTarget target, int sealsBefore)
+    {
+        if (!RewardWindowCheck.CapHidesQuality(target, sealsBefore, sealCap))
+        {
+            return;
+        }
+
+        Warn(
+            $"Hand-in: the seal cap leaves room for {RewardWindowCheck.LowestSeals(target.SealReward, sealsBefore, sealCap)} seals, no more than normal quality pays " +
+            $"({RewardWindowCheck.NormalQualitySeals(target.SealReward)}), so the reward window's seals cannot tell a normal-quality swap on {HandInReads.Describe(target)}. " +
+            "No reward window value is known to hold the experience to compare instead; the bag count after Deliver confirms the quality.");
     }
 
     private async Task<Halt> PressDeliver(HandInTarget target)

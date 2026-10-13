@@ -181,5 +181,5 @@ public sealed class RunOutcomeTests
         Assert.Equal(0, recorded.GilSpent);
     }
 
-    private static HandInResult Result(HandInOutcome outcome) => new(outcome, HandInPauseReason.None, string.Empty, [], 0, 0, 0);
+    private static HandInResult Result(HandInOutcome outcome) => new(outcome, HandInPauseReason.None, string.Empty, RewardWindowMismatch.None, [], 0, 0, 0);
 }

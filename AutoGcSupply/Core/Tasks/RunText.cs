@@ -72,6 +72,11 @@ internal static class RunText
             return Loc.T(L.Run.NeedsUnconfirmed);
         }
 
+        if (result.PauseReason == HandInPauseReason.RewardWindowMismatch)
+        {
+            return WithTryAgain(RewardWindow(result.RewardWindow));
+        }
+
         return WithTryAgain(HandInPause(result.PauseReason, result.Detail));
     }
 
@@ -98,10 +103,20 @@ internal static class RunText
         HandInPauseReason.UnexpectedAddon => Loc.T(L.Run.NeedsAddon, detail),
         HandInPauseReason.HighQualityPromptForNormalRow => Loc.T(L.Run.NeedsHighQualityPrompt),
         HandInPauseReason.RewardWindowDidNotOpen or HandInPauseReason.DeliverButtonDisabled => Loc.T(L.Run.NeedsReward),
-        HandInPauseReason.RewardWindowMismatch => Loc.T(L.Run.NeedsRewardMismatch, detail),
         HandInPauseReason.InCombatOrDuty => Loc.T(L.Run.NeedsCombat),
         _ => Loc.T(L.Run.NeedsHandInFault),
     };
+
+    private static string RewardWindow(in RewardWindowMismatch mismatch) => mismatch.Verdict switch
+    {
+        RewardWindowVerdict.OtherItem => Loc.T(L.Run.NeedsRewardMismatch, Loc.T(L.Run.NeedsRewardOtherItem, mismatch.ShownItemName, mismatch.ExpectedItemName)),
+        RewardWindowVerdict.OtherSeals => Loc.T(
+            L.Run.NeedsRewardMismatch,
+            Loc.T(L.Run.NeedsRewardOtherSeals, Seals(mismatch.ShownSeals), mismatch.ExpectedItemName, Seals(mismatch.LowestSeals), Seals(mismatch.HighestSeals))),
+        _ => Loc.T(L.Run.NeedsRewardUnreadable),
+    };
+
+    private static string Seals(int seals) => seals.ToString("N0", Loc.Culture);
 
     private static string WithTryAgain(string reason) => string.Concat(reason, " ", Loc.T(L.Run.NeedsTryAgain));
 }

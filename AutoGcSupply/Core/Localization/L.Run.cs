@@ -72,6 +72,9 @@ internal static partial class L
         public static readonly LocString NeedsHighQualityPrompt = new("run.needs.highQualityPrompt", "The game asked to trade a high-quality item for a normal-quality request.");
         public static readonly LocString NeedsReward = new("run.needs.reward", "The delivery window did not respond.");
         public static readonly LocString NeedsRewardMismatch = new("run.needs.rewardMismatch", "The delivery window did not match the request and was cancelled: {0}");
+        public static readonly LocString NeedsRewardOtherItem = new("run.needs.rewardOtherItem", "it showed {0} instead of {1}.");
+        public static readonly LocString NeedsRewardOtherSeals = new("run.needs.rewardOtherSeals", "it offered {0} seals for {1} instead of {2} to {3}.");
+        public static readonly LocString NeedsRewardUnreadable = new("run.needs.rewardUnreadable", "The delivery window could not be read and was cancelled.");
         public static readonly LocString NeedsCombat = new("run.needs.combat", "Combat or a duty interrupted the hand-in.");
         public static readonly LocString NeedsHandInFault = new("run.needs.handInFault", "The hand-in stopped on an unexpected error. The log has the details.");
         public static readonly LocString NeedsHandInTimeout = new("run.needs.handInTimeout", "The hand-in took too long and was stopped.");

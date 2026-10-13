@@ -12,6 +12,7 @@ namespace AutoGcSupply.Core.HandIn;
 internal sealed partial class HandInDriver : AutoCommon
 {
     public const int WatchdogMs = 1_200_000;
+    public const int CleanupBoundMs = 30_000;
     public const int NoTarget = RowMatch.NoTarget;
 
     private const int PollMs = 100;
@@ -53,6 +54,8 @@ internal sealed partial class HandInDriver : AutoCommon
     public ReadOnlySpan<HandInRowResult> Rows => rows;
 
     public HandInResult Result { get; private set; } = HandInResult.Running;
+
+    public bool Settled => Step == HandInStep.Finished;
 
     protected override async Task Execute()
     {
@@ -155,7 +158,7 @@ internal sealed partial class HandInDriver : AutoCommon
             : HandInOutcome.Partial;
         Step = HandInStep.Finished;
         CurrentTargetIndex = NoTarget;
-        Result = new HandInResult(outcome, halt.Reason, halt.Detail, rows, delivered, sealsGained, sealsLost);
+        Result = new HandInResult(outcome, halt.Reason, halt.Detail, halt.RewardWindow, rows, delivered, sealsGained, sealsLost);
         Bump();
 
         var summary = $"Hand-in: {outcome}, {delivered}/{rows.Length} delivered, {sealsGained} seals gained, {sealsLost} lost to the cap";
@@ -230,6 +233,8 @@ internal sealed partial class HandInDriver : AutoCommon
     private readonly record struct Halt(HandInPauseReason Reason, string Detail)
     {
         public static Halt None { get; } = new(HandInPauseReason.None, string.Empty);
+
+        public RewardWindowMismatch RewardWindow { get; init; } = RewardWindowMismatch.None;
 
         public bool Stopped => Reason != HandInPauseReason.None;
     }
