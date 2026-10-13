@@ -140,13 +140,16 @@ internal static partial class L
         public static readonly LocString[] Release1000 =
         [
             new("changelog.r1000.1", "Today page: the day's 8 supply and 3 provisioning requests with item, quantity, owned stock, cost, XP, seals and gil per 1,000 XP"),
-            new("changelog.r1000.2", "Click a row to choose what to deliver; delivered and max-level classes stay muted, and max-level ones can be included for seals"),
-            new("changelog.r1000.3", "Automatic quality picks HQ when it costs at most twice NQ, since HQ supply pays double, and items you own are used first"),
-            new("changelog.r1000.4", "Buys only what is missing through Auto Shopper, within a run spend cap and per-item price caps, and follows its dry run switch"),
-            new("changelog.r1000.5", "Travels to your Grand Company with Lifestream, talks to the Personnel Officer and hands each request in"),
-            new("changelog.r1000.6", "Confirms every delivery by your bags and seals, and stops to ask you whenever something is unclear"),
-            new("changelog.r1000.7", "A live step-by-step view with pause and stop, a summary at the end and a History of every run"),
-            new("changelog.r1000.8", "Works without Auto Shopper too: items you already own are still read, valued and handed in"),
+            new("changelog.r1000.2", "Reads the requests by opening the Timers window for a moment, and again after the daily reset at 20:00 UTC"),
+            new("changelog.r1000.3", "Click a row to choose what to deliver, kept per character; max-level classes stay out unless you include them for seals in Settings"),
+            new("changelog.r1000.4", "Automatic quality buys HQ supply items when they cost at most twice NQ, since HQ supply pays double; provisioning stays NQ, and items in your bags go first"),
+            new("changelog.r1000.5", "Buys only what is missing through Auto Shopper 1.1.0.0 or later, within a run spend cap and per-item price caps, after you allow it there once"),
+            new("changelog.r1000.6", "Teleports to your Grand Company's city, walks to the Personnel Officer and hands in the requests you chose, one at a time"),
+            new("changelog.r1000.7", "Picks rows by item and class, checks the reward window before Deliver, and answers Yes only to the game's HQ trade prompt on an HQ row"),
+            new("changelog.r1000.8", "Confirms every delivery by your bags and seals, can skip a request whose seals would pass your cap, and stops to ask you whenever something is unclear"),
+            new("changelog.r1000.9", "A live step-by-step view with pause, resume and stop, auto-pause in duties, a summary at the end and a History of every run"),
+            new("changelog.r1000.10", "Follows Auto Shopper's dry run switch: while it is on, a run buys nothing and hands nothing in, and every step shows what it would do"),
+            new("changelog.r1000.11", "Works without Auto Shopper too: requests your bags already cover are still handed in"),
         ];
     }
 
