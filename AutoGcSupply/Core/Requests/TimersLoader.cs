@@ -64,10 +64,15 @@ public sealed class TimersLoader(TimersPasses passes, bool forcePass) : AutoComm
     private async Task<bool> PassThroughTimers(int attempt, bool dataPresent)
     {
         Status = "Loading today's requests from the Timers window";
-        var openedHere = !NpcInteraction.IsAddonReady(ContentsInfoAddon);
+        var leftOpen = TimersReady();
+        if (leftOpen && forcePass && !await CloseLeftOpenTimers(attempt))
+        {
+            return false;
+        }
+
         try
         {
-            if (openedHere && !await OpenTimers(attempt))
+            if (!TimersReady() && !await OpenTimers(attempt))
             {
                 return false;
             }
@@ -84,11 +89,27 @@ public sealed class TimersLoader(TimersPasses passes, bool forcePass) : AutoComm
         }
         finally
         {
-            if (openedHere)
+            if (!leftOpen)
             {
                 await CloseTimers(attempt);
             }
         }
+    }
+
+    private async Task<bool> CloseLeftOpenTimers(int attempt)
+    {
+        Diag("Timers loader: the Timers window is already open; closing it so it loads today's requests afresh.");
+        if (await WaitUntilTimed(TimersClosedAfterNudge, CloseWaitMs, $"timers-reopen#{attempt}"))
+        {
+            return true;
+        }
+
+        if (!CancelToken.IsCancellationRequested)
+        {
+            Warn("Timers loader: the open Timers window did not close, so it could not load today's requests afresh.");
+        }
+
+        return false;
     }
 
     private async Task<bool> OpenTimers(int attempt)
