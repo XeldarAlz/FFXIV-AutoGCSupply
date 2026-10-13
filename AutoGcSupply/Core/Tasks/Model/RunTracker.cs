@@ -12,6 +12,7 @@ internal sealed class RunTracker
     private string status = string.Empty;
     private bool dryRun;
     private string shopperStatus = string.Empty;
+    private bool shopperPaused;
     private long confirmedSpend;
     private RunRow[] rows = [];
     private NeedsPlayerReason needsPlayer = NeedsPlayerReason.None;
@@ -37,6 +38,7 @@ internal sealed class RunTracker
                 Status = status,
                 DryRun = dryRun,
                 ShopperStatus = shopperStatus,
+                ShopperPaused = shopperPaused,
                 ConfirmedSpend = confirmedSpend,
                 Rows = ImmutableArray.Create(rows),
                 NeedsPlayer = needsPlayer,
@@ -52,6 +54,8 @@ internal sealed class RunTracker
 
     public RunEnd End => end;
 
+    public bool ShopperPaused => shopperPaused;
+
     public void Begin(RunRow[] initialRows, string initialStatus)
     {
         step = RunStep.Reading;
@@ -59,6 +63,7 @@ internal sealed class RunTracker
         status = initialStatus;
         dryRun = false;
         shopperStatus = string.Empty;
+        shopperPaused = false;
         confirmedSpend = 0;
         rows = initialRows;
         needsPlayer = NeedsPlayerReason.None;
@@ -110,15 +115,16 @@ internal sealed class RunTracker
         Touch();
     }
 
-    public void SetShopper(string nextStatus, long nextConfirmedSpend)
+    public void SetShopper(string nextStatus, long nextConfirmedSpend, bool nextPaused)
     {
-        if (shopperStatus == nextStatus && confirmedSpend == nextConfirmedSpend)
+        if (shopperStatus == nextStatus && confirmedSpend == nextConfirmedSpend && shopperPaused == nextPaused)
         {
             return;
         }
 
         shopperStatus = nextStatus;
         confirmedSpend = nextConfirmedSpend;
+        shopperPaused = nextPaused;
         Touch();
     }
 

@@ -478,6 +478,8 @@
   "run.status.reading": "Reading today's requests",
   "run.status.pricing": "Pricing the items to buy",
   "run.status.buying": "Buying through Auto Shopper",
+  "run.status.shopperPaused": "Paused in Auto Shopper; resume it there to carry on buying",
+  "run.status.shopperPausedInContent": "Auto Shopper paused for the duty and carries on once you leave",
   "run.status.stopping": "Stopping once Auto Shopper settles its purchase",
   "run.status.counting": "Counting the items in your bags",
   "run.status.travelling": "Travelling to the Personnel Officer",

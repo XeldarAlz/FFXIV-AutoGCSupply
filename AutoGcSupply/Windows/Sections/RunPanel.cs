@@ -123,14 +123,14 @@ internal static class RunPanel
         var available = ImGui.GetContentRegionAvail().X;
         var lineHeight = ImGui.GetTextLineHeight();
         var midY = origin.Y + lineHeight * 0.5f;
-        var active = controller.Running && !controller.Paused;
+        var active = controller.Running && controller.Phase != RunPhase.Paused;
 
         var dot = active ? Styling.PulseColor(accent, accentSoft, Styling.PulseMedium) : accent;
         var radius = 4f * scale;
         Paint.Dot(drawList, new Vector2(origin.X + radius + 3f * scale, midY), radius, dot);
 
         var status = !controller.Running ? Loc.T(L.Running.StatusFinished)
-            : controller.Paused ? Loc.T(L.Shell.StatusPaused)
+            : controller.Phase == RunPhase.Paused ? Loc.T(L.Shell.StatusPaused)
             : Loc.T(L.Shell.StatusRunning);
         var statusSize = TextDraw.SmallCapsSize(status);
         var statusX = origin.X + radius * 2f + 12f * scale;
@@ -163,7 +163,7 @@ internal static class RunPanel
         var origin = ImGui.GetCursorScreenPos();
         var end = origin + size;
         var drawList = ImGui.GetWindowDrawList();
-        var active = !controller.Paused && controller.Phase != RunPhase.Stopping;
+        var active = controller.Phase is not (RunPhase.Paused or RunPhase.Stopping);
         var rounding = Styling.PanelRounding * scale;
 
         Paint.Glass(drawList, origin, end, rounding, accent, active ? 0.10f : 0.03f, 0f, elevated: true);

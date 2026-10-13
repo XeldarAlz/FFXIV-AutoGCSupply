@@ -55,7 +55,7 @@ internal sealed partial class GcRunController
 
             return tracker.Step switch
             {
-                RunStep.Buying => RunPhase.Buying,
+                RunStep.Buying => tracker.ShopperPaused ? RunPhase.Paused : RunPhase.Buying,
                 RunStep.Travelling => RunPhase.Travelling,
                 RunStep.HandingIn => RunPhase.HandingIn,
                 RunStep.Finishing or RunStep.Done => RunPhase.Finishing,

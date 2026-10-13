@@ -12,7 +12,7 @@ public sealed class RunTrackerTests
         var first = tracker.Current;
 
         tracker.SetStep(RunStep.Reading, "Reading");
-        tracker.SetShopper(string.Empty, 0);
+        tracker.SetShopper(string.Empty, 0, false);
         tracker.SetDryRun(false);
         tracker.SetRow(0, default);
 
@@ -69,5 +69,24 @@ public sealed class RunTrackerTests
 
         Assert.Equal(RunStep.HandingIn, tracker.Current.LastStep);
         Assert.Equal(RunStep.Done, tracker.Current.Step);
+    }
+
+    [Fact]
+    public void AnAutoShopperPauseIsMirrored()
+    {
+        var tracker = new RunTracker();
+        tracker.Begin(new RunRow[1], "Reading");
+        tracker.SetShopper("Searching", 630, false);
+
+        Assert.False(tracker.Current.ShopperPaused);
+
+        tracker.SetShopper("Paused", 630, true);
+
+        Assert.True(tracker.ShopperPaused);
+        Assert.True(tracker.Current.ShopperPaused);
+
+        tracker.Begin(new RunRow[1], "Reading");
+
+        Assert.False(tracker.Current.ShopperPaused);
     }
 }

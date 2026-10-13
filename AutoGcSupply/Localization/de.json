@@ -478,6 +478,8 @@
   "run.status.reading": "Die heutigen Aufträge werden gelesen",
   "run.status.pricing": "Die zu kaufenden Gegenstände werden bepreist",
   "run.status.buying": "Einkauf über Auto Shopper",
+  "run.status.shopperPaused": "In Auto Shopper pausiert; setze dort fort, um weiterzukaufen",
+  "run.status.shopperPausedInContent": "Auto Shopper pausiert für den Inhalt und macht weiter, sobald du ihn verlässt",
   "run.status.stopping": "Wird beendet, sobald Auto Shopper seinen Kauf abgeschlossen hat",
   "run.status.counting": "Die Gegenstände in deinem Inventar werden gezählt",
   "run.status.travelling": "Reise zum Personaloffizier",

@@ -211,7 +211,12 @@ internal sealed partial class GcRunTask
         session.DryRun = view.DryRun;
         session.ShopperDryRun = view.DryRun;
         session.Tracker.SetDryRun(view.DryRun);
-        session.Tracker.SetShopper(view.Status, view.ConfirmedSpend);
+        session.Tracker.SetShopper(view.Status, view.ConfirmedSpend, view.Paused);
+        if (!session.StopRequested)
+        {
+            session.Tracker.SetStatus(view.Paused ? RunText.ShopperPaused(view.PauseReason) : Loc.T(L.Run.StatusBuying));
+        }
+
         if (BuyProgress.Apply(session.Plan, session.Progress, view) > 0)
         {
             session.PublishRows();

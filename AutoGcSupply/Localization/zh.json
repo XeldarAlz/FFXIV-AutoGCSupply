@@ -478,6 +478,8 @@
   "run.status.reading": "正在读取今日需求",
   "run.status.pricing": "正在为要购买的物品报价",
   "run.status.buying": "正在通过 Auto Shopper 购买",
+  "run.status.shopperPaused": "已在 Auto Shopper 中暂停；请在那里继续以恢复购买",
+  "run.status.shopperPausedInContent": "Auto Shopper 因副本暂停，离开后会继续",
   "run.status.stopping": "Auto Shopper 结算完当前购买后停止",
   "run.status.counting": "正在清点背包中的物品",
   "run.status.travelling": "正在前往人事负责人处",

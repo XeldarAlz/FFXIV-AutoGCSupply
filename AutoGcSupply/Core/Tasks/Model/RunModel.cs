@@ -33,6 +33,7 @@ internal sealed class RunModel
         Status = string.Empty,
         DryRun = false,
         ShopperStatus = string.Empty,
+        ShopperPaused = false,
         ConfirmedSpend = 0,
         Rows = [],
         NeedsPlayer = NeedsPlayerReason.None,
@@ -47,6 +48,7 @@ internal sealed class RunModel
     public required string Status { get; init; }
     public required bool DryRun { get; init; }
     public required string ShopperStatus { get; init; }
+    public required bool ShopperPaused { get; init; }
     public required long ConfirmedSpend { get; init; }
     public required ImmutableArray<RunRow> Rows { get; init; }
     public required NeedsPlayerReason NeedsPlayer { get; init; }

@@ -61,6 +61,9 @@ internal static class RunText
         _ => view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName),
     };
 
+    public static string ShopperPaused(ShopperPauseReason reason)
+        => Loc.T(reason == ShopperPauseReason.InContent ? L.Run.StatusShopperPausedInContent : L.Run.StatusShopperPaused);
+
     public static string HandInNeeds(NeedsPlayerReason reason, in HandInResult result)
     {
         if (reason == NeedsPlayerReason.DeliveryUnconfirmed)

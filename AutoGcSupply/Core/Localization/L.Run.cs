@@ -7,6 +7,8 @@ internal static partial class L
         public static readonly LocString StatusReading = new("run.status.reading", "Reading today's requests");
         public static readonly LocString StatusPricing = new("run.status.pricing", "Pricing the items to buy");
         public static readonly LocString StatusBuying = new("run.status.buying", "Buying through Auto Shopper");
+        public static readonly LocString StatusShopperPaused = new("run.status.shopperPaused", "Paused in Auto Shopper; resume it there to carry on buying");
+        public static readonly LocString StatusShopperPausedInContent = new("run.status.shopperPausedInContent", "Auto Shopper paused for the duty and carries on once you leave");
         public static readonly LocString StatusStopping = new("run.status.stopping", "Stopping once Auto Shopper settles its purchase");
         public static readonly LocString StatusCounting = new("run.status.counting", "Counting the items in your bags");
         public static readonly LocString StatusTravelling = new("run.status.travelling", "Travelling to the Personnel Officer");

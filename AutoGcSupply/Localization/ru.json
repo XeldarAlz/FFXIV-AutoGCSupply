@@ -478,6 +478,8 @@
   "run.status.reading": "Чтение сегодняшних запросов",
   "run.status.pricing": "Оценка цен на предметы для покупки",
   "run.status.buying": "Покупка через Auto Shopper",
+  "run.status.shopperPaused": "Пауза в Auto Shopper; продолжите там, чтобы покупки возобновились",
+  "run.status.shopperPausedInContent": "Auto Shopper на паузе из-за контента и продолжит, когда вы его покинете",
   "run.status.stopping": "Остановка, как только Auto Shopper завершит покупку",
   "run.status.counting": "Подсчёт предметов в инвентаре",
   "run.status.travelling": "Путь к офицеру по кадрам",

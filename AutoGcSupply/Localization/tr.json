@@ -478,6 +478,8 @@
   "run.status.reading": "Bugünün talepleri okunuyor",
   "run.status.pricing": "Satın alınacak eşyaların fiyatı çıkarılıyor",
   "run.status.buying": "Auto Shopper ile satın alınıyor",
+  "run.status.shopperPaused": "Auto Shopper'da duraklatıldı; satın almaya devam etmek için orada sürdürün",
+  "run.status.shopperPausedInContent": "Auto Shopper içerik nedeniyle duraklatıldı, çıktığınızda devam eder",
   "run.status.stopping": "Auto Shopper satın alımını sonuçlandırınca durdurulacak",
   "run.status.counting": "Envanterinizdeki eşyalar sayılıyor",
   "run.status.travelling": "Personel subayına gidiliyor",
