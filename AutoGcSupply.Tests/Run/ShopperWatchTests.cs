@@ -59,6 +59,23 @@ public sealed class ShopperWatchTests
     }
 
     [Fact]
+    public void ATripBetweenWorldsGetsSeventyFiveMinutes()
+    {
+        var watch = new ShopperWatch(0);
+        watch.Observe(Status(revision: 5) with { Phase = ShopperRunPhase.Travelling }, 0);
+
+        Assert.Equal(ShopperWatch.TravelStallLimitMs, watch.StallLimit);
+        Assert.False(watch.Stalled(75 * MinuteMs - 1));
+        Assert.True(watch.Stalled(75 * MinuteMs));
+
+        watch.Observe(Status(revision: 5), 30 * MinuteMs);
+
+        Assert.Equal(ShopperWatch.StallLimitMs, watch.StallLimit);
+        Assert.False(watch.Stalled(50 * MinuteMs - 1));
+        Assert.True(watch.Stalled(50 * MinuteMs));
+    }
+
+    [Fact]
     public void ThreeHoursEndTheWaitWhateverHappens()
     {
         var watch = new ShopperWatch(10 * MinuteMs);

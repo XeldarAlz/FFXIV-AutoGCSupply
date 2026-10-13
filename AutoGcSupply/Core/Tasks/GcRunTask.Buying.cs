@@ -29,7 +29,7 @@ internal sealed partial class GcRunTask
         var shopper = ShopperProbe.Read();
         if (shopper != ShopperState.Available)
         {
-            Unbought(UnboughtNote(shopper), $"Auto Shopper is {shopper}");
+            Unbought(RunPlanRules.ShopperNote(shopper), $"Auto Shopper is {shopper}");
             return true;
         }
 
@@ -57,13 +57,6 @@ internal sealed partial class GcRunTask
         return false;
     }
 
-    private static RowNote UnboughtNote(ShopperState shopper) => shopper switch
-    {
-        ShopperState.Missing => RowNote.ShopperMissing,
-        ShopperState.Newer => RowNote.ShopperNewer,
-        _ => RowNote.ShopperOutdated,
-    };
-
     private void Unbought(RowNote note, string reason)
     {
         var marked = RunPlanRules.MarkUnbought(session.Plan, session.Progress, note);
@@ -81,9 +74,17 @@ internal sealed partial class GcRunTask
         }
 
         session.Tracker.SetStep(RunStep.Pricing, Loc.T(L.Run.StatusPricing));
-        Diag($"Run: pricing {needed.Length} item(s) again before buying.");
-        quotes.Start(needed);
-        while (quotes.Book.Status == QuoteStatus.Pending)
+        if (quotes.Book.AsksFor(needed))
+        {
+            Diag($"Run: waiting for the quote already asked for, which covers the {needed.Length} item(s) to buy.");
+        }
+        else
+        {
+            Diag($"Run: pricing {needed.Length} item(s) again before buying.");
+            quotes.Start(needed);
+        }
+
+        while (quotes.Book.Outstanding)
         {
             await DelayMs(PollMs);
             if (CancelToken.IsCancellationRequested)
@@ -188,7 +189,7 @@ internal sealed partial class GcRunTask
 
             if (watch.Stalled(nowMs))
             {
-                return GiveUp(runId, $"Auto Shopper run {runId} showed no change for {ShopperWatch.StallLimitMs / TimeUnits.MillisecondsPerMinute} minutes while not paused");
+                return GiveUp(runId, $"Auto Shopper run {runId} showed no change for {watch.StallLimit / TimeUnits.MillisecondsPerMinute} minutes while not paused ({lastView.Phase})");
             }
 
             if (watch.Overdue(nowMs))
@@ -208,7 +209,7 @@ internal sealed partial class GcRunTask
     {
         var stopped = AutoShopperApi.Instance.StopRun(runId);
         Warn($"Run: {reason}; {(stopped ? "its run was asked to stop" : "it did not take the stop")} and the run needs you.");
-        return ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperInterrupted);
+        return ShopperSettlementRule.LostTrack(stopped);
     }
 
     private void Mirror(in ShopperRunView view)

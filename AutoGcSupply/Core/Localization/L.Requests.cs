@@ -40,10 +40,10 @@ internal static partial class L
         public static readonly LocString ShopperLabel = new("requests.shopper.label", "Auto Shopper");
         public static readonly LocString ShopperMissing = new("requests.shopper.missing", "Not installed. Items you already own can still be handed in.");
         public static readonly LocString ShopperInstall = new("requests.shopper.install", "Install Auto Shopper to buy missing items");
-        public static readonly LocString ShopperOutdated = new("requests.shopper.outdated", "This version cannot take orders. Update it to buy missing items.");
+        public static readonly LocString ShopperOutdated = new("requests.shopper.outdated", "This version cannot take orders. Update it to use Automate.");
         public static readonly LocString ShopperUpdate = new("requests.shopper.update", "Update");
         public static readonly LocString ShopperUpdateHelp = new("requests.shopper.updateHelp", "Update Auto Shopper from /xlplugins, then come back here.");
-        public static readonly LocString ShopperNewer = new("requests.shopper.newer", "Newer than this Auto GC Supply can use. Update Auto GC Supply to buy missing items.");
+        public static readonly LocString ShopperNewer = new("requests.shopper.newer", "Newer than this Auto GC Supply can use. Update Auto GC Supply to use Automate.");
         public static readonly LocString ShopperReady = new("requests.shopper.ready", "Buys what is missing, within your caps.");
         public static readonly LocString DryRunOn = new("requests.dryRun.on", "Dry run on");
         public static readonly LocString DryRunOff = new("requests.dryRun.off", "Dry run off");
@@ -51,7 +51,9 @@ internal static partial class L
         public static readonly LocString DryRunOffHelp = new("requests.dryRun.offHelp", "Dry run is off in Auto Shopper: a run spends real gil, up to the run spend cap, and hands the items in.");
         public static readonly LocString ChangeInShopper = new("requests.changeInShopper", "Change in Auto Shopper");
         public static readonly LocString PricingPending = new("requests.pricing.pending", "Pricing…");
-        public static readonly LocString PricingPendingHelp = new("requests.pricing.pendingHelp", "Auto Shopper is fetching market prices for today's items.");
+        public static readonly LocString PricingPendingHelp = new("requests.pricing.pendingHelp", "Auto Shopper fetches market prices for today's items when their turn comes. Its own price fetches go first, so this can take a minute or two.");
+        public static readonly LocString PricingQueued = new("requests.pricing.queued", "Waiting its turn in Auto Shopper");
+        public static readonly LocString PricingQueuedHelp = new("requests.pricing.queuedHelp", "Auto Shopper still has earlier price requests from Auto GC Supply waiting. It is asked again in a few seconds.");
         public static readonly LocString PricingReady = new("requests.pricing.ready", "Priced");
         public static readonly LocString PricingReadyHelp = new("requests.pricing.readyHelp", "Costs come from Auto Shopper's market prices for the worlds it is allowed to visit.");
         public static readonly LocString PricingFailed = new("requests.pricing.failed", "Prices failed");

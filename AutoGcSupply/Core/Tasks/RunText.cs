@@ -46,21 +46,11 @@ internal static class RunText
             return Loc.T(L.Run.NeedsNoAnswer);
         }
 
-        if (reason == NeedsPlayerReason.ShopperConsent)
-        {
-            return Loc.T(L.Run.NeedsConsent);
-        }
-
-        return acceptance.Message.Length > 0 ? acceptance.Message : Loc.T(L.Run.NeedsRefused, acceptance.RefusalName);
+        return ShopperNeeds(reason, acceptance.Refusal, acceptance.Message.Length > 0 ? acceptance.Message : Loc.T(L.Run.NeedsRefused, acceptance.RefusalName));
     }
 
-    public static string ShopperNeeds(NeedsPlayerReason reason, in ShopperRunView view) => reason switch
-    {
-        NeedsPlayerReason.ShopperConsent => Loc.T(L.Run.NeedsConsent),
-        NeedsPlayerReason.ShopperUncertainPurchase => Loc.T(L.Run.NeedsUncertain),
-        NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
-        _ => view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName),
-    };
+    public static string ShopperNeeds(NeedsPlayerReason reason, in ShopperRunView view)
+        => ShopperNeeds(reason, view.Refusal, view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName));
 
     public static string ShopperPaused(ShopperPauseReason reason)
         => Loc.T(reason == ShopperPauseReason.InContent ? L.Run.StatusShopperPausedInContent : L.Run.StatusShopperPaused);
@@ -91,6 +81,18 @@ internal static class RunText
         _ => Loc.T(L.Run.StatusStopped),
     };
 
+    private static string ShopperNeeds(NeedsPlayerReason reason, ShopperRefusal refusal, string shopperText) => reason switch
+    {
+        NeedsPlayerReason.ShopperConsent => Loc.T(refusal == ShopperRefusal.ConsentDenied ? L.Run.NeedsConsentDenied : L.Run.NeedsConsent),
+        NeedsPlayerReason.ShopperUncertainPurchase => Loc.T(L.Run.NeedsUncertain),
+        NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
+        NeedsPlayerReason.ShopperNotReady => string.Concat(shopperText, " ", Loc.T(L.Run.NeedsInShopper)),
+        NeedsPlayerReason.ShopperStopped => Loc.T(L.Run.NeedsShopperStopped),
+        NeedsPlayerReason.ShopperLostTrack => Loc.T(L.Run.NeedsLostTrack),
+        NeedsPlayerReason.ShopperLostTrackStopped => Loc.T(L.Run.NeedsLostTrackStopped),
+        _ => WithTryAgain(shopperText),
+    };
+
     private static string HandInPause(HandInPauseReason reason, string detail) => reason switch
     {
         HandInPauseReason.NotInGrandCompany => Loc.T(L.Run.NeedsNotInGrandCompany),
@@ -98,7 +100,8 @@ internal static class RunText
         HandInPauseReason.OfficerNotFound => Loc.T(L.Run.NeedsOfficerNotFound),
         HandInPauseReason.OfficerUnreachable => Loc.T(L.Run.NeedsOfficerUnreachable),
         HandInPauseReason.MenuTextUnavailable or HandInPauseReason.MenuOptionNotFound => Loc.T(L.Run.NeedsMenu),
-        HandInPauseReason.ListDidNotOpen or HandInPauseReason.ListClosed or HandInPauseReason.TabDidNotSwitch or HandInPauseReason.ListNotRefreshed => Loc.T(L.Run.NeedsList),
+        HandInPauseReason.ListDidNotOpen or HandInPauseReason.ListClosed or HandInPauseReason.TabDidNotSwitch => Loc.T(L.Run.NeedsList),
+        HandInPauseReason.ListNotRefreshed => Loc.T(L.Run.NeedsListNotRefreshed),
         HandInPauseReason.UnexpectedPrompt => Loc.T(L.Run.NeedsPrompt, detail),
         HandInPauseReason.UnexpectedAddon => Loc.T(L.Run.NeedsAddon, detail),
         HandInPauseReason.HighQualityPromptForNormalRow => Loc.T(L.Run.NeedsHighQualityPrompt),

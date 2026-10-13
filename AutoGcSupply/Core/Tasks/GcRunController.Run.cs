@@ -55,6 +55,7 @@ internal sealed partial class GcRunController
         session = active;
         PauseReason = PauseReason.None;
         tracker.Begin(new RunRow[authorization.Rows.Length], Loc.T(L.Run.StatusReading));
+        RunPlanRules.NoteUnpriced(active.Plan, active.Progress, model.Shopper);
         active.PublishRows();
         todayDirty = true;
         RunLog.Info(

@@ -49,9 +49,9 @@ public sealed class ShopperSettlementTests
     }
 
     [Fact]
-    public void ARunStoppedInsideAutoShopperStopsThisRunToo()
+    public void ARunStoppedInsideAutoShopperTellsThePlayerInsteadOfEndingQuietly()
     {
-        Assert.Equal(ShopperSettlement.Stopped, ShopperSettlementRule.Classify(RunView(true, ShopperRunOutcome.Stopped), stopRequested: false));
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperStopped), ShopperSettlementRule.Classify(RunView(true, ShopperRunOutcome.Stopped), stopRequested: false));
     }
 
     [Fact]
@@ -65,6 +65,13 @@ public sealed class ShopperSettlementTests
     }
 
     [Fact]
+    public void LosingTrackOfARunSaysWhetherItTookTheStop()
+    {
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperLostTrackStopped), ShopperSettlementRule.LostTrack(stopTaken: true));
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperLostTrack), ShopperSettlementRule.LostTrack(stopTaken: false));
+    }
+
+    [Fact]
     public void AnUnreadableOrForgottenRunIsNotSettled()
     {
         Assert.Equal(ShopperSettlement.Unreadable, ShopperSettlementRule.Classify(ShopperRunView.Failed(ShopperReply.Unavailable), stopRequested: false));
@@ -73,13 +80,49 @@ public sealed class ShopperSettlementTests
 
     [Theory]
     [InlineData((int)ShopperRefusal.ConsentRequired, (int)NeedsPlayerReason.ShopperConsent)]
-    [InlineData((int)ShopperRefusal.ConsentDenied, (int)NeedsPlayerReason.ShopperRefused)]
-    [InlineData((int)ShopperRefusal.Busy, (int)NeedsPlayerReason.ShopperRefused)]
-    [InlineData((int)ShopperRefusal.NeedsReconciliation, (int)NeedsPlayerReason.ShopperRefused)]
+    [InlineData((int)ShopperRefusal.ConsentDenied, (int)NeedsPlayerReason.ShopperConsent)]
+    [InlineData((int)ShopperRefusal.NeedsReconciliation, (int)NeedsPlayerReason.ShopperUncertainPurchase)]
+    [InlineData((int)ShopperRefusal.InterruptedRun, (int)NeedsPlayerReason.ShopperInterrupted)]
+    [InlineData((int)ShopperRefusal.SetupNeeded, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.JournalDamaged, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.JournalWriteFailed, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.Busy, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.ReadingUnavailable, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.BuyingUnavailable, (int)NeedsPlayerReason.ShopperNotReady)]
     [InlineData((int)ShopperRefusal.InvalidRequest, (int)NeedsPlayerReason.ShopperRefused)]
-    public void StartRefusalsAskForConsentOrShowTheMessage(int refusal, int expected)
+    [InlineData((int)ShopperRefusal.LoggedOut, (int)NeedsPlayerReason.ShopperRefused)]
+    [InlineData((int)ShopperRefusal.PricesUnavailable, (int)NeedsPlayerReason.ShopperRefused)]
+    public void RefusalsNameWhatThePlayerHasToDo(int refusal, int expected)
     {
         Assert.Equal((NeedsPlayerReason)expected, ShopperSettlementRule.ReasonForRefusal((ShopperRefusal)refusal));
+    }
+
+    [Theory]
+    [InlineData((int)ShopperRefusal.ConsentRequired, (int)NeedsPlayerReason.ShopperConsent)]
+    [InlineData((int)ShopperRefusal.ConsentDenied, (int)NeedsPlayerReason.ShopperConsent)]
+    [InlineData((int)ShopperRefusal.JournalDamaged, (int)NeedsPlayerReason.ShopperNotReady)]
+    [InlineData((int)ShopperRefusal.InterruptedRun, (int)NeedsPlayerReason.ShopperInterrupted)]
+    public void APreflightRefusalIsRoutedLikeAStartRefusal(int refusal, int expected)
+    {
+        var view = RunView(true, ShopperRunOutcome.Stopped) with { Refusal = (ShopperRefusal)refusal };
+
+        Assert.Equal(ShopperSettlement.NeedsPlayer((NeedsPlayerReason)expected), ShopperSettlementRule.Classify(view, stopRequested: false));
+    }
+
+    [Theory]
+    [InlineData((int)NeedsPlayerReason.ShopperConsent, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperUncertainPurchase, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperInterrupted, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperNotReady, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperStopped, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperLostTrack, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperLostTrackStopped, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperRefused, false)]
+    [InlineData((int)NeedsPlayerReason.HandInPaused, false)]
+    [InlineData((int)NeedsPlayerReason.DeliveryUnconfirmed, false)]
+    public void OnlyWhatIsSolvedInAutoShopperOffersToOpenIt(int reason, bool owned)
+    {
+        Assert.Equal(owned, ShopperSettlementRule.OwnedByShopper((NeedsPlayerReason)reason));
     }
 
     [Fact]

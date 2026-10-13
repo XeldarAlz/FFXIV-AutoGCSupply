@@ -31,6 +31,46 @@ public sealed class RunPlanRulesTests
     }
 
     [Fact]
+    public void UnpricedRowsNameAMissingAutoShopperInsteadOfAMissingPrice()
+    {
+        RowDecision[] rows =
+        [
+            Owned(SupplyClasses.Carpenter, CarpenterItem, 1),
+            Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0),
+            Row(SupplyClasses.Botanist, 5509, 20, RowCoverage.NoListings, ItemQuality.Normal, 20, 0, 0, 0, 0, 0),
+        ];
+        var progress = RunPlanRules.Initial(rows);
+
+        var noted = RunPlanRules.NoteUnpriced(rows, progress, ShopperState.Missing);
+
+        Assert.Equal(1, noted);
+        Assert.Equal(RowProgress.Of(RowRunState.Waiting, RowNote.InBags), progress[0]);
+        Assert.Equal(RowProgress.Of(RowRunState.NotBought, RowNote.ShopperMissing), progress[1]);
+        Assert.Equal(RowProgress.Of(RowRunState.NotBought, RowNote.NoListings), progress[2]);
+        Assert.Equal(0, RunPlanRules.NoteUnpriced(rows, progress, ShopperState.Missing));
+    }
+
+    [Fact]
+    public void UnpricedRowsKeepNoPriceWhileAutoShopperIsThere()
+    {
+        RowDecision[] rows = [Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0)];
+        var progress = RunPlanRules.Initial(rows);
+
+        Assert.Equal(0, RunPlanRules.NoteUnpriced(rows, progress, ShopperState.Available));
+        Assert.Equal(RowProgress.Of(RowRunState.NotBought, RowNote.NoPrice), progress[0]);
+    }
+
+    [Theory]
+    [InlineData((int)ShopperState.Missing, (int)RowNote.ShopperMissing)]
+    [InlineData((int)ShopperState.Outdated, (int)RowNote.ShopperOutdated)]
+    [InlineData((int)ShopperState.Newer, (int)RowNote.ShopperNewer)]
+    [InlineData((int)ShopperState.Available, (int)RowNote.NoPrice)]
+    public void EachAutoShopperStateNamesItsOwnNote(int shopper, int note)
+    {
+        Assert.Equal((RowNote)note, RunPlanRules.ShopperNote((ShopperState)shopper));
+    }
+
+    [Fact]
     public void ReadingDropsRowsHandedInElsewhereOrChangedAndKeepsTheRest()
     {
         RowDecision[] plan =

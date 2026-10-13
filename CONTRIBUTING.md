@@ -25,7 +25,7 @@ Load the built plugin via `/xlsettings` -> **Experimental** -> **Dev Plugin Loca
 - `AutoGcSupply/Core/Shopper/`: the client for Auto Shopper's Buying API v1 (quotes, runs, run status, stop, dry run) and its JSON model.
 - `AutoGcSupply/Core/HandIn/`: the supply list reader and the hand-in driver, with the officer's menu, row matching, prompts, the reward window check and the delivery check.
 - `AutoGcSupply/Core/Tasks/`: the run controller and the run itself, the Today and run models, Start's refusal reasons, and the shared movement helpers (teleport, aethernet, walking, landing).
-- `AutoGcSupply/Core/Travel/` and `AutoGcSupply/Core/Ipc/`: zone and aetheryte data, and the Lifestream and vnavmesh bridges.
+- `AutoGcSupply/Core/Travel/` and `AutoGcSupply/Core/Ipc/`: zone and aetheryte data, and the vnavmesh bridge.
 - `AutoGcSupply/Core/Game/`: NPC and dialog handling, text input focus, and the duty and GM watchers.
 - `AutoGcSupply/Core/External/`: the helper plugins on the Plugins page and their one-click install.
 - `AutoGcSupply/Core/Stats/` and `AutoGcSupply/Core/Changelog/`: History and the changelog entries.

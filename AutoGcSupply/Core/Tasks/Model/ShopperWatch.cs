@@ -5,6 +5,7 @@ namespace AutoGcSupply.Core.Tasks.Model;
 internal struct ShopperWatch
 {
     public const long StallLimitMs = 1_200_000;
+    public const long TravelStallLimitMs = 4_500_000;
     public const long TotalLimitMs = 10_800_000;
 
     private readonly long startedAtMs;
@@ -34,7 +35,9 @@ internal struct ShopperWatch
         paused = view.Paused;
     }
 
-    public readonly bool Stalled(long nowMs) => !paused && nowMs - movedAtMs >= StallLimitMs;
+    public readonly long StallLimit => phase == ShopperRunPhase.Travelling ? TravelStallLimitMs : StallLimitMs;
+
+    public readonly bool Stalled(long nowMs) => !paused && nowMs - movedAtMs >= StallLimit;
 
     public readonly bool Overdue(long nowMs) => nowMs - startedAtMs >= TotalLimitMs;
 }

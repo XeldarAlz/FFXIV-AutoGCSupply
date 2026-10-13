@@ -6,15 +6,28 @@ namespace AutoGcSupply.Core.Tasks;
 
 internal sealed class QuoteTracker
 {
+    private const int MaxUnreadableReplies = 30;
+
+    private int unreadable;
+
     public QuoteBook Book { get; } = new();
 
     public void Start(ShopperQuoteLine[] lines)
     {
         var acceptance = AutoShopperApi.Instance.QuoteStart(lines);
+        var nowMs = Environment.TickCount64;
         if (acceptance.Accepted)
         {
-            Book.Begin(acceptance.Id, lines, Environment.TickCount64);
+            unreadable = 0;
+            Book.Begin(acceptance.Id, lines, nowMs);
             RunLog.Debug($"Quote {acceptance.Id} started for {lines.Length} item(s).");
+            return;
+        }
+
+        if (acceptance.Refusal == ShopperRefusal.Busy)
+        {
+            Book.Defer(lines, nowMs);
+            RunLog.Debug($"Auto Shopper still has earlier quotes waiting; asking again in {QuoteBook.BusyRetryMs / TimeUnits.MillisecondsPerSecond}s.");
             return;
         }
 
@@ -24,23 +37,39 @@ internal sealed class QuoteTracker
 
     public void Poll()
     {
-        if (Book.Status != QuoteStatus.Pending)
+        var nowMs = Environment.TickCount64;
+        if (Book.TimedOut(nowMs))
         {
+            RunLog.Warning($"Auto Shopper gave no prices within {QuoteBook.TimeoutMs / TimeUnits.MillisecondsPerMinute} minutes ({Book.Status}).");
+            Book.Fail(Book.PendingLines);
             return;
         }
 
-        if (Book.TimedOut(Environment.TickCount64))
+        if (Book.RetryDue(nowMs))
         {
-            RunLog.Warning($"Quote {Book.QuoteId} gave no prices within {QuoteBook.TimeoutMs / TimeUnits.MillisecondsPerSecond}s.");
-            Book.Fail(Book.PendingLines);
+            Start(Book.PendingLines);
+            return;
+        }
+
+        if (Book.Status != QuoteStatus.Pending)
+        {
             return;
         }
 
         var quote = AutoShopperApi.Instance.QuoteResult(Book.QuoteId);
         if (quote.Reply != ShopperReply.Valid)
         {
+            unreadable++;
+            if (unreadable >= MaxUnreadableReplies)
+            {
+                RunLog.Warning($"Auto Shopper gave no usable answer about quote {Book.QuoteId} {MaxUnreadableReplies} times in a row ({quote.Reply}).");
+                Book.Fail(Book.PendingLines);
+            }
+
             return;
         }
+
+        unreadable = 0;
 
         switch (quote.State)
         {

@@ -7,13 +7,15 @@ internal enum TodayState : byte { NotLoggedIn, NoGrandCompany, Reading, NotLoade
 
 internal enum ShopperState : byte { Missing, Outdated, Newer, Available }
 
-internal enum PricingState : byte { NotNeeded, Pending, Ready, Failed, Unavailable }
+internal enum PricingState : byte { NotNeeded, Pending, Queued, Ready, Failed, Unavailable }
 
 internal enum StartBlock : byte
 {
     None,
     Running,
     SetupNeeded,
+    ShopperOutdated,
+    UpdateNeeded,
     NotLoggedIn,
     NoGrandCompany,
     NotOnHomeWorld,
@@ -25,7 +27,6 @@ internal enum StartBlock : byte
     PricesFailed,
     NeedsSpendCap,
     ShopperNeeded,
-    UpdateNeeded,
 }
 
 internal readonly record struct TodayHeader(byte GrandCompany, byte Rank, uint Seals, uint SealCap, DateTime NextResetUtc, string DayLabel);

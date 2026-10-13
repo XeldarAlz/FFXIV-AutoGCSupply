@@ -15,6 +15,10 @@ internal enum NeedsPlayerReason : byte
     ShopperUncertainPurchase,
     ShopperInterrupted,
     ShopperRefused,
+    ShopperNotReady,
+    ShopperStopped,
+    ShopperLostTrack,
+    ShopperLostTrackStopped,
     HandInPaused,
     DeliveryUnconfirmed,
 }

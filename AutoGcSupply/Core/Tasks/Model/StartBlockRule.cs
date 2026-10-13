@@ -28,6 +28,16 @@ internal static class StartBlockRule
             return StartBlock.SetupNeeded;
         }
 
+        if (facts.Shopper == ShopperState.Outdated)
+        {
+            return StartBlock.ShopperOutdated;
+        }
+
+        if (facts.Shopper == ShopperState.Newer)
+        {
+            return StartBlock.UpdateNeeded;
+        }
+
         if (!facts.LoggedIn)
         {
             return StartBlock.NotLoggedIn;
@@ -79,13 +89,13 @@ internal static class StartBlockRule
             return StartBlock.None;
         }
 
-        return facts.Shopper == ShopperState.Newer ? StartBlock.UpdateNeeded : StartBlock.ShopperNeeded;
+        return StartBlock.ShopperNeeded;
     }
 
     private static RowCounts Count(in StartFacts facts, ReadOnlySpan<TodayRow> rows)
     {
         var shopperAvailable = facts.Shopper == ShopperState.Available;
-        var pricesOutstanding = facts.Pricing is PricingState.Pending or PricingState.Failed;
+        var pricesOutstanding = facts.Pricing is PricingState.Pending or PricingState.Queued or PricingState.Failed;
         var counts = new RowCounts();
         for (var index = 0; index < rows.Length; index++)
         {

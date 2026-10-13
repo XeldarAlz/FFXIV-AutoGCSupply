@@ -38,15 +38,17 @@ internal static partial class L
         public static readonly LocString RowUnconfirmed = new("running.row.unconfirmed", "Unconfirmed");
 
         public static readonly LocString ConsentTitle = new("running.consent.title", "Allow Auto GC Supply in Auto Shopper");
-        public static readonly LocString ConsentBody = new("running.consent.body", "Auto Shopper asks before another plugin may buy for you. Open it and allow Auto GC Supply; the run carries on once you do.");
+        public static readonly LocString ConsentBody = new("running.consent.body", "Auto Shopper asks before another plugin may buy for you. Allow Auto GC Supply in Auto Shopper, then press Automate again.");
         public static readonly LocString UncertainTitle = new("running.uncertain.title", "A purchase needs your answer");
-        public static readonly LocString UncertainBody = new("running.uncertain.body", "Auto Shopper could not confirm a purchase. Answer its question in Auto Shopper; the run waits until you do.");
+        public static readonly LocString UncertainBody = new("running.uncertain.body", "Auto Shopper could not confirm a purchase. Answer its question in Auto Shopper, then press Automate again.");
         public static readonly LocString InterruptedTitle = new("running.interrupted.title", "An Auto Shopper run was interrupted");
-        public static readonly LocString InterruptedBody = new("running.interrupted.body", "An earlier Auto Shopper run stopped part way. Resume or discard it in Auto Shopper first.");
+        public static readonly LocString InterruptedBody = new("running.interrupted.body", "An Auto Shopper run stopped part way. Resume or discard it in Auto Shopper, then press Automate again.");
         public static readonly LocString RefusedTitle = new("running.refused.title", "Auto Shopper turned the order down");
+        public static readonly LocString ShopperStoppedTitle = new("running.shopperStopped.title", "Auto Shopper stopped the run");
+        public static readonly LocString LostTrackTitle = new("running.lostTrack.title", "Lost track of Auto Shopper's run");
         public static readonly LocString HandInPausedTitle = new("running.handInPaused.title", "The hand-in paused");
         public static readonly LocString UnconfirmedTitle = new("running.unconfirmed.title", "A delivery could not be confirmed");
-        public static readonly LocString NeedsPlayerFallback = new("running.needsPlayerFallback", "Check the game, then resume or stop the run.");
+        public static readonly LocString NeedsPlayerFallback = new("running.needsPlayerFallback", "Check the game, then press Automate again.");
         public static readonly LocString OpenShopper = new("running.openShopper", "Open Auto Shopper");
 
         public static readonly LocString FinishedTitle = new("running.finished.title", "Run finished");

@@ -149,9 +149,10 @@ public sealed class TodayBuilderTests
     }
 
     [Theory]
-    [InlineData((int)ShopperState.Missing)]
-    [InlineData((int)ShopperState.Outdated)]
-    public void PricesDoNotOutliveAutoShopper(int shopper)
+    [InlineData((int)ShopperState.Missing, (int)StartBlock.ShopperNeeded)]
+    [InlineData((int)ShopperState.Outdated, (int)StartBlock.ShopperOutdated)]
+    [InlineData((int)ShopperState.Newer, (int)StartBlock.UpdateNeeded)]
+    public void PricesDoNotOutliveAutoShopper(int shopper, int expected)
     {
         var quotes = new QuoteBook();
         var needed = Needed();
@@ -164,7 +165,7 @@ public sealed class TodayBuilderTests
         Assert.Equal(RowCoverage.Unpriced, model.Rows[8].Decision.Coverage);
         Assert.Equal(0, model.Totals.ToBuy);
         Assert.Equal(0, model.Totals.EstimatedSpend);
-        Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
+        Assert.Equal((StartBlock)expected, model.StartBlock);
     }
 
     [Fact]

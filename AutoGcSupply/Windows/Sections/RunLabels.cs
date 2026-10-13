@@ -12,6 +12,8 @@ internal static class RunLabels
     {
         StartBlock.Running => Loc.T(L.Automate.BlockRunning),
         StartBlock.SetupNeeded => Loc.T(L.Automate.BlockSetup),
+        StartBlock.ShopperOutdated => Loc.T(L.Automate.BlockShopperOutdated),
+        StartBlock.UpdateNeeded => Loc.T(L.Automate.BlockUpdateNeeded),
         StartBlock.NotLoggedIn => Loc.T(L.Automate.BlockLoggedOut),
         StartBlock.NoGrandCompany => Loc.T(L.Automate.BlockNoGrandCompany),
         StartBlock.NotOnHomeWorld => Loc.T(L.Automate.BlockNotOnHomeWorld),
@@ -23,7 +25,6 @@ internal static class RunLabels
         StartBlock.PricesFailed => Loc.T(L.Automate.BlockPricesFailed),
         StartBlock.NeedsSpendCap => Loc.T(L.Automate.BlockNeedsSpendCap),
         StartBlock.ShopperNeeded => Loc.T(L.Automate.BlockShopperNeeded),
-        StartBlock.UpdateNeeded => Loc.T(L.Automate.BlockUpdateNeeded),
         _ => string.Empty,
     };
 
