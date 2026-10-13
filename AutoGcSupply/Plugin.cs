@@ -64,7 +64,7 @@ public sealed class Plugin : IDalamudPlugin
 
             Configuration = LoadConfiguration();
 
-            History = new RunHistory();
+            History = new RunHistory(PluginInterface.ConfigDirectory.FullName);
             Controller = new GcRunController();
             dutyWatcher = new DutyWatcher();
             completed.Push(dutyWatcher.Dispose);
