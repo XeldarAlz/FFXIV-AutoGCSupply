@@ -1,8 +1,10 @@
+using AutoGcSupply.Core.Inventory.Model;
+
 namespace AutoGcSupply.Core.HandIn.Model;
 
 internal static class RowMatcher
 {
-    public static RowMatch Evaluate(in SupplyListState list, in HandInTarget target, BagStock stock, int targetIndex)
+    public static RowMatch Evaluate(in SupplyListState list, in HandInTarget target, OwnedCount stock, int targetIndex)
     {
         if (!target.IsValid)
         {
@@ -59,7 +61,7 @@ internal static class RowMatcher
         return new RowMatch(RowMatchStatus.Matched, targetIndex, row.RowIndex);
     }
 
-    public static RowMatch FindNext(in SupplyListState list, ReadOnlySpan<HandInTarget> targets, ReadOnlySpan<HandInRowResult> rows, ReadOnlySpan<BagStock> stocks)
+    public static RowMatch FindNext(in SupplyListState list, ReadOnlySpan<HandInTarget> targets, ReadOnlySpan<HandInRowResult> rows, ReadOnlySpan<OwnedCount> stocks)
     {
         if (!list.Loaded)
         {

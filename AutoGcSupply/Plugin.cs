@@ -64,8 +64,9 @@ public sealed class Plugin : IDalamudPlugin
 
             Configuration = LoadConfiguration();
 
-            History = new RunHistory();
-            Controller = new GcRunController();
+            History = new RunHistory(PluginInterface.ConfigDirectory.FullName);
+            Controller = new GcRunController(Configuration, History);
+            completed.Push(Controller.Shutdown);
             dutyWatcher = new DutyWatcher();
             completed.Push(dutyWatcher.Dispose);
             gmAlertWatcher = new GmAlertWatcher();
@@ -263,7 +264,7 @@ public sealed class Plugin : IDalamudPlugin
         return Languages.IsKnown(osLanguage) ? Languages.Resolve(osLanguage).Code : Languages.English.Code;
     }
 
-    private void OnLogout(int type, int code) => Controller.Stop();
+    private void OnLogout(int type, int code) => Controller.Interrupt();
 
     private static void Undo(Stack<Action> completed)
     {

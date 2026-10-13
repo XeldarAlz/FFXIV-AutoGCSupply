@@ -219,13 +219,13 @@ internal static class ShopperReplies
 
     private static bool TryReadPrice(QuotePriceJson? source, out ShopperQuotePrice price)
     {
-        if (source is not { Available: bool available, Units: int units and >= 0, Total: long total and >= 0, UnitPrice: long unitPrice and >= 0 })
+        if (source is not { Available: bool available, Units: int units and >= 0, Total: long total and >= 0, UnitPrice: long unitPrice and >= 0, HighestUnitPrice: var highestUnitPrice and (null or >= 0) })
         {
             price = default;
             return false;
         }
 
-        price = new ShopperQuotePrice(available, units, total, unitPrice);
+        price = new ShopperQuotePrice(available, units, total, unitPrice, highestUnitPrice ?? 0);
         return true;
     }
 

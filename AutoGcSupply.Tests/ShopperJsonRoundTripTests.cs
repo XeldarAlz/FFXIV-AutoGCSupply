@@ -31,6 +31,12 @@ public sealed class ShopperJsonRoundTripTests
     }
 
     [Fact]
+    public void QuoteResultWithTheHighestUnitPriceRoundTrips()
+    {
+        AssertRoundTrip(ShopperFixtures.QuoteResultWithHighest, ShopperJsonContext.Default.QuoteResultResponseJson);
+    }
+
+    [Fact]
     public void StartRunRequestRoundTrips()
     {
         AssertRoundTrip(ShopperFixtures.StartRunRequest, ShopperJsonContext.Default.StartRunRequestJson);

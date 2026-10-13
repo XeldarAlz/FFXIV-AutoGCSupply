@@ -4,7 +4,7 @@ public static class CapRule
 {
     private const long PercentDenominator = 100;
 
-    public static bool TryMaxUnitPrice(long unitPrice, int tolerancePercent, out long maxUnitPrice)
+    public static bool TryMaxUnitPrice(long unitPrice, long highestUnitPrice, int tolerancePercent, out long maxUnitPrice)
     {
         if (unitPrice <= 0 || tolerancePercent < 0)
         {
@@ -12,7 +12,8 @@ public static class CapRule
             return false;
         }
 
-        var scaled = (Int128)unitPrice * (PercentDenominator + tolerancePercent);
+        var basePrice = Math.Max(unitPrice, highestUnitPrice);
+        var scaled = (Int128)basePrice * (PercentDenominator + tolerancePercent);
         var roundedUp = (scaled + PercentDenominator - 1) / PercentDenominator;
         if (roundedUp > long.MaxValue)
         {

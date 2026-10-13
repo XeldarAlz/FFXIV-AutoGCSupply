@@ -152,6 +152,18 @@ public sealed class DecisionBuilderTests
     }
 
     [Fact]
+    public void CapStartsFromTheDearestListingTheQuoteChose()
+    {
+        var prices = Prices();
+        prices[2] = Item(43314, 1, None, Listed(1, 20_000) with { HighestUnitPrice = 24_000 });
+
+        var rows = Build(Defaults, prices);
+
+        Assert.Equal(20_000, rows[5].UnitPrice);
+        Assert.Equal(30_000, rows[5].MaxUnitPrice);
+    }
+
+    [Fact]
     public void WithoutQuotesOnlyOwnedRowsAreReady()
     {
         var rows = Build(Defaults, []);
