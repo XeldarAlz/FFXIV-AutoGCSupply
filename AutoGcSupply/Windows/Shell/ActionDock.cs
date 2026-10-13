@@ -57,7 +57,7 @@ internal static class ActionDock
 
         if (!canPause && Hit.HoveringRect(origin, origin + new Vector2(half, Layout.HeroButtonHeight * ImGuiHelpers.GlobalScale)))
         {
-            Tooltip.Show(Loc.T(L.Automate.PauseInShopperHelp));
+            Tooltip.Show(ReadyState.PauseBlockedReason(controller));
         }
 
         ImGui.SameLine(0f, gap);

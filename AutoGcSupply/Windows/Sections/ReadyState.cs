@@ -47,6 +47,16 @@ internal static class ReadyState
 
     public static bool CanPause(GcRunController controller) => (controller.Paused && !controller.Settling) || controller.CanPause;
 
+    public static string PauseBlockedReason(GcRunController controller)
+    {
+        if (controller.Settling)
+        {
+            return Loc.T(L.Run.StatusClosingList);
+        }
+
+        return controller.Phase == RunPhase.Stopping ? Loc.T(L.Automate.StateStopping) : Loc.T(L.Automate.PauseInShopperHelp);
+    }
+
     public static string ShortLabel(Kind kind) => kind switch
     {
         Kind.Running     => Loc.T(L.Shell.StatusRunning),

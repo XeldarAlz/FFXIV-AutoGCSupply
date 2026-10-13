@@ -103,7 +103,7 @@ internal static class MiniPlayer
 
         if ((pauseBlocked || resumeBlocked) && Hit.HoveringRect(pausePosition, pausePosition + new Vector2(buttonSize, buttonSize)))
         {
-            Tooltip.Show(resumeBlocked ? Loc.T(L.Shell.ResumeBlocked) : Loc.T(L.Automate.PauseInShopperHelp));
+            Tooltip.Show(resumeBlocked ? Loc.T(L.Shell.ResumeBlocked) : ReadyState.PauseBlockedReason(controller));
         }
 
         ImGui.SetCursorScreenPos(new Vector2(end.X - padX - buttonSize, midY - buttonSize * 0.5f));
