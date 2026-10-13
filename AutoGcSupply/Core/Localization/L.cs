@@ -35,8 +35,6 @@ internal static partial class L
 
     internal static class Today
     {
-        public static readonly LocString Title = new("today.title", "Today");
-        public static readonly LocString Subtitle = new("today.subtitle", "Your Grand Company supply and provisioning missions for the day.");
         public static readonly LocString Empty = new("today.empty", "Today's supply and provisioning requests will appear here.");
     }
 

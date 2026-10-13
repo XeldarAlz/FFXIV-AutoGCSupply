@@ -19,6 +19,9 @@ internal static class Formatting
         return $"{t.Minutes}m {t.Seconds:D2}s";
     }
 
+    public static string Countdown(TimeSpan remaining)
+        => remaining.TotalHours >= 1 ? $"{(int)remaining.TotalHours}h {remaining.Minutes:D2}m" : $"{remaining.Minutes}m";
+
     public static string Gil(long amount) => Loc.Gil(amount);
 
     public static string RelativeTime(DateTime utc) => RelativeTime(utc, DateTime.UtcNow);
