@@ -245,7 +245,7 @@ internal sealed partial class GcRunController
 
     private void KeepQuoteAlive(long now)
     {
-        if (session is not null || !quotes.Book.Outstanding || now - keptAliveAtMs < PollIntervalMs)
+        if ((session is not null && !Paused) || !quotes.Book.Outstanding || now - keptAliveAtMs < PollIntervalMs)
         {
             return;
         }
