@@ -82,6 +82,7 @@ internal static class RunText
         NeedsPlayerReason.ShopperUncertainPurchase => Loc.T(L.Run.NeedsUncertain),
         NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
         NeedsPlayerReason.ShopperNotReady => string.Concat(shopperText, " ", Loc.T(L.Run.NeedsInShopper)),
+        NeedsPlayerReason.ShopperStopped => Loc.T(L.Run.NeedsShopperStopped),
         _ => WithTryAgain(shopperText),
     };
 

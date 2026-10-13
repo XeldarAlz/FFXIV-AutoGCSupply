@@ -36,6 +36,7 @@ internal static class NeedsPlayerCard
             NeedsPlayerReason.ShopperUncertainPurchase => (Loc.T(L.Running.UncertainTitle), Loc.T(L.Running.UncertainBody), detail),
             NeedsPlayerReason.ShopperInterrupted => (Loc.T(L.Running.InterruptedTitle), Loc.T(L.Running.InterruptedBody), detail),
             NeedsPlayerReason.ShopperRefused or NeedsPlayerReason.ShopperNotReady => (Loc.T(L.Running.RefusedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
+            NeedsPlayerReason.ShopperStopped => (Loc.T(L.Running.ShopperStoppedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
             NeedsPlayerReason.HandInPaused => (Loc.T(L.Running.HandInPausedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
             _ => (Loc.T(L.Running.UnconfirmedTitle), detail ?? Loc.T(L.Running.NeedsPlayerFallback), null),
         };

@@ -49,9 +49,9 @@ public sealed class ShopperSettlementTests
     }
 
     [Fact]
-    public void ARunStoppedInsideAutoShopperStopsThisRunToo()
+    public void ARunStoppedInsideAutoShopperTellsThePlayerInsteadOfEndingQuietly()
     {
-        Assert.Equal(ShopperSettlement.Stopped, ShopperSettlementRule.Classify(RunView(true, ShopperRunOutcome.Stopped), stopRequested: false));
+        Assert.Equal(ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperStopped), ShopperSettlementRule.Classify(RunView(true, ShopperRunOutcome.Stopped), stopRequested: false));
     }
 
     [Fact]
@@ -107,6 +107,7 @@ public sealed class ShopperSettlementTests
     [InlineData((int)NeedsPlayerReason.ShopperUncertainPurchase, true)]
     [InlineData((int)NeedsPlayerReason.ShopperInterrupted, true)]
     [InlineData((int)NeedsPlayerReason.ShopperNotReady, true)]
+    [InlineData((int)NeedsPlayerReason.ShopperStopped, true)]
     [InlineData((int)NeedsPlayerReason.ShopperRefused, false)]
     [InlineData((int)NeedsPlayerReason.HandInPaused, false)]
     [InlineData((int)NeedsPlayerReason.DeliveryUnconfirmed, false)]

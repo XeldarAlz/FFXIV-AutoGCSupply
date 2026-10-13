@@ -59,6 +59,7 @@ internal static partial class L
         public static readonly LocString NeedsConsentDenied = new("run.needs.consentDenied", "Auto GC Supply was denied in Auto Shopper. Allow it under Auto Shopper's Settings, General, Other plugins, then press Automate again.");
         public static readonly LocString NeedsUncertain = new("run.needs.uncertain", "Auto Shopper has a purchase without a clear answer. Answer it in Auto Shopper, then press Automate again.");
         public static readonly LocString NeedsInterrupted = new("run.needs.interrupted", "Auto Shopper's run was interrupted. Resume or discard it in Auto Shopper, then press Automate again.");
+        public static readonly LocString NeedsShopperStopped = new("run.needs.shopperStopped", "The run was stopped inside Auto Shopper: by its Stop button, its GM alert or a change to Auto GC Supply's permission. Anything it bought stays in your bags; press Automate to hand it in.");
         public static readonly LocString NeedsRefused = new("run.needs.refused", "Auto Shopper refused the run ({0}).");
         public static readonly LocString NeedsInShopper = new("run.needs.inShopper", "Open Auto Shopper to sort it out, then press Automate again.");
         public static readonly LocString NeedsNoAnswer = new("run.needs.noAnswer", "Auto Shopper did not answer. Check that it is installed and up to date, then press Automate again.");
