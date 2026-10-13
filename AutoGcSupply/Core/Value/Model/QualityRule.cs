@@ -9,17 +9,15 @@ public static class QualityRule
     {
         var provisioning = kind == SupplyMissionKind.Provisioning;
         var allowsNormal = provisioning || policy != SupplyQualityPolicy.AlwaysHigh;
-        var allowsHigh = provisioning || policy != SupplyQualityPolicy.AlwaysNormal;
-        var ownedFirst = provisioning ? ItemQuality.Normal : ItemQuality.High;
-        var ownedSecond = provisioning ? ItemQuality.High : ItemQuality.Normal;
-        if (Allows(ownedFirst, allowsNormal, allowsHigh) && owned.Covers(ownedFirst, requested))
+        var allowsHigh = !provisioning && policy != SupplyQualityPolicy.AlwaysNormal;
+        if (allowsHigh && owned.Covers(ItemQuality.High, requested))
         {
-            return new QualityChoice(RowCoverage.Owned, ownedFirst, 0, 0, 0);
+            return new QualityChoice(RowCoverage.Owned, ItemQuality.High, 0, 0, 0);
         }
 
-        if (Allows(ownedSecond, allowsNormal, allowsHigh) && owned.Covers(ownedSecond, requested))
+        if (allowsNormal && owned.Covers(ItemQuality.Normal, requested))
         {
-            return new QualityChoice(RowCoverage.Owned, ownedSecond, 0, 0, 0);
+            return new QualityChoice(RowCoverage.Owned, ItemQuality.Normal, 0, 0, 0);
         }
 
         var fallback = allowsNormal ? ItemQuality.Normal : ItemQuality.High;
@@ -47,9 +45,6 @@ public static class QualityRule
 
     public static bool HighPaysOff(SupplyMissionKind kind, long highTotal, long normalTotal)
         => kind == SupplyMissionKind.Supply && (Int128)highTotal <= (Int128)normalTotal * RewardMath.HighQualitySupplyFactor;
-
-    private static bool Allows(ItemQuality quality, bool allowsNormal, bool allowsHigh)
-        => quality == ItemQuality.High ? allowsHigh : allowsNormal;
 
     private static bool TryEstimate(bool allowed, in ItemPrice price, ItemQuality quality, int shortfall, out long total)
     {

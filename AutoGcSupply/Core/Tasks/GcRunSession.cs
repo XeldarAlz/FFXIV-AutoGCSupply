@@ -40,6 +40,8 @@ internal sealed class GcRunSession
 
     public bool DidWork { get; set; }
 
+    public bool HandInStarted { get; set; }
+
     public bool DryRun { get; set; }
 
     public bool ShopperDryRun { get; set; }
@@ -64,7 +66,7 @@ internal sealed class GcRunSession
     {
         for (var index = 0; index < Plan.Length; index++)
         {
-            Tracker.SetRow(index, new RunRow(Plan[index].Request.ClassJobId, Progress[index].State, RunText.Detail(Progress[index], Plan[index])));
+            Tracker.SetRow(index, RunRow.For(Authorization.Rows.ItemRef(index), Progress[index], RunText.Detail(Progress[index], Plan[index])));
         }
     }
 

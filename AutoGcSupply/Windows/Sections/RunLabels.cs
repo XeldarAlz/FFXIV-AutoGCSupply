@@ -14,12 +14,16 @@ internal static class RunLabels
         StartBlock.SetupNeeded => Loc.T(L.Automate.BlockSetup),
         StartBlock.NotLoggedIn => Loc.T(L.Automate.BlockLoggedOut),
         StartBlock.NoGrandCompany => Loc.T(L.Automate.BlockNoGrandCompany),
+        StartBlock.NotOnHomeWorld => Loc.T(L.Automate.BlockNotOnHomeWorld),
+        StartBlock.InDuty => Loc.T(L.Automate.BlockInDuty),
         StartBlock.NotLoaded => Loc.T(L.Automate.BlockNotLoaded),
         StartBlock.NothingSelected => Loc.T(L.Automate.BlockNothingSelected),
         StartBlock.NothingToDo => Loc.T(L.Automate.BlockNothingToDo),
         StartBlock.PricesPending => Loc.T(L.Automate.BlockPricesPending),
+        StartBlock.PricesFailed => Loc.T(L.Automate.BlockPricesFailed),
         StartBlock.NeedsSpendCap => Loc.T(L.Automate.BlockNeedsSpendCap),
         StartBlock.ShopperNeeded => Loc.T(L.Automate.BlockShopperNeeded),
+        StartBlock.UpdateNeeded => Loc.T(L.Automate.BlockUpdateNeeded),
         _ => string.Empty,
     };
 
@@ -41,11 +45,11 @@ internal static class RunLabels
         _ => Styling.AccentRose,
     };
 
-    public static string CoverageLabel(RowCoverage coverage) => coverage switch
+    public static string CoverageLabel(RowCoverage coverage, bool shopperAvailable) => coverage switch
     {
         RowCoverage.Owned => Loc.T(L.Requests.CoverageOwned),
         RowCoverage.ToBuy => Loc.T(L.Requests.CoverageToBuy),
-        RowCoverage.Unpriced => Loc.T(L.Requests.CoverageUnpriced),
+        RowCoverage.Unpriced => Loc.T(shopperAvailable ? L.Requests.CoverageUnpriced : L.Requests.CoverageNoShopper),
         RowCoverage.NoListings => Loc.T(L.Requests.CoverageNoListings),
         RowCoverage.Delivered => Loc.T(L.Requests.CoverageDelivered),
         RowCoverage.Excluded => Loc.T(L.Requests.CoverageExcluded),

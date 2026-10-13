@@ -138,6 +138,26 @@ public sealed class RunPlanRulesTests
     }
 
     [Fact]
+    public void RequestsReadByATimersPassTodayNeedNoOtherPass()
+    {
+        var open = Snapshot(readAtUtc, Request(SupplyClasses.Carpenter, CarpenterItem, 1, 1));
+
+        Assert.False(RunPlanRules.NeedsTimersPass(currentToday: true, handInStarted: false, open));
+        Assert.True(RunPlanRules.NeedsTimersPass(currentToday: false, handInStarted: false, open));
+    }
+
+    [Fact]
+    public void EverythingClosedAfterAHandInIsTrustedWithoutAPass()
+    {
+        var allClosed = Snapshot(readAtUtc, Request(SupplyClasses.Carpenter, CarpenterItem, 1, 0), Request(SupplyClasses.Miner, MinerItem, 10, 0));
+        var oneOpen = Snapshot(readAtUtc, Request(SupplyClasses.Carpenter, CarpenterItem, 1, 0), Request(SupplyClasses.Miner, MinerItem, 10, 10));
+
+        Assert.False(RunPlanRules.NeedsTimersPass(currentToday: false, handInStarted: true, allClosed));
+        Assert.True(RunPlanRules.NeedsTimersPass(currentToday: false, handInStarted: true, oneOpen));
+        Assert.True(RunPlanRules.NeedsTimersPass(currentToday: false, handInStarted: false, allClosed));
+    }
+
+    [Fact]
     public void ReleasingAStoppedHandInPutsTheRowBackInTheBags()
     {
         var progress = new[] { RowProgress.Of(RowRunState.HandingIn, RowNote.HandingIn), RowProgress.Of(RowRunState.Delivered, RowNote.HandedIn) };

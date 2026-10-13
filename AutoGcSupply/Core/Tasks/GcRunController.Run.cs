@@ -14,12 +14,12 @@ internal sealed partial class GcRunController
     private GcRunSession? session;
     private GcRunTask? currentTask;
 
-    public void Start()
+    public StartBlock Start()
     {
         if (session is not null)
         {
             RunLog.Info("Start ignored: a run is already running.");
-            return;
+            return StartBlock.Running;
         }
 
         viewedAtMs = Environment.TickCount64;
@@ -29,7 +29,7 @@ internal sealed partial class GcRunController
         if (model.StartBlock != StartBlock.None)
         {
             RunLog.Info($"Start refused: {model.StartBlock}.");
-            return;
+            return model.StartBlock;
         }
 
         var decisions = new RowDecision[model.Rows.Length];
@@ -58,6 +58,7 @@ internal sealed partial class GcRunController
             $"{model.Totals.ToBuy} to buy for about {model.Totals.EstimatedSpend} gil under a cap of {authorization.RunCap} gil, " +
             $"tolerance {authorization.TolerancePercent}%, seal cap policy {authorization.SealCapPolicy}.");
         Launch(active);
+        return StartBlock.None;
     }
 
     public void Stop()
@@ -169,7 +170,7 @@ internal sealed partial class GcRunController
     {
         try
         {
-            var task = new GcRunTask(active, quotes);
+            var task = new GcRunTask(active, quotes, timersPasses);
             currentTask = task;
             ClibServices.Automation.Start(task, OnCompleted: () => _ = Svc.Framework.RunOnFrameworkThread(() => HandOff(task)));
         }
@@ -242,9 +243,10 @@ internal sealed partial class GcRunController
         RunPlanRules.ReleaseHandingIn(active.Progress);
         active.PublishRows();
         var authorization = active.Authorization;
-        var summary = RunOutcomeRule.Summarize(authorization.Rows.AsSpan(), active.Progress, active.GilSpent, DateTime.UtcNow - authorization.StartedAtUtc, active.DryRun);
+        var authorized = authorization.Rows.AsSpan();
+        var summary = RunOutcomeRule.Summarize(authorized, active.Progress, active.GilSpent, active.ShopperDryRun, DateTime.UtcNow - authorization.StartedAtUtc, active.DryRun);
         tracker.Finish(active.End, summary, RunText.Ended(active.End, summary, active.Failure));
-        Record(active, summary);
+        Record(active, RunOutcomeRule.ForHistory(authorized, active.Progress, summary));
         todayDirty = true;
         lastPollMs = 0;
         RunLog.Info(

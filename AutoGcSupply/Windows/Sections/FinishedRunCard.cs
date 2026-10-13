@@ -105,7 +105,7 @@ internal static class FinishedRunCard
         }
 
         ImGui.SameLine(0f, gap);
-        StatTile.Draw(Loc.T(run.Summary.DryRun ? L.Running.TileWouldSpend : L.Running.TileSpent), spent, null, Styling.AccentAmber, tileWidth);
+        StatTile.Draw(Loc.T(run.Summary.DrySpend ? L.Running.TileWouldSpend : L.Running.TileSpent), spent, null, Styling.AccentAmber, tileWidth);
         ImGui.SameLine(0f, gap);
         StatTile.Draw(Loc.T(L.Running.TileTime), duration, null, Styling.AccentBlue, tileWidth);
     }

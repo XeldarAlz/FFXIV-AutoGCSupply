@@ -36,6 +36,17 @@ public sealed class TodayBuilderTests
     }
 
     [Fact]
+    public void StartWaitsForTheHomeWorldAndTheEndOfADuty()
+    {
+        var visiting = Build(Inputs() with { Character = CharacterFixtures.Standard() with { CurrentWorldId = CharacterFixtures.HomeWorldId + 1 } });
+        var inDuty = Build(Inputs() with { InDuty = true });
+
+        Assert.Equal(TodayState.Ready, visiting.State);
+        Assert.Equal(StartBlock.NotOnHomeWorld, visiting.StartBlock);
+        Assert.Equal(StartBlock.InDuty, inDuty.StartBlock);
+    }
+
+    [Fact]
     public void ReadingWhileTheTimersLoaderRuns()
     {
         var model = Build(Inputs() with { Reading = true });
@@ -52,6 +63,18 @@ public sealed class TodayBuilderTests
         Assert.Equal(TodayState.NotLoaded, model.State);
         Assert.Empty(model.Rows);
         Assert.Equal(StartBlock.NotLoaded, model.StartBlock);
+    }
+
+    [Fact]
+    public void RequestsWithoutATimersPassTodayAreNotTrusted()
+    {
+        var stale = Build(Inputs() with { RequestsCurrent = false });
+        var staleAllDone = Build(Inputs() with { RequestsCurrent = false, Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.Closed(SupplyFixtures.OpenDayCopy())) });
+
+        Assert.Equal(TodayState.NotLoaded, stale.State);
+        Assert.Empty(stale.Rows);
+        Assert.Equal(StartBlock.NotLoaded, stale.StartBlock);
+        Assert.Equal(TodayState.NotLoaded, staleAllDone.State);
     }
 
     [Fact]
@@ -125,6 +148,25 @@ public sealed class TodayBuilderTests
         Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
     }
 
+    [Theory]
+    [InlineData((int)ShopperState.Missing)]
+    [InlineData((int)ShopperState.Outdated)]
+    public void PricesDoNotOutliveAutoShopper(int shopper)
+    {
+        var quotes = new QuoteBook();
+        var needed = Needed();
+        quotes.Begin("quote", needed, 0);
+        quotes.Land(PricesFor(needed), nowUtc);
+
+        var model = Build(Inputs() with { Shopper = (ShopperState)shopper }, quotes, out _);
+
+        Assert.Equal(PricingState.Unavailable, model.Pricing);
+        Assert.Equal(RowCoverage.Unpriced, model.Rows[8].Decision.Coverage);
+        Assert.Equal(0, model.Totals.ToBuy);
+        Assert.Equal(0, model.Totals.EstimatedSpend);
+        Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
+    }
+
     [Fact]
     public void DryRunMirrorsAnAvailableAutoShopper()
     {
@@ -147,7 +189,9 @@ public sealed class TodayBuilderTests
         LoggedIn = true,
         HasCharacter = true,
         Character = CharacterFixtures.Standard(),
+        InDuty = false,
         Snapshot = SupplyFixtures.Snapshot(SupplyFixtures.OpenDay),
+        RequestsCurrent = true,
         Reading = false,
         OwnedBySlot = ImmutableArray.Create(new OwnedCount[SupplyClasses.Count]),
         Settings = new DecisionSettings(false, true, SupplyQualityPolicy.Automatic, 25, ClassMask.None),

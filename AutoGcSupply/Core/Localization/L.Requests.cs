@@ -43,6 +43,7 @@ internal static partial class L
         public static readonly LocString ShopperOutdated = new("requests.shopper.outdated", "This version cannot take orders. Update it to buy missing items.");
         public static readonly LocString ShopperUpdate = new("requests.shopper.update", "Update");
         public static readonly LocString ShopperUpdateHelp = new("requests.shopper.updateHelp", "Update Auto Shopper from /xlplugins, then come back here.");
+        public static readonly LocString ShopperNewer = new("requests.shopper.newer", "Newer than this Auto GC Supply can use. Update Auto GC Supply to buy missing items.");
         public static readonly LocString ShopperReady = new("requests.shopper.ready", "Buys what is missing, within your caps.");
         public static readonly LocString DryRunOn = new("requests.dryRun.on", "Dry run on");
         public static readonly LocString DryRunOff = new("requests.dryRun.off", "Dry run off");
@@ -115,6 +116,7 @@ internal static partial class L
         public static readonly LocString CoverageOwned = new("requests.coverage.owned", "Owned");
         public static readonly LocString CoverageToBuy = new("requests.coverage.toBuy", "To buy");
         public static readonly LocString CoverageUnpriced = new("requests.coverage.unpriced", "Unpriced");
+        public static readonly LocString CoverageNoShopper = new("requests.coverage.noShopper", "Not buyable");
         public static readonly LocString CoverageNoListings = new("requests.coverage.noListings", "No listings");
         public static readonly LocString CoverageDelivered = new("requests.coverage.delivered", "Delivered");
         public static readonly LocString CoverageExcluded = new("requests.coverage.excluded", "Excluded");
@@ -122,6 +124,7 @@ internal static partial class L
         public static readonly LocString CoverageOwnedHelp = new("requests.coverage.ownedHelp", "Your bags hold enough. It is handed in without buying.");
         public static readonly LocString CoverageToBuyHelp = new("requests.coverage.toBuyHelp", "Auto Shopper buys {0} for about {1}, at most {2} each.");
         public static readonly LocString CoverageUnpricedHelp = new("requests.coverage.unpricedHelp", "No price yet for this item. Without one it is not bought.");
+        public static readonly LocString CoverageNoShopperHelp = new("requests.coverage.noShopperHelp", "Auto Shopper cannot buy right now, so this item is not bought. The Auto Shopper line above says why.");
         public static readonly LocString CoverageNoListingsHelp = new("requests.coverage.noListingsHelp", "No listing on your worlds covers this request right now.");
         public static readonly LocString CoverageDeliveredHelp = new("requests.coverage.deliveredHelp", "Already handed in today.");
         public static readonly LocString CoverageExcludedHelp = new("requests.coverage.excludedHelp", "Left out of this run.");

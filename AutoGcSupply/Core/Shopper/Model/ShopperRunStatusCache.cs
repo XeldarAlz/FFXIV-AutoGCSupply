@@ -51,6 +51,10 @@ internal sealed class ShopperRunStatusCache
         int? schema = null;
         bool? known = null;
         long? revision = null;
+        var terminal = false;
+        var paused = false;
+        var needsPlayer = false;
+        var phase = 0;
         try
         {
             var reader = new Utf8JsonReader(utf8Json);
@@ -69,15 +73,22 @@ internal sealed class ShopperRunStatusCache
                         schema = reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var schemaValue) ? schemaValue : null;
                         break;
                     case StampProperty.Known:
-                        known = reader.TokenType switch
-                        {
-                            JsonTokenType.True => true,
-                            JsonTokenType.False => false,
-                            _ => null,
-                        };
+                        known = FlagOf(reader.TokenType);
                         break;
                     case StampProperty.Revision:
                         revision = reader.TokenType == JsonTokenType.Number && reader.TryGetInt64(out var revisionValue) ? revisionValue : null;
+                        break;
+                    case StampProperty.Terminal:
+                        terminal = FlagOf(reader.TokenType) == true;
+                        break;
+                    case StampProperty.Paused:
+                        paused = FlagOf(reader.TokenType) == true;
+                        break;
+                    case StampProperty.NeedsPlayer:
+                        needsPlayer = FlagOf(reader.TokenType) == true;
+                        break;
+                    case StampProperty.Phase:
+                        phase = PhaseKeyOf(ref reader);
                         break;
                 }
 
@@ -94,8 +105,27 @@ internal sealed class ShopperRunStatusCache
             return false;
         }
 
-        stamp = new RunStamp(isKnown, revisionNumber);
+        stamp = new RunStamp(isKnown, revisionNumber, terminal, paused, needsPlayer, phase);
         return true;
+    }
+
+    private static bool? FlagOf(JsonTokenType tokenType) => tokenType switch
+    {
+        JsonTokenType.True => true,
+        JsonTokenType.False => false,
+        _ => null,
+    };
+
+    private static int PhaseKeyOf(ref Utf8JsonReader reader)
+    {
+        if (reader.TokenType is not (JsonTokenType.String or JsonTokenType.Number))
+        {
+            return 0;
+        }
+
+        var hash = new HashCode();
+        hash.AddBytes(reader.ValueSpan);
+        return hash.ToHashCode();
     }
 
     private static StampProperty StampPropertyOf(ref Utf8JsonReader reader)
@@ -116,6 +146,26 @@ internal sealed class ShopperRunStatusCache
             return StampProperty.Known;
         }
 
+        if (Ascii.EqualsIgnoreCase(name, "terminal"u8))
+        {
+            return StampProperty.Terminal;
+        }
+
+        if (Ascii.EqualsIgnoreCase(name, "paused"u8))
+        {
+            return StampProperty.Paused;
+        }
+
+        if (Ascii.EqualsIgnoreCase(name, "needsPlayer"u8))
+        {
+            return StampProperty.NeedsPlayer;
+        }
+
+        if (Ascii.EqualsIgnoreCase(name, "phase"u8))
+        {
+            return StampProperty.Phase;
+        }
+
         return Ascii.EqualsIgnoreCase(name, "schema"u8) ? StampProperty.Schema : StampProperty.Other;
     }
 
@@ -125,7 +175,11 @@ internal sealed class ShopperRunStatusCache
         Schema,
         Known,
         Revision,
+        Terminal,
+        Paused,
+        NeedsPlayer,
+        Phase,
     }
 
-    private readonly record struct RunStamp(bool Known, long Revision);
+    private readonly record struct RunStamp(bool Known, long Revision, bool Terminal, bool Paused, bool NeedsPlayer, int Phase);
 }

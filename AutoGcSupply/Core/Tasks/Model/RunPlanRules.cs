@@ -130,6 +130,9 @@ internal static class RunPlanRules
         return released;
     }
 
+    public static bool NeedsTimersPass(bool currentToday, bool handInStarted, in RequestSnapshot memory)
+        => !currentToday && !(handInStarted && memory.AllDone);
+
     public static bool AnyPurchase(ReadOnlySpan<RowDecision> plan)
     {
         for (var index = 0; index < plan.Length; index++)

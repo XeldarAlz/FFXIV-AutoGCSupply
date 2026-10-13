@@ -18,6 +18,7 @@ internal static class RunText
         RowNote.NoListings => Loc.T(L.Run.RowNoListings),
         RowNote.ShopperMissing => Loc.T(L.Run.RowShopperMissing),
         RowNote.ShopperOutdated => Loc.T(L.Run.RowShopperOutdated),
+        RowNote.ShopperNewer => Loc.T(L.Run.RowShopperNewer),
         RowNote.PriceCapExceeded => Loc.T(L.Run.RowPriceCap),
         RowNote.NoStock => Loc.T(L.Run.RowNoStock),
         RowNote.InventoryFull => Loc.T(L.Run.RowInventoryFull),
@@ -60,6 +61,9 @@ internal static class RunText
         NeedsPlayerReason.ShopperInterrupted => Loc.T(L.Run.NeedsInterrupted),
         _ => view.Status.Length > 0 ? view.Status : Loc.T(L.Run.NeedsRefused, view.RefusalName),
     };
+
+    public static string ShopperPaused(ShopperPauseReason reason)
+        => Loc.T(reason == ShopperPauseReason.InContent ? L.Run.StatusShopperPausedInContent : L.Run.StatusShopperPaused);
 
     public static string HandInNeeds(NeedsPlayerReason reason, in HandInResult result)
     {

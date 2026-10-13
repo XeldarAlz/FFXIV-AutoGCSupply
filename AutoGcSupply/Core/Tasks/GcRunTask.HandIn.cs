@@ -33,11 +33,12 @@ internal sealed partial class GcRunTask
 
     private async Task<bool> HandIn(HandInPlan plan)
     {
-        var shopperDryRunNow = ShopperProbe.Read() == ShopperState.Available && AutoShopperApi.Instance.DryRun();
+        var shopperDryRunNow = ShopperProbe.Read() == ShopperState.Available && AutoShopperApi.Instance.DryRun(whenUnknown: true);
         var dryRun = shopperDryRunNow || session.ShopperDryRun;
         session.DryRun = dryRun;
         session.Tracker.SetDryRun(dryRun);
         session.DidWork = true;
+        session.HandInStarted = true;
         var driver = new HandInDriver(new HandInRequest(plan.Targets, session.Authorization.SealCapPolicy, dryRun));
         var seenRevision = -1;
         IFramework.OnUpdateDelegate mirror = _ =>

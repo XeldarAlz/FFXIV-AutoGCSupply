@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoGcSupply.Core.Tasks;
 
-internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quotes) : AutoCommon
+internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quotes, TimersPasses passes) : AutoCommon
 {
     private const int PollMs = TimeUnits.MillisecondsPerSecond;
 
@@ -55,7 +55,9 @@ internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quote
     private async Task<bool> ReadRequests()
     {
         session.Tracker.SetStep(RunStep.Reading, Loc.T(L.Run.StatusReading));
-        var loader = new TimersLoader(confirmCompletedDay: true);
+        var memory = GcSupplyReader.Read();
+        var currentToday = passes.IsCurrent(memory.ContentId, DayKey.For(DateTime.UtcNow));
+        var loader = new TimersLoader(passes, RunPlanRules.NeedsTimersPass(currentToday, session.HandInStarted, memory));
         await RunCancellable(loader, TimersLoader.WatchdogMs, "run-reading");
         if (CancelToken.IsCancellationRequested)
         {

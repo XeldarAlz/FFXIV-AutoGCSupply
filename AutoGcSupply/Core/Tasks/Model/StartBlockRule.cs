@@ -7,6 +7,8 @@ internal readonly record struct StartFacts(
     bool SetupReady,
     bool LoggedIn,
     bool InGrandCompany,
+    bool OnHomeWorld,
+    bool InDuty,
     bool Loaded,
     PricingState Pricing,
     ShopperState Shopper,
@@ -36,6 +38,16 @@ internal static class StartBlockRule
             return StartBlock.NoGrandCompany;
         }
 
+        if (!facts.OnHomeWorld)
+        {
+            return StartBlock.NotOnHomeWorld;
+        }
+
+        if (facts.InDuty)
+        {
+            return StartBlock.InDuty;
+        }
+
         if (!facts.Loaded)
         {
             return StartBlock.NotLoaded;
@@ -54,7 +66,7 @@ internal static class StartBlockRule
 
         if (counts.AwaitingPrice > 0)
         {
-            return StartBlock.PricesPending;
+            return facts.Pricing == PricingState.Failed ? StartBlock.PricesFailed : StartBlock.PricesPending;
         }
 
         if (counts.Purchases > 0 && facts.SpendCap <= 0)
@@ -62,7 +74,12 @@ internal static class StartBlockRule
             return StartBlock.NeedsSpendCap;
         }
 
-        return counts.Actionable == 0 ? StartBlock.ShopperNeeded : StartBlock.None;
+        if (counts.Actionable > 0)
+        {
+            return StartBlock.None;
+        }
+
+        return facts.Shopper == ShopperState.Newer ? StartBlock.UpdateNeeded : StartBlock.ShopperNeeded;
     }
 
     private static RowCounts Count(in StartFacts facts, ReadOnlySpan<TodayRow> rows)

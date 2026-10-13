@@ -48,7 +48,7 @@ internal static class RequestTable
     private static TodayModel? textsModel;
     private static LanguageInfo? textsLanguage;
 
-    private readonly record struct RowText(string Level, string Quantity, string Owned, string Cost, string Experience, string Share, string Seals, string Value, string Tooltip);
+    private readonly record struct RowText(string Level, string Quantity, string Owned, string Status, string Cost, string Experience, string Share, string Seals, string Value, string Tooltip);
 
     private readonly record struct Columns(
         float Left, float Check, float ClassIcon, float ClassText, float ItemIcon, float Name, float NameRight,
@@ -228,7 +228,7 @@ internal static class RequestTable
         DrawRequest(drawList, row, text, columns, midY, strong, secondary, muted);
 
         var chipColor = RunLabels.CoverageColor(coverage);
-        Badge.DrawLeft(drawList, TextDraw.Truncate(RunLabels.CoverageLabel(coverage), StatusWidth * scale), chipColor, columns.Status, midY);
+        Badge.DrawLeft(drawList, TextDraw.Truncate(text.Status, StatusWidth * scale), chipColor, columns.Status, midY);
 
         var lineY = midY - ImGui.GetTextLineHeight() * 0.5f;
         TextDraw.Right(text.Cost, columns.CostRight, lineY, coverage == RowCoverage.ToBuy ? Styling.TextSecondary : Styling.TextMuted);
@@ -413,9 +413,10 @@ internal static class RequestTable
 
         supplyCount = 0;
         provisioningCount = 0;
+        var shopperAvailable = today.Shopper == ShopperState.Available;
         for (var index = 0; index < rows.Length; index++)
         {
-            texts[index] = Build(rows[index]);
+            texts[index] = Build(rows[index], shopperAvailable);
             if (rows[index].Decision.Request.Kind == SupplyMissionKind.Supply)
             {
                 supplyRows[supplyCount++] = index;
@@ -427,7 +428,7 @@ internal static class RequestTable
         }
     }
 
-    private static RowText Build(in TodayRow row)
+    private static RowText Build(in TodayRow row, bool shopperAvailable)
     {
         var culture = Loc.Culture;
         var decision = row.Decision;
@@ -437,22 +438,23 @@ internal static class RequestTable
             Loc.T(L.Requests.Level, row.Level),
             Loc.T(L.Requests.Quantity, decision.Request.Requested),
             owned.Normal == 0 && owned.High == 0 ? Loc.T(L.Requests.OwnedNone) : Loc.T(L.Requests.Owned, owned.Normal.ToString("N0", culture), owned.High.ToString("N0", culture)),
+            RunLabels.CoverageLabel(decision.Coverage, shopperAvailable),
             decision.Coverage == RowCoverage.ToBuy ? Formatting.Gil(decision.EstimatedTotal) : NoValue,
             experience > 0 ? experience.ToString("N0", culture) : NoValue,
             experience > 0 && decision.LevelShare > 0d ? Loc.T(L.Requests.LevelShare, (decision.LevelShare * 100d).ToString("0.#", culture)) : string.Empty,
             decision.Seals > 0 ? decision.Seals.ToString("N0", culture) : NoValue,
             decision.GilPerThousandExperience > 0 ? decision.GilPerThousandExperience.ToString("N0", culture) : NoValue,
-            RowTooltip(decision));
+            RowTooltip(decision, shopperAvailable));
     }
 
-    private static string RowTooltip(in RowDecision decision)
+    private static string RowTooltip(in RowDecision decision, bool shopperAvailable)
     {
         var coverage = decision.Coverage;
         var text = coverage switch
         {
             RowCoverage.Owned => Loc.T(L.Requests.CoverageOwnedHelp),
             RowCoverage.ToBuy => Loc.T(L.Requests.CoverageToBuyHelp, decision.BuyQuantity.ToString("N0", Loc.Culture), Formatting.Gil(decision.EstimatedTotal), Formatting.Gil(decision.MaxUnitPrice)),
-            RowCoverage.Unpriced => Loc.T(L.Requests.CoverageUnpricedHelp),
+            RowCoverage.Unpriced => Loc.T(shopperAvailable ? L.Requests.CoverageUnpricedHelp : L.Requests.CoverageNoShopperHelp),
             RowCoverage.NoListings => Loc.T(L.Requests.CoverageNoListingsHelp),
             RowCoverage.Delivered => Loc.T(L.Requests.CoverageDeliveredHelp),
             RowCoverage.Excluded => Loc.T(L.Requests.CoverageExcludedHelp),

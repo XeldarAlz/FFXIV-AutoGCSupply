@@ -86,6 +86,36 @@ public sealed class QuoteBookTests
     }
 
     [Fact]
+    public void AFailedQuoteCanBeRetriedWithoutLosingAnything()
+    {
+        var book = new QuoteBook();
+        book.Begin("quote", twoItems, 0);
+        book.Fail(twoItems);
+
+        Assert.False(book.NeedsQuote(twoItems));
+        Assert.Equal(PricingState.Failed, book.StateFor(twoItems, shopperAvailable: true));
+
+        book.Retry();
+
+        Assert.Equal(QuoteStatus.Idle, book.Status);
+        Assert.True(book.NeedsQuote(twoItems));
+        Assert.Equal(PricingState.Pending, book.StateFor(twoItems, shopperAvailable: true));
+    }
+
+    [Fact]
+    public void RetryLeavesAQuoteThatDidNotFailAlone()
+    {
+        var book = new QuoteBook();
+        book.Begin("quote", twoItems, 0);
+        var revision = book.Revision;
+
+        book.Retry();
+
+        Assert.Equal(QuoteStatus.Pending, book.Status);
+        Assert.Equal(revision, book.Revision);
+    }
+
+    [Fact]
     public void APendingQuoteTimesOutAfterTwoMinutes()
     {
         var book = new QuoteBook();

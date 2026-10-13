@@ -14,6 +14,7 @@ internal sealed partial class GcRunController
     private readonly Configuration configuration;
     private readonly RunHistory history;
     private readonly QuoteTracker quotes = new();
+    private readonly TimersPasses timersPasses = new();
     private readonly RowLabels labels = new();
     private readonly RunTracker tracker = new();
 
@@ -54,7 +55,7 @@ internal sealed partial class GcRunController
 
             return tracker.Step switch
             {
-                RunStep.Buying => RunPhase.Buying,
+                RunStep.Buying => tracker.ShopperPaused ? RunPhase.Paused : RunPhase.Buying,
                 RunStep.Travelling => RunPhase.Travelling,
                 RunStep.HandingIn => RunPhase.HandingIn,
                 RunStep.Finishing or RunStep.Done => RunPhase.Finishing,
@@ -76,6 +77,8 @@ internal sealed partial class GcRunController
 
     public RunModel Run => tracker.Current;
 
+    public IRowLabels Labels => labels;
+
     public void Refresh()
     {
         if (session is not null)
@@ -89,6 +92,19 @@ internal sealed partial class GcRunController
         lastPollMs = 0;
         todayDirty = true;
         RunLog.Info("Refresh: reading the requests and pricing them again.");
+    }
+
+    public void RetryPrices()
+    {
+        if (session is not null)
+        {
+            return;
+        }
+
+        quotes.Retry();
+        lastPollMs = 0;
+        todayDirty = true;
+        RunLog.Info("Retrying the prices of today's items.");
     }
 
     public void SetIncluded(byte classJobId, bool included)

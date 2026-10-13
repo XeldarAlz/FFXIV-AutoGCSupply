@@ -10,6 +10,12 @@ namespace AutoGcSupply.Tests.Run;
 public sealed class RunOutcomeTests
 {
     private static readonly int[] firstThreeRows = [0, 1, 2];
+    private static readonly TimeSpan historyDuration = TimeSpan.FromMinutes(9);
+    private static readonly RowDecision[] historyRows =
+    [
+        Owned(SupplyClasses.Carpenter, CarpenterItem, 1),
+        Owned(SupplyClasses.Culinarian, CulinarianItem, 3),
+    ];
 
     [Fact]
     public void HandInResultsTickTheRowsTheyBelongTo()
@@ -122,11 +128,57 @@ public sealed class RunOutcomeTests
         ];
         var duration = TimeSpan.FromMinutes(12);
 
-        var real = RunOutcomeRule.Summarize(authorized, progress, 8_000, duration, dryRun: false);
-        var dry = RunOutcomeRule.Summarize(authorized, progress, 8_000, duration, dryRun: true);
+        var real = RunOutcomeRule.Summarize(authorized, progress, 8_000, drySpend: false, duration, dryRun: false);
+        var dry = RunOutcomeRule.Summarize(authorized, progress, 8_000, drySpend: true, duration, dryRun: true);
 
-        Assert.Equal(new RunSummary(1, 3, 360_000, 840, 140, 8_000, duration, false), real);
-        Assert.Equal(new RunSummary(2, 3, 535_000, 1_250, 140, 8_000, duration, true), dry);
+        Assert.Equal(new RunSummary(1, 3, 360_000, 840, 140, 8_000, false, duration, false), real);
+        Assert.Equal(new RunSummary(2, 3, 535_000, 1_250, 140, 8_000, true, duration, true), dry);
+    }
+
+    [Fact]
+    public void HistoryKeepsARealRunAsItWas()
+    {
+        var shown = RunOutcomeRule.Summarize(historyRows, Progress(RowRunState.Delivered, RowRunState.Skipped), 8_000, drySpend: false, historyDuration, dryRun: false);
+
+        Assert.Equal(shown, RunOutcomeRule.ForHistory(historyRows, Progress(RowRunState.Delivered, RowRunState.Skipped), shown));
+    }
+
+    [Fact]
+    public void HistoryKeepsARunThatDidNothingRealAsDry()
+    {
+        var progress = Progress(RowRunState.WouldDeliver, RowRunState.WouldDeliver);
+        var shown = RunOutcomeRule.Summarize(historyRows, progress, 8_000, drySpend: true, historyDuration, dryRun: true);
+
+        var recorded = RunOutcomeRule.ForHistory(historyRows, progress, shown);
+
+        Assert.True(recorded.DryRun);
+        Assert.Equal(8_000, recorded.GilSpent);
+        Assert.Equal(2, recorded.Delivered);
+    }
+
+    [Fact]
+    public void RealGilSpentBeforeADryHandInIsRecordedAsReal()
+    {
+        var progress = Progress(RowRunState.WouldDeliver, RowRunState.WouldDeliver);
+        var shown = RunOutcomeRule.Summarize(historyRows, progress, 8_000, drySpend: false, historyDuration, dryRun: true);
+
+        var recorded = RunOutcomeRule.ForHistory(historyRows, progress, shown);
+
+        Assert.Equal(new RunSummary(0, 2, 0, 0, 0, 8_000, false, historyDuration, false), recorded);
+    }
+
+    [Fact]
+    public void ARealDeliveryBeforeADryHandInIsRecordedAsReal()
+    {
+        var progress = Progress(RowRunState.Delivered, RowRunState.WouldDeliver);
+        var shown = RunOutcomeRule.Summarize(historyRows, progress, 0, drySpend: false, historyDuration, dryRun: true);
+
+        var recorded = RunOutcomeRule.ForHistory(historyRows, progress, shown);
+
+        Assert.False(recorded.DryRun);
+        Assert.Equal(1, recorded.Delivered);
+        Assert.Equal(400, recorded.Seals);
+        Assert.Equal(0, recorded.GilSpent);
     }
 
     private static HandInResult Result(HandInOutcome outcome) => new(outcome, HandInPauseReason.None, string.Empty, [], 0, 0, 0);

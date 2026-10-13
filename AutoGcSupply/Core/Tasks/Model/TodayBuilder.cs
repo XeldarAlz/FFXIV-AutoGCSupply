@@ -10,10 +10,11 @@ internal static class TodayBuilder
 {
     public static TodayModel Build(in TodayInputs inputs, QuoteBook quotes, IRowLabels labels, int revision, out ShopperQuoteLine[] neededQuote)
     {
-        var decisions = DecisionsOf(inputs, quotes.Prices);
+        var requestsLoaded = inputs.Snapshot.Loaded && inputs.RequestsCurrent;
+        var shopperAvailable = inputs.Shopper == ShopperState.Available;
+        var decisions = DecisionsOf(inputs, requestsLoaded, shopperAvailable ? quotes.Prices : ReadOnlySpan<ItemPrice>.Empty);
         var rows = RowsOf(inputs, decisions, labels);
         neededQuote = QuoteLines.ForDecisions(decisions);
-        var shopperAvailable = inputs.Shopper == ShopperState.Available;
         var pricing = quotes.StateFor(neededQuote, shopperAvailable);
         var totals = TodayTotalsRule.Sum(rows.AsSpan(), inputs.Character.Seals, inputs.Character.SealCap);
         var loggedIn = inputs.LoggedIn && inputs.HasCharacter;
@@ -22,14 +23,16 @@ internal static class TodayBuilder
             inputs.SetupReady,
             loggedIn,
             loggedIn && inputs.Character.InGrandCompany,
-            inputs.Snapshot.Loaded && !inputs.Reading,
+            loggedIn && inputs.Character.OnHomeWorld,
+            inputs.InDuty,
+            requestsLoaded && !inputs.Reading,
             pricing,
             inputs.Shopper,
             inputs.SpendCap);
         return new TodayModel
         {
             Revision = revision,
-            State = StateOf(inputs),
+            State = StateOf(inputs, requestsLoaded),
             Header = HeaderOf(inputs),
             Rows = rows,
             Totals = totals,
@@ -42,7 +45,7 @@ internal static class TodayBuilder
         };
     }
 
-    private static TodayState StateOf(in TodayInputs inputs)
+    private static TodayState StateOf(in TodayInputs inputs, bool requestsLoaded)
     {
         if (!inputs.LoggedIn || !inputs.HasCharacter)
         {
@@ -59,7 +62,7 @@ internal static class TodayBuilder
             return TodayState.Reading;
         }
 
-        if (!inputs.Snapshot.Loaded)
+        if (!requestsLoaded)
         {
             return TodayState.NotLoaded;
         }
@@ -79,9 +82,9 @@ internal static class TodayBuilder
         return new TodayHeader(character.GrandCompany, character.Rank, character.Seals, character.SealCap, day.NextResetUtc, day.ToString());
     }
 
-    private static RowDecision[] DecisionsOf(in TodayInputs inputs, ReadOnlySpan<ItemPrice> prices)
+    private static RowDecision[] DecisionsOf(in TodayInputs inputs, bool requestsLoaded, ReadOnlySpan<ItemPrice> prices)
     {
-        if (!inputs.HasCharacter || !inputs.Snapshot.Loaded)
+        if (!inputs.HasCharacter || !requestsLoaded)
         {
             return [];
         }

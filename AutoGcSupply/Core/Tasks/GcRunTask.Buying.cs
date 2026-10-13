@@ -21,16 +21,15 @@ internal sealed partial class GcRunTask
             return true;
         }
 
-        if (!session.Authorization.AllowsPurchases(session.ReadDay, DateTime.UtcNow))
+        if (!DayAllowsPurchases())
         {
-            Unbought(RowNote.DayChanged, "a new supply day began after Start");
             return true;
         }
 
         var shopper = ShopperProbe.Read();
         if (shopper != ShopperState.Available)
         {
-            Unbought(shopper == ShopperState.Missing ? RowNote.ShopperMissing : RowNote.ShopperOutdated, $"Auto Shopper is {shopper}");
+            Unbought(UnboughtNote(shopper), $"Auto Shopper is {shopper}");
             return true;
         }
 
@@ -39,8 +38,31 @@ internal sealed partial class GcRunTask
             return false;
         }
 
-        return !RunPlanRules.AnyPurchase(session.Plan) || await Shop();
+        if (!RunPlanRules.AnyPurchase(session.Plan) || !DayAllowsPurchases())
+        {
+            return true;
+        }
+
+        return await Shop();
     }
+
+    private bool DayAllowsPurchases()
+    {
+        if (session.Authorization.AllowsPurchases(session.ReadDay, DateTime.UtcNow))
+        {
+            return true;
+        }
+
+        Unbought(RowNote.DayChanged, "a new supply day began after Start");
+        return false;
+    }
+
+    private static RowNote UnboughtNote(ShopperState shopper) => shopper switch
+    {
+        ShopperState.Missing => RowNote.ShopperMissing,
+        ShopperState.Newer => RowNote.ShopperNewer,
+        _ => RowNote.ShopperOutdated,
+    };
 
     private void Unbought(RowNote note, string reason)
     {
@@ -133,22 +155,24 @@ internal sealed partial class GcRunTask
     {
         var api = AutoShopperApi.Instance;
         var unreadable = 0;
+        var watch = new ShopperWatch(Environment.TickCount64);
         while (true)
         {
             var view = api.RunStatus(runId);
+            var nowMs = Environment.TickCount64;
             var settlement = ShopperSettlementRule.Classify(view, session.StopRequested);
             if (settlement.Kind == ShopperSettlementKind.Unreadable)
             {
                 unreadable++;
                 if (unreadable >= MaxUnreadableReplies)
                 {
-                    Warn($"Run: Auto Shopper gave no usable status for run {runId} {MaxUnreadableReplies} times in a row ({view.Reply}, known {view.Known}).");
-                    return ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperInterrupted);
+                    return GiveUp(runId, $"Auto Shopper gave no usable status for run {runId} {MaxUnreadableReplies} times in a row ({view.Reply}, known {view.Known})");
                 }
             }
             else
             {
                 unreadable = 0;
+                watch.Observe(view, nowMs);
                 Mirror(view);
                 if (settlement.Kind != ShopperSettlementKind.Running)
                 {
@@ -156,10 +180,20 @@ internal sealed partial class GcRunTask
                 }
             }
 
-            if (session.StopRequested && Environment.TickCount64 - session.StopRequestedAtMs >= StopWaitMs)
+            if (session.StopRequested && nowMs - session.StopRequestedAtMs >= StopWaitMs)
             {
                 Warn($"Run: Auto Shopper did not settle within {StopWaitMs / TimeUnits.MillisecondsPerSecond}s of the stop; the run ends as stopped.");
                 return ShopperSettlement.Stopped;
+            }
+
+            if (watch.Stalled(nowMs))
+            {
+                return GiveUp(runId, $"Auto Shopper run {runId} showed no change for {ShopperWatch.StallLimitMs / TimeUnits.MillisecondsPerMinute} minutes while not paused");
+            }
+
+            if (watch.Overdue(nowMs))
+            {
+                return GiveUp(runId, $"Auto Shopper run {runId} did not end within {ShopperWatch.TotalLimitMs / TimeUnits.MillisecondsPerMinute} minutes");
             }
 
             await DelayMs(PollMs);
@@ -170,6 +204,13 @@ internal sealed partial class GcRunTask
         }
     }
 
+    private ShopperSettlement GiveUp(string runId, string reason)
+    {
+        var stopped = AutoShopperApi.Instance.StopRun(runId);
+        Warn($"Run: {reason}; {(stopped ? "its run was asked to stop" : "it did not take the stop")} and the run needs you.");
+        return ShopperSettlement.NeedsPlayer(NeedsPlayerReason.ShopperInterrupted);
+    }
+
     private void Mirror(in ShopperRunView view)
     {
         lastView = view;
@@ -177,7 +218,12 @@ internal sealed partial class GcRunTask
         session.DryRun = view.DryRun;
         session.ShopperDryRun = view.DryRun;
         session.Tracker.SetDryRun(view.DryRun);
-        session.Tracker.SetShopper(view.Status, view.ConfirmedSpend);
+        session.Tracker.SetShopper(view.Status, view.ConfirmedSpend, view.Paused);
+        if (!session.StopRequested)
+        {
+            session.Tracker.SetStatus(view.Paused ? RunText.ShopperPaused(view.PauseReason) : Loc.T(L.Run.StatusBuying));
+        }
+
         if (BuyProgress.Apply(session.Plan, session.Progress, view) > 0)
         {
             session.PublishRows();

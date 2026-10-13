@@ -1,6 +1,7 @@
 using AutoGcSupply.Core.Character;
 using AutoGcSupply.Core.Character.Model;
 using AutoGcSupply.Core.External;
+using AutoGcSupply.Core.Game.Watchers;
 using AutoGcSupply.Core.Inventory;
 using AutoGcSupply.Core.Inventory.Model;
 using AutoGcSupply.Core.Requests;
@@ -32,7 +33,9 @@ internal sealed partial class GcRunController
     private bool loggedIn;
     private bool hasCharacter;
     private CharacterState character;
+    private bool inDuty;
     private RequestSnapshot snapshot = RequestSnapshot.Unread(DateTime.UtcNow);
+    private bool requestsCurrent;
     private ImmutableArray<OwnedCount> ownedBySlot = ImmutableArray<OwnedCount>.Empty;
     private DecisionSettings settings;
     private long spendCap;
@@ -44,6 +47,7 @@ internal sealed partial class GcRunController
     private DayKey day;
     private bool dayKnown;
     private bool rolloverLoadWanted;
+    private bool quotesOutdated;
     private bool refreshWanted;
     private LoadMark autoLoaded;
     private TimersLoader? loader;
@@ -88,7 +92,9 @@ internal sealed partial class GcRunController
     private void ReadInputs()
     {
         ReadDay(DateTime.UtcNow);
+        DropOutdatedQuotes();
         ReadCharacter();
+        ReadDuty();
         ReadRequests();
         RecountBags();
         ReadSettings();
@@ -106,13 +112,24 @@ internal sealed partial class GcRunController
         if (dayKnown)
         {
             rolloverLoadWanted = true;
-            quotes.Clear();
+            quotesOutdated = true;
             RunLog.Info($"A new supply day began ({current}); the requests are read again.");
         }
 
         day = current;
         dayKnown = true;
         todayDirty = true;
+    }
+
+    private void DropOutdatedQuotes()
+    {
+        if (!quotesOutdated || session is not null)
+        {
+            return;
+        }
+
+        quotesOutdated = false;
+        quotes.Clear();
     }
 
     private void ReadCharacter()
@@ -130,15 +147,29 @@ internal sealed partial class GcRunController
         todayDirty = true;
     }
 
+    private void ReadDuty()
+    {
+        var inDutyNow = DutyWatcher.InContent();
+        if (inDutyNow == inDuty)
+        {
+            return;
+        }
+
+        inDuty = inDutyNow;
+        todayDirty = true;
+    }
+
     private void ReadRequests()
     {
         var snapshotNow = GcSupplyReader.Read();
-        if (TodayInputChanges.SameRequests(snapshotNow, snapshot))
+        var currentNow = timersPasses.IsCurrent(snapshotNow.ContentId, day);
+        if (currentNow == requestsCurrent && TodayInputChanges.SameRequests(snapshotNow, snapshot))
         {
             return;
         }
 
         snapshot = snapshotNow;
+        requestsCurrent = currentNow;
         todayDirty = true;
     }
 
@@ -178,7 +209,7 @@ internal sealed partial class GcRunController
     private void ReadShopper()
     {
         var shopperNow = ShopperProbe.Read();
-        var dryRunNow = shopperNow == ShopperState.Available && AutoShopperApi.Instance.DryRun();
+        var dryRunNow = shopperNow == ShopperState.Available && AutoShopperApi.Instance.DryRun(whenUnknown: false);
         var setupReadyNow = ExternalPlugins.AllRequiredInstalled();
         if (shopperNow == shopper && dryRunNow == shopperDryRun && setupReadyNow == setupReady)
         {
@@ -219,7 +250,7 @@ internal sealed partial class GcRunController
         }
 
         var mark = new LoadMark(character.ContentId, day);
-        var automatic = snapshot.LoadState == SnapshotLoadState.NotLoaded && autoLoaded != mark;
+        var automatic = !requestsCurrent && autoLoaded != mark;
         if (!refreshWanted && !rolloverLoadWanted && !automatic)
         {
             return;
@@ -239,7 +270,7 @@ internal sealed partial class GcRunController
 
     private void StartLoader()
     {
-        var task = new TimersLoader(confirmCompletedDay: true);
+        var task = new TimersLoader(timersPasses, forcePass: true);
         loader = task;
         todayDirty = true;
         try
@@ -274,7 +305,9 @@ internal sealed partial class GcRunController
             LoggedIn = loggedIn,
             HasCharacter = hasCharacter,
             Character = character,
+            InDuty = inDuty,
             Snapshot = snapshot,
+            RequestsCurrent = requestsCurrent,
             Reading = loader is not null,
             OwnedBySlot = ownedBySlot,
             Settings = settings,
