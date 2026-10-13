@@ -29,6 +29,7 @@ internal sealed class RunModel
     {
         Revision = 0,
         Step = RunStep.Idle,
+        LastStep = RunStep.Idle,
         Status = string.Empty,
         DryRun = false,
         ShopperStatus = string.Empty,
@@ -42,6 +43,7 @@ internal sealed class RunModel
 
     public required int Revision { get; init; }
     public required RunStep Step { get; init; }
+    public required RunStep LastStep { get; init; }
     public required string Status { get; init; }
     public required bool DryRun { get; init; }
     public required string ShopperStatus { get; init; }

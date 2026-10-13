@@ -8,6 +8,7 @@ internal sealed class RunTracker
     private bool dirty;
     private int revision;
     private RunStep step = RunStep.Idle;
+    private RunStep lastStep = RunStep.Idle;
     private string status = string.Empty;
     private bool dryRun;
     private string shopperStatus = string.Empty;
@@ -32,6 +33,7 @@ internal sealed class RunTracker
             {
                 Revision = revision,
                 Step = step,
+                LastStep = lastStep,
                 Status = status,
                 DryRun = dryRun,
                 ShopperStatus = shopperStatus,
@@ -53,6 +55,7 @@ internal sealed class RunTracker
     public void Begin(RunRow[] initialRows, string initialStatus)
     {
         step = RunStep.Reading;
+        lastStep = RunStep.Reading;
         status = initialStatus;
         dryRun = false;
         shopperStatus = string.Empty;
@@ -69,6 +72,7 @@ internal sealed class RunTracker
     {
         Begin([], string.Empty);
         step = RunStep.Idle;
+        lastStep = RunStep.Idle;
     }
 
     public void SetStep(RunStep nextStep, string nextStatus)
@@ -79,6 +83,7 @@ internal sealed class RunTracker
         }
 
         step = nextStep;
+        lastStep = nextStep;
         status = nextStatus;
         Touch();
     }

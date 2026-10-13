@@ -35,10 +35,12 @@ public sealed class RunTrackerTests
         tracker.NeedPlayer(NeedsPlayerReason.ShopperConsent, "Allow it");
         var summary = new RunSummary(0, 1, 0, 0, 0, 0, TimeSpan.FromSeconds(5), false);
 
+        tracker.SetStep(RunStep.Buying, "Buying");
         tracker.Finish(RunEnd.NeedsPlayer, summary, "Waiting for you");
         var finished = tracker.Current;
 
         Assert.Equal(RunStep.Done, finished.Step);
+        Assert.Equal(RunStep.Buying, finished.LastStep);
         Assert.Equal(RunEnd.NeedsPlayer, finished.End);
         Assert.Equal(NeedsPlayerReason.ShopperConsent, finished.NeedsPlayer);
         Assert.Equal("Allow it", finished.NeedsPlayerDetail);
@@ -48,8 +50,24 @@ public sealed class RunTrackerTests
         var idle = tracker.Current;
 
         Assert.Equal(RunStep.Idle, idle.Step);
+        Assert.Equal(RunStep.Idle, idle.LastStep);
         Assert.Equal(RunEnd.None, idle.End);
         Assert.Empty(idle.Rows);
         Assert.True(idle.Revision > finished.Revision);
+    }
+
+    [Fact]
+    public void TheLastStepFollowsTheRunUntilItEnds()
+    {
+        var tracker = new RunTracker();
+        tracker.Begin(new RunRow[1], "Reading");
+
+        Assert.Equal(RunStep.Reading, tracker.Current.LastStep);
+
+        tracker.SetStep(RunStep.HandingIn, "Handing in");
+        tracker.Finish(RunEnd.Failed, default, "Failed");
+
+        Assert.Equal(RunStep.HandingIn, tracker.Current.LastStep);
+        Assert.Equal(RunStep.Done, tracker.Current.Step);
     }
 }

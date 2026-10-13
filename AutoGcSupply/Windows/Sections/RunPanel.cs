@@ -288,9 +288,10 @@ internal static class RunPanel
         var drawList = ImGui.GetWindowDrawList();
         Paint.Surface(drawList, origin, end, Styling.CardRounding * scale, Styling.WithAlpha(Styling.Surface1, 0.45f), Styling.WithAlpha(Styling.BorderDim, 0.5f), topLight: false);
 
-        var current = !running && run.End is RunEnd.Completed or RunEnd.CompletedPartial ? StepCount : StepIndex(run.Step);
-        var halted = running ? run.NeedsPlayer != NeedsPlayerReason.None : run.End is RunEnd.Stopped or RunEnd.Failed or RunEnd.NeedsPlayer;
-        var haltColor = running || run.End == RunEnd.NeedsPlayer ? Styling.AccentAmber : Styling.AccentRose;
+        var completed = !running && run.End == RunEnd.Completed;
+        var current = completed ? StepCount : StepIndex(running ? run.Step : run.LastStep);
+        var halted = running ? run.NeedsPlayer != NeedsPlayerReason.None : !completed;
+        var haltColor = running ? Styling.AccentAmber : RunLabels.OutcomeColor(run.End);
         var radius = StepRadius * scale;
         var padX = PadX * scale + radius;
         var spacing = (size.X - padX * 2f) / (StepCount - 1);
