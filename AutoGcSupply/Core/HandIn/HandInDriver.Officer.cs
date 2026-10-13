@@ -5,7 +5,6 @@ using AutoGcSupply.Core.Travel;
 using clib.Extensions;
 using clib.TaskSystem;
 using Dalamud.Game.ClientState.Conditions;
-using ECommons;
 using ECommons.DalamudServices;
 using System.Numerics;
 using System.Text;
@@ -27,10 +26,8 @@ internal sealed partial class HandInDriver
     private const int MenuReselectMs = 2_000;
     private const int ListLoadTimeoutMs = 10_000;
     private const int ListPollFrames = 6;
-    private const int LeaveMenuWaitMs = 3_000;
-    private const int LeaveMenuCallback = -1;
-    private const string SelectStringAddonName = "SelectString";
 
+    private bool officerEngaged;
     private bool listOpened;
 
     private async Task<Halt> ReachOfficer()
@@ -112,6 +109,7 @@ internal sealed partial class HandInDriver
     private async Task<Halt> OpenSupplyList()
     {
         EnterStep(HandInStep.OpeningMenu, "Talking to the Personnel Officer");
+        officerEngaged = true;
         var optionText = OfficerMenuText.SupplyOption();
         if (optionText.Length == 0)
         {
@@ -149,7 +147,7 @@ internal sealed partial class HandInDriver
                 if (entryIndex == NpcInteraction.NoEntry)
                 {
                     var shown = DescribeMenu();
-                    await LeaveMenu();
+                    await OfficerWindows.LeaveMenu(cancelled);
                     return new Halt(HandInPauseReason.MenuOptionNotFound, $"'{optionText}' is not among the menu entries [{shown}]");
                 }
 
@@ -192,56 +190,28 @@ internal sealed partial class HandInDriver
             : new Halt(HandInPauseReason.ListDidNotOpen, "the supply list opened but never finished loading");
     }
 
-    private async Task CloseListAndLeave()
+    private async Task LeaveOfficer()
     {
-        EnterStep(HandInStep.ClosingList, "Closing the supply list");
-        await CloseAddon(HandInClicks.RewardAddonName);
-        if (SupplyListReader.IsOpen() && !await RepeatUntil(HandInClicks.CloseList, () => !SupplyListReader.IsOpen(), ClickWaitMs))
-        {
-            Warn("Hand-in: the supply list did not close through its own callback; closing the window");
-            await CloseAddon(SupplyListReader.AddonName);
-        }
-
-        EnterStep(HandInStep.LeavingMenu, "Leaving the Personnel Officer");
-        if (!listOpened)
-        {
-            await LeaveMenu();
-            return;
-        }
-
-        var deadline = Environment.TickCount64 + LeaveMenuWaitMs;
-        while (Environment.TickCount64 < deadline && !CancelToken.IsCancellationRequested)
-        {
-            if (NpcInteraction.SelectStringOpen())
-            {
-                await LeaveMenu();
-                return;
-            }
-
-            if (NpcInteraction.TalkOpen())
-            {
-                NpcInteraction.ProgressTalk();
-            }
-            else if (!GenericHelpers.IsOccupied())
-            {
-                return;
-            }
-
-            await DelayMs(PollMs);
-        }
-    }
-
-    private async Task LeaveMenu()
-    {
-        if (!NpcInteraction.SelectStringOpen())
+        if (!officerEngaged)
         {
             return;
         }
 
-        Diag("Hand-in: leaving the officer's menu");
-        if (!await RepeatUntil(() => NpcInteraction.FireCallback(SelectStringAddonName, LeaveMenuCallback), () => !NpcInteraction.SelectStringOpen(), ClickWaitMs))
+        if (CancelToken.IsCancellationRequested)
         {
-            Warn("Hand-in: the officer's menu did not close");
+            Diag("Hand-in: stopped at the Personnel Officer; closing the reward window, the supply list and the menu");
+        }
+
+        try
+        {
+            EnterStep(HandInStep.ClosingList, "Closing the supply list");
+            await OfficerWindows.CloseList(unloaded);
+            EnterStep(HandInStep.LeavingMenu, "Leaving the Personnel Officer");
+            await OfficerWindows.LeaveOfficer(listOpened, unloaded);
+        }
+        catch (Exception exception)
+        {
+            RunLog.Warning(exception, "Hand-in: closing the Personnel Officer's windows failed");
         }
     }
 

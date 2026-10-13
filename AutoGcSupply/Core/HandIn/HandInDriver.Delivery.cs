@@ -64,6 +64,22 @@ internal sealed partial class HandInDriver
         return halt;
     }
 
+    private async Task<Halt> CloseStaleRewardWindow()
+    {
+        if (!HandInClicks.RewardOpen())
+        {
+            return Halt.None;
+        }
+
+        Warn("Hand-in: a reward window is open before a row was chosen; closing it");
+        if (await OfficerWindows.CloseReward(cancelled) || CancelToken.IsCancellationRequested)
+        {
+            return Halt.None;
+        }
+
+        return new Halt(HandInPauseReason.UnexpectedAddon, HandInClicks.RewardAddonName);
+    }
+
     private async Task<Halt> AwaitRewardWindow(HandInTarget target)
     {
         EnterStep(HandInStep.Confirming, $"Waiting for the reward window for {HandInReads.ItemName(target.ItemId)}");
@@ -193,19 +209,19 @@ internal sealed partial class HandInDriver
         var text = NpcInteraction.SelectYesnoText();
         if (!PromptText.Same(text, HighQualityPrompt.Text()))
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.UnexpectedPrompt, text);
         }
 
         if (target.Quality != ItemQuality.High)
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.HighQualityPromptForNormalRow, $"{HandInReads.Describe(target)}: {text}");
         }
 
         if (highQualityAccepted)
         {
-            await DeclinePrompt();
+            await OfficerWindows.DeclinePrompt(cancelled);
             return new Halt(HandInPauseReason.UnexpectedPrompt, $"a second high-quality confirmation for {HandInReads.Describe(target)}: {text}");
         }
 
@@ -229,7 +245,7 @@ internal sealed partial class HandInDriver
         }
 
         var text = NpcInteraction.SelectYesnoText();
-        await DeclinePrompt();
+        await OfficerWindows.DeclinePrompt(cancelled);
         return new Halt(HandInPauseReason.UnexpectedPrompt, $"a confirmation stayed open after the high-quality one was accepted: {text}");
     }
 

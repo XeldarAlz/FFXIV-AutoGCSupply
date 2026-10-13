@@ -126,6 +126,11 @@ internal sealed partial class HandInDriver
         while (!CancelToken.IsCancellationRequested)
         {
             var unexpected = await HaltOnUnexpected(talkUnexpected: true);
+            if (!Interrupted(unexpected))
+            {
+                unexpected = await CloseStaleRewardWindow();
+            }
+
             if (Interrupted(unexpected))
             {
                 return TabPick.Stopped(unexpected);
