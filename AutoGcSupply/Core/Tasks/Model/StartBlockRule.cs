@@ -28,6 +28,16 @@ internal static class StartBlockRule
             return StartBlock.SetupNeeded;
         }
 
+        if (facts.Shopper == ShopperState.Outdated)
+        {
+            return StartBlock.ShopperOutdated;
+        }
+
+        if (facts.Shopper == ShopperState.Newer)
+        {
+            return StartBlock.UpdateNeeded;
+        }
+
         if (!facts.LoggedIn)
         {
             return StartBlock.NotLoggedIn;
@@ -79,7 +89,7 @@ internal static class StartBlockRule
             return StartBlock.None;
         }
 
-        return facts.Shopper == ShopperState.Newer ? StartBlock.UpdateNeeded : StartBlock.ShopperNeeded;
+        return StartBlock.ShopperNeeded;
     }
 
     private static RowCounts Count(in StartFacts facts, ReadOnlySpan<TodayRow> rows)

@@ -14,6 +14,8 @@ internal enum StartBlock : byte
     None,
     Running,
     SetupNeeded,
+    ShopperOutdated,
+    UpdateNeeded,
     NotLoggedIn,
     NoGrandCompany,
     NotOnHomeWorld,
@@ -25,7 +27,6 @@ internal enum StartBlock : byte
     PricesFailed,
     NeedsSpendCap,
     ShopperNeeded,
-    UpdateNeeded,
 }
 
 internal readonly record struct TodayHeader(byte GrandCompany, byte Rank, uint Seals, uint SealCap, DateTime NextResetUtc, string DayLabel);

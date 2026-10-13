@@ -53,7 +53,7 @@ It never buys anything itself. Every purchase goes through Auto Shopper (1.1.0.0
 ## Safety
 
 - **Every purchase belongs to Auto Shopper.** Auto GC Supply never touches the market board. It sends Auto Shopper one order per run, with a price cap on each line and the run spend cap, and Auto Shopper's worlds, gil reserve and purchase checks still apply.
-- **Dry run.** Auto Shopper's Dry run switch, shown next to Automate, governs the whole run. While it is on, nothing is bought and nothing is handed in: the run travels, opens the supply list, and marks each row it would deliver. When Auto Shopper 1.1.0.0 or later is there but its switch cannot be read, the hand-in is dry too. Without it (not installed, or a version without the Buying API) there is no dry run, so a hand-in-only run delivers for real.
+- **Dry run.** Auto Shopper's Dry run switch, shown next to Automate, governs the whole run. While it is on, nothing is bought and nothing is handed in: the run travels, opens the supply list, and marks each row it would deliver. When Auto Shopper 1.1.0.0 or later is there but its switch cannot be read, the hand-in is dry too. Without Auto Shopper there is no dry run, so a hand-in-only run delivers for real. An Auto Shopper that is installed but older than 1.1.0.0, or newer than this version understands, keeps Automate off until one of them is updated, so its dry run is never skipped.
 - **Asked once.** The first run that buys stops at Auto Shopper's permission card on its Shop page, and nothing is bought until you allow Auto GC Supply there. You can take that back under Auto Shopper's Settings, General.
 - **Caps.** No run that buys starts without a run spend cap, and each line carries its own price cap.
 - **Only the rows you chose.** A run hands in only the rows you had chosen at Start, and drops a row whose request changed or was handed in elsewhere.
@@ -79,7 +79,7 @@ Tick **Enabled**, click **+**, then **Save and Close**. Open `/xlplugins` → **
 ## Requirements
 
 - **vnavmesh** for walking to the Personnel Officer. Automate stays off until it is installed and loaded.
-- **Auto Shopper 1.1.0.0 or later** for buying the missing items, through its Buying API. It is optional: without it, only requests your bags already cover are handed in, and there is no dry run. The first run that buys asks you once, on Auto Shopper's Shop page, to allow Auto GC Supply; press Allow there, then press Automate again. Auto Shopper brings its own requirements, such as Lifestream for its trips between worlds.
+- **Auto Shopper 1.1.0.0 or later** for buying the missing items, through its Buying API. It is optional: without it, only requests your bags already cover are handed in, and there is no dry run. Once it is installed, Automate stays off while it is older than 1.1.0.0 or newer than this version understands. The first run that buys asks you once, on Auto Shopper's Shop page, to allow Auto GC Supply; press Allow there, then press Automate again. Auto Shopper brings its own requirements, such as Lifestream for its trips between worlds.
 - **A Grand Company**, with runs started from your home world.
 - **A run spend cap** on the Today page or under Settings, Run, for any run that buys.
 

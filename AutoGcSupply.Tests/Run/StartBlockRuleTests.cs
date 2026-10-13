@@ -36,7 +36,9 @@ public sealed class StartBlockRuleTests
         var everythingWrong = new StartFacts(true, false, false, false, false, true, false, PricingState.Pending, ShopperState.Missing, 0);
 
         Assert.Equal(StartBlock.Running, StartBlockRule.Evaluate(everythingWrong, []));
-        Assert.Equal(StartBlock.SetupNeeded, StartBlockRule.Evaluate(everythingWrong with { Running = false }, []));
+        Assert.Equal(StartBlock.SetupNeeded, StartBlockRule.Evaluate(everythingWrong with { Running = false, Shopper = ShopperState.Outdated }, []));
+        Assert.Equal(StartBlock.ShopperOutdated, StartBlockRule.Evaluate(everythingWrong with { Running = false, SetupReady = true, Shopper = ShopperState.Outdated }, []));
+        Assert.Equal(StartBlock.UpdateNeeded, StartBlockRule.Evaluate(everythingWrong with { Running = false, SetupReady = true, Shopper = ShopperState.Newer }, []));
         Assert.Equal(StartBlock.NotLoggedIn, StartBlockRule.Evaluate(everythingWrong with { Running = false, SetupReady = true }, []));
         Assert.Equal(StartBlock.NoGrandCompany, StartBlockRule.Evaluate(ready with { InGrandCompany = false, OnHomeWorld = false, Loaded = false }, []));
         Assert.Equal(StartBlock.NotOnHomeWorld, StartBlockRule.Evaluate(ready with { OnHomeWorld = false, InDuty = true, Loaded = false }, []));
@@ -86,22 +88,26 @@ public sealed class StartBlockRuleTests
         Assert.Equal(StartBlock.None, StartBlockRule.Evaluate(ready with { SpendCap = 0 }, rows));
     }
 
-    [Theory]
-    [InlineData((int)ShopperState.Missing)]
-    [InlineData((int)ShopperState.Outdated)]
-    public void OnlyRowsToBuyWithoutAutoShopperNeedIt(int shopper)
+    [Fact]
+    public void OnlyRowsToBuyWithoutAutoShopperNeedIt()
     {
         var rows = TodayRows(Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
 
-        Assert.Equal(StartBlock.ShopperNeeded, StartBlockRule.Evaluate(ready with { Shopper = (ShopperState)shopper, Pricing = PricingState.Unavailable }, rows));
+        Assert.Equal(StartBlock.ShopperNeeded, StartBlockRule.Evaluate(ready with { Shopper = ShopperState.Missing, Pricing = PricingState.Unavailable }, rows));
     }
 
-    [Fact]
-    public void ANewerAutoShopperAsksForAnUpdateOfThisPlugin()
+    [Theory]
+    [InlineData((int)ShopperState.Outdated, (int)StartBlock.ShopperOutdated)]
+    [InlineData((int)ShopperState.Newer, (int)StartBlock.UpdateNeeded)]
+    public void AnInstalledButIncompatibleAutoShopperBlocksEvenAHandInOnlyRun(int shopper, int expected)
     {
-        var rows = TodayRows(Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
+        var buying = TodayRows(Row(SupplyClasses.Miner, MinerItem, 10, RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0, 0, 0, 0));
+        var owned = TodayRows(Owned(SupplyClasses.Carpenter, CarpenterItem, 1));
+        var facts = ready with { Shopper = (ShopperState)shopper, Pricing = PricingState.Unavailable, SpendCap = 0 };
 
-        Assert.Equal(StartBlock.UpdateNeeded, StartBlockRule.Evaluate(ready with { Shopper = ShopperState.Newer, Pricing = PricingState.Unavailable }, rows));
+        Assert.Equal((StartBlock)expected, StartBlockRule.Evaluate(facts, buying));
+        Assert.Equal((StartBlock)expected, StartBlockRule.Evaluate(facts, owned));
+        Assert.Equal((StartBlock)expected, StartBlockRule.Evaluate(facts with { Loaded = false }, []));
     }
 
     [Fact]

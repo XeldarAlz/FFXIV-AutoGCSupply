@@ -19,7 +19,8 @@ internal static partial class L
         public static readonly LocString BlockPricesFailed = new("automate.block.pricesFailed", "prices failed: retry them or leave out the items to buy");
         public static readonly LocString BlockNeedsSpendCap = new("automate.block.needsSpendCap", "set a run spend cap");
         public static readonly LocString BlockShopperNeeded = new("automate.block.shopperNeeded", "Auto Shopper is needed to buy");
-        public static readonly LocString BlockUpdateNeeded = new("automate.block.updateNeeded", "update Auto GC Supply to buy");
+        public static readonly LocString BlockShopperOutdated = new("automate.block.shopperOutdated", "update Auto Shopper to 1.1.0.0 or later");
+        public static readonly LocString BlockUpdateNeeded = new("automate.block.updateNeeded", "update Auto GC Supply to work with this Auto Shopper");
         public static readonly LocString DryRun = new("automate.dryRun", "Dry run");
         public static readonly LocString DryRunOnCaption = new("automate.dryRunOnCaption", "buys nothing");
         public static readonly LocString DryRunOffCaption = new("automate.dryRunOffCaption", "spends real gil");
