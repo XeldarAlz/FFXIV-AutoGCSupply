@@ -29,6 +29,7 @@ internal sealed partial class GcRunController
     private bool todayDirty = true;
     private long viewedAtMs;
     private long lastPollMs;
+    private long keptAliveAtMs;
     private bool bagsChanged;
     private bool loggedIn;
     private bool hasCharacter;
@@ -57,6 +58,7 @@ internal sealed partial class GcRunController
         var now = Environment.TickCount64;
         if (now - viewedAtMs > WatchedForMs)
         {
+            KeepQuoteAlive(now);
             return;
         }
 
@@ -229,7 +231,7 @@ internal sealed partial class GcRunController
             return;
         }
 
-        if (quotes.Book.Status == QuoteStatus.Pending)
+        if (quotes.Book.Outstanding)
         {
             quotes.Poll();
             return;
@@ -239,6 +241,17 @@ internal sealed partial class GcRunController
         {
             quotes.Start(neededQuote);
         }
+    }
+
+    private void KeepQuoteAlive(long now)
+    {
+        if (session is not null || !quotes.Book.Outstanding || now - keptAliveAtMs < PollIntervalMs)
+        {
+            return;
+        }
+
+        keptAliveAtMs = now;
+        quotes.Poll();
     }
 
     private void TryLoad()

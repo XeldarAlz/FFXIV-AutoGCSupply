@@ -63,6 +63,7 @@ public sealed class StartBlockRuleTests
 
     [Theory]
     [InlineData((int)PricingState.Pending, (int)StartBlock.PricesPending)]
+    [InlineData((int)PricingState.Queued, (int)StartBlock.PricesPending)]
     [InlineData((int)PricingState.Failed, (int)StartBlock.PricesFailed)]
     public void UnpricedRowsWaitForTheirPricesOrSayTheyFailed(int pricing, int expected)
     {

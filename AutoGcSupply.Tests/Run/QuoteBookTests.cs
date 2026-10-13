@@ -116,13 +116,104 @@ public sealed class QuoteBookTests
     }
 
     [Fact]
-    public void APendingQuoteTimesOutAfterTwoMinutes()
+    public void APendingQuoteKeepsItsPlaceForTheProvidersTenMinutes()
     {
         var book = new QuoteBook();
         book.Begin("quote", twoItems, 10_000);
 
+        Assert.Equal(600_000, QuoteBook.TimeoutMs);
         Assert.False(book.TimedOut(10_000 + QuoteBook.TimeoutMs - 1));
         Assert.True(book.TimedOut(10_000 + QuoteBook.TimeoutMs));
+    }
+
+    [Fact]
+    public void ABusyRefusalWaitsItsTurnAndAsksAgainLater()
+    {
+        var book = new QuoteBook();
+        book.Defer(twoItems, 5_000);
+
+        Assert.Equal(QuoteStatus.Waiting, book.Status);
+        Assert.True(book.Outstanding);
+        Assert.False(book.NeedsQuote(twoItems));
+        Assert.Equal(PricingState.Queued, book.StateFor(twoItems, shopperAvailable: true));
+        Assert.Equal(twoItems, book.PendingLines);
+        Assert.False(book.RetryDue(5_000 + QuoteBook.BusyRetryMs - 1));
+        Assert.True(book.RetryDue(5_000 + QuoteBook.BusyRetryMs));
+
+        book.Begin("quote", twoItems, 15_000);
+
+        Assert.False(book.RetryDue(30_000));
+        Assert.Equal(PricingState.Pending, book.StateFor(twoItems, shopperAvailable: true));
+    }
+
+    [Fact]
+    public void WaitingItsTurnEndsTenMinutesAfterTheFirstBusyRefusal()
+    {
+        var book = new QuoteBook();
+        book.Defer(twoItems, 0);
+        book.Defer(twoItems, QuoteBook.BusyRetryMs);
+
+        Assert.Equal(0, book.StartedAtMs);
+        Assert.Equal(2 * QuoteBook.BusyRetryMs, book.RetryAtMs);
+        Assert.False(book.TimedOut(QuoteBook.TimeoutMs - 1));
+        Assert.True(book.TimedOut(QuoteBook.TimeoutMs));
+    }
+
+    [Fact]
+    public void ClearDropsThePricesButKeepsAQuoteStillWaitingForItsTurn()
+    {
+        var book = new QuoteBook();
+        book.Begin("first", twoItems, 0);
+        book.Land([PriceFixtures.Item(MinerItem, 10, PriceFixtures.PerUnit(10, 210), PriceFixtures.None)], pricedAtUtc);
+        book.Begin("second", twoItems, 1_000);
+        var revision = book.Revision;
+
+        book.Clear();
+
+        Assert.Equal(QuoteStatus.Pending, book.Status);
+        Assert.Equal("second", book.QuoteId);
+        Assert.Equal(1_000, book.StartedAtMs);
+        Assert.Equal(0, book.Prices.Length);
+        Assert.Equal(PricingState.Pending, book.StateFor(twoItems, shopperAvailable: true));
+        Assert.True(book.Revision > revision);
+
+        book.Land([], pricedAtUtc);
+
+        Assert.Equal(PricingState.Ready, book.StateFor(twoItems, shopperAvailable: true));
+    }
+
+    [Fact]
+    public void ClearKeepsAQuoteThatWaitsAfterABusyRefusal()
+    {
+        var book = new QuoteBook();
+        book.Defer(twoItems, 0);
+
+        book.Clear();
+
+        Assert.Equal(QuoteStatus.Waiting, book.Status);
+        Assert.Equal(twoItems, book.PendingLines);
+    }
+
+    [Fact]
+    public void AnOutstandingQuoteAsksForTheItemsItCovers()
+    {
+        var book = new QuoteBook();
+        Assert.False(book.AsksFor([new(MinerItem, 10)]));
+
+        book.Begin("quote", twoItems, 0);
+
+        Assert.True(book.AsksFor([new(MinerItem, 4)]));
+        Assert.True(book.AsksFor(twoItems));
+        Assert.False(book.AsksFor([new(MinerItem, 11)]));
+        Assert.False(book.AsksFor([new(CulinarianItem, 1)]));
+
+        book.Land([], pricedAtUtc);
+
+        Assert.False(book.AsksFor([new(MinerItem, 4)]));
+
+        book.Defer(twoItems, 0);
+
+        Assert.True(book.AsksFor([new(CarpenterItem, 1)]));
     }
 
     [Fact]

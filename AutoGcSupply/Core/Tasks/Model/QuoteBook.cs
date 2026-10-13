@@ -3,11 +3,12 @@ using AutoGcSupply.Core.Value.Model;
 
 namespace AutoGcSupply.Core.Tasks.Model;
 
-internal enum QuoteStatus : byte { Idle, Pending, Ready, Failed }
+internal enum QuoteStatus : byte { Idle, Pending, Ready, Failed, Waiting }
 
 internal sealed class QuoteBook
 {
-    public const long TimeoutMs = 120_000;
+    public const long TimeoutMs = 600_000;
+    public const long BusyRetryMs = 10_000;
     public const int MaxExpiredRetries = 3;
 
     public static readonly TimeSpan FreshFor = TimeSpan.FromMinutes(10);
@@ -23,6 +24,8 @@ internal sealed class QuoteBook
 
     public long StartedAtMs { get; private set; }
 
+    public long RetryAtMs { get; private set; }
+
     public DateTime PricedAtUtc { get; private set; }
 
     public int ExpiredCount { get; private set; }
@@ -33,9 +36,11 @@ internal sealed class QuoteBook
 
     public ShopperQuoteLine[] PendingLines => pendingLines;
 
+    public bool Outstanding => Status is QuoteStatus.Pending or QuoteStatus.Waiting;
+
     public bool NeedsQuote(ReadOnlySpan<ShopperQuoteLine> needed)
     {
-        if (needed.IsEmpty || Status == QuoteStatus.Pending || QuoteLines.Covers(readyLines, needed))
+        if (needed.IsEmpty || Outstanding || QuoteLines.Covers(readyLines, needed))
         {
             return false;
         }
@@ -46,7 +51,11 @@ internal sealed class QuoteBook
     public bool IsFresh(ReadOnlySpan<ShopperQuoteLine> needed, DateTime nowUtc)
         => readyLines.Length > 0 && QuoteLines.Covers(readyLines, needed) && nowUtc - PricedAtUtc <= FreshFor;
 
-    public bool TimedOut(long nowMs) => Status == QuoteStatus.Pending && nowMs - StartedAtMs >= TimeoutMs;
+    public bool AsksFor(ReadOnlySpan<ShopperQuoteLine> needed) => Outstanding && QuoteLines.Covers(pendingLines, needed);
+
+    public bool TimedOut(long nowMs) => Outstanding && nowMs - StartedAtMs >= TimeoutMs;
+
+    public bool RetryDue(long nowMs) => Status == QuoteStatus.Waiting && nowMs >= RetryAtMs;
 
     public PricingState StateFor(ReadOnlySpan<ShopperQuoteLine> needed, bool shopperAvailable)
     {
@@ -65,7 +74,12 @@ internal sealed class QuoteBook
             return PricingState.Ready;
         }
 
-        return Status == QuoteStatus.Failed && QuoteLines.Covers(failedLines, needed) ? PricingState.Failed : PricingState.Pending;
+        if (Status == QuoteStatus.Failed && QuoteLines.Covers(failedLines, needed))
+        {
+            return PricingState.Failed;
+        }
+
+        return Status == QuoteStatus.Waiting ? PricingState.Queued : PricingState.Pending;
     }
 
     public void Begin(string quoteId, ShopperQuoteLine[] lines, long nowMs)
@@ -75,6 +89,18 @@ internal sealed class QuoteBook
         StartedAtMs = nowMs;
         Status = QuoteStatus.Pending;
         Revision++;
+    }
+
+    public void Defer(ShopperQuoteLine[] lines, long nowMs)
+    {
+        if (Status != QuoteStatus.Waiting)
+        {
+            StartedAtMs = nowMs;
+        }
+
+        pendingLines = lines;
+        RetryAtMs = nowMs + BusyRetryMs;
+        Settle(QuoteStatus.Waiting);
     }
 
     public void Land(ItemPrice[] landed, DateTime pricedAtUtc)
@@ -119,12 +145,18 @@ internal sealed class QuoteBook
 
     public void Clear()
     {
-        pendingLines = [];
         readyLines = [];
         failedLines = [];
         prices = [];
         PricedAtUtc = default;
         ExpiredCount = 0;
+        if (Outstanding)
+        {
+            Revision++;
+            return;
+        }
+
+        pendingLines = [];
         Settle(QuoteStatus.Idle);
     }
 

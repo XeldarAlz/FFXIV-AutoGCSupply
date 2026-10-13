@@ -81,9 +81,17 @@ internal sealed partial class GcRunTask
         }
 
         session.Tracker.SetStep(RunStep.Pricing, Loc.T(L.Run.StatusPricing));
-        Diag($"Run: pricing {needed.Length} item(s) again before buying.");
-        quotes.Start(needed);
-        while (quotes.Book.Status == QuoteStatus.Pending)
+        if (quotes.Book.AsksFor(needed))
+        {
+            Diag($"Run: waiting for the quote already asked for, which covers the {needed.Length} item(s) to buy.");
+        }
+        else
+        {
+            Diag($"Run: pricing {needed.Length} item(s) again before buying.");
+            quotes.Start(needed);
+        }
+
+        while (quotes.Book.Outstanding)
         {
             await DelayMs(PollMs);
             if (CancelToken.IsCancellationRequested)

@@ -120,6 +120,7 @@ internal static class ShopperStrip
             return pricing switch
             {
                 PricingState.Pending => (SpinnerRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingPending)).X,
+                PricingState.Queued => (SpinnerRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingQueued)).X,
                 PricingState.Ready => (DotRadius * 2f + 8f) * scale + TextDraw.Measure(Loc.T(L.Requests.PricingReady)).X,
                 PricingState.Failed => TextDraw.Measure(Loc.T(L.Requests.PricingFailed)).X + ItemGap * scale + PillButton.Width(Loc.T(L.Requests.PricingRetry), FontAwesomeIcon.Redo),
                 _ => 0f,
@@ -135,16 +136,11 @@ internal static class ShopperStrip
         switch (pricing)
         {
             case PricingState.Pending:
-            {
-                var radius = SpinnerRadius * scale;
-                var center = new Vector2(x + radius, midY);
-                ProgressRing.Track(center, radius, SpinnerThickness * scale, Styling.WithAlpha(Styling.BorderDim, 0.7f));
-                ProgressRing.Sweep(center, radius, SpinnerThickness * scale, Styling.AccentBlue, Styling.PulseCalm, MathF.PI * 0.9f, 1f);
-                x += radius * 2f + 8f * scale;
-                Caption(Loc.T(L.Requests.PricingPending), x, float.MaxValue, midY, Styling.AccentBlueSoft);
-                HoverHelp(start, midY, L.Requests.PricingPendingHelp);
+                DrawWaiting(L.Requests.PricingPending, L.Requests.PricingPendingHelp, Styling.AccentBlue, Styling.AccentBlueSoft, x, midY);
                 return;
-            }
+            case PricingState.Queued:
+                DrawWaiting(L.Requests.PricingQueued, L.Requests.PricingQueuedHelp, Styling.AccentAmber, Styling.AccentAmberSoft, x, midY);
+                return;
             case PricingState.Ready:
             {
                 var radius = DotRadius * scale;
@@ -172,6 +168,17 @@ internal static class ShopperStrip
                 return;
             }
         }
+    }
+
+    private static void DrawWaiting(LocString caption, LocString help, Vector4 spinner, Vector4 text, float x, float midY)
+    {
+        var scale = ImGuiHelpers.GlobalScale;
+        var radius = SpinnerRadius * scale;
+        var center = new Vector2(x + radius, midY);
+        ProgressRing.Track(center, radius, SpinnerThickness * scale, Styling.WithAlpha(Styling.BorderDim, 0.7f));
+        ProgressRing.Sweep(center, radius, SpinnerThickness * scale, spinner, Styling.PulseCalm, MathF.PI * 0.9f, 1f);
+        Caption(Loc.T(caption), x + radius * 2f + 8f * scale, float.MaxValue, midY, text);
+        HoverHelp(x, midY, help);
     }
 
     private static void HoverHelp(float x, float midY, LocString help)

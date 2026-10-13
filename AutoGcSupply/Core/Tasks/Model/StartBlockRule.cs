@@ -85,7 +85,7 @@ internal static class StartBlockRule
     private static RowCounts Count(in StartFacts facts, ReadOnlySpan<TodayRow> rows)
     {
         var shopperAvailable = facts.Shopper == ShopperState.Available;
-        var pricesOutstanding = facts.Pricing is PricingState.Pending or PricingState.Failed;
+        var pricesOutstanding = facts.Pricing is PricingState.Pending or PricingState.Queued or PricingState.Failed;
         var counts = new RowCounts();
         for (var index = 0; index < rows.Length; index++)
         {

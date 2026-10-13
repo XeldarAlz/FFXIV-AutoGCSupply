@@ -7,7 +7,7 @@ internal enum TodayState : byte { NotLoggedIn, NoGrandCompany, Reading, NotLoade
 
 internal enum ShopperState : byte { Missing, Outdated, Newer, Available }
 
-internal enum PricingState : byte { NotNeeded, Pending, Ready, Failed, Unavailable }
+internal enum PricingState : byte { NotNeeded, Pending, Queued, Ready, Failed, Unavailable }
 
 internal enum StartBlock : byte
 {
