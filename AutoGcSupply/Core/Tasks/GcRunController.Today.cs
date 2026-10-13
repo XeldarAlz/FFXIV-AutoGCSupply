@@ -45,6 +45,7 @@ internal sealed partial class GcRunController
     private DayKey day;
     private bool dayKnown;
     private bool rolloverLoadWanted;
+    private bool quotesOutdated;
     private bool refreshWanted;
     private LoadMark autoLoaded;
     private TimersLoader? loader;
@@ -89,6 +90,7 @@ internal sealed partial class GcRunController
     private void ReadInputs()
     {
         ReadDay(DateTime.UtcNow);
+        DropOutdatedQuotes();
         ReadCharacter();
         ReadRequests();
         RecountBags();
@@ -107,13 +109,24 @@ internal sealed partial class GcRunController
         if (dayKnown)
         {
             rolloverLoadWanted = true;
-            quotes.Clear();
+            quotesOutdated = true;
             RunLog.Info($"A new supply day began ({current}); the requests are read again.");
         }
 
         day = current;
         dayKnown = true;
         todayDirty = true;
+    }
+
+    private void DropOutdatedQuotes()
+    {
+        if (!quotesOutdated || session is not null)
+        {
+            return;
+        }
+
+        quotesOutdated = false;
+        quotes.Clear();
     }
 
     private void ReadCharacter()

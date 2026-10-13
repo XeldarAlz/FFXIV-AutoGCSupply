@@ -21,9 +21,8 @@ internal sealed partial class GcRunTask
             return true;
         }
 
-        if (!session.Authorization.AllowsPurchases(session.ReadDay, DateTime.UtcNow))
+        if (!DayAllowsPurchases())
         {
-            Unbought(RowNote.DayChanged, "a new supply day began after Start");
             return true;
         }
 
@@ -39,7 +38,23 @@ internal sealed partial class GcRunTask
             return false;
         }
 
-        return !RunPlanRules.AnyPurchase(session.Plan) || await Shop();
+        if (!RunPlanRules.AnyPurchase(session.Plan) || !DayAllowsPurchases())
+        {
+            return true;
+        }
+
+        return await Shop();
+    }
+
+    private bool DayAllowsPurchases()
+    {
+        if (session.Authorization.AllowsPurchases(session.ReadDay, DateTime.UtcNow))
+        {
+            return true;
+        }
+
+        Unbought(RowNote.DayChanged, "a new supply day began after Start");
+        return false;
     }
 
     private void Unbought(RowNote note, string reason)
