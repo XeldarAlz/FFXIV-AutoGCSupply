@@ -2,6 +2,7 @@ using AutoGcSupply.Core.Ipc;
 using AutoGcSupply.Core.Travel;
 using clib.TaskSystem;
 using Dalamud.Game.ClientState.Conditions;
+using ECommons;
 using ECommons.DalamudServices;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -102,10 +103,11 @@ public abstract partial class AutoCommon
         }
 
         Status = "Waiting for the character to be ready";
+        Diag($"Travel: waiting for the character to be free to move ({ConditionTag()})");
         var ready = await WaitUntilTimed(PlayerReady, TravelPlayerReadyWaitMs, "travel-player-ready");
         if (!ready && !CancelToken.IsCancellationRequested)
         {
-            Warn("Travel: the character never became ready to move");
+            Warn($"Travel: the character never became free to move ({ConditionTag()})");
         }
 
         return ready;
@@ -626,9 +628,7 @@ public abstract partial class AutoCommon
     }
 
     private static bool PlayerReady()
-        => Svc.Objects.LocalPlayer is not null
-        && !Svc.Condition[ConditionFlag.BetweenAreas]
-        && !Svc.Condition[ConditionFlag.BetweenAreas51];
+        => Svc.Objects.LocalPlayer is not null && !GenericHelpers.IsOccupied();
 
     private static bool FreeToMount()
         => !Svc.Condition[ConditionFlag.InCombat]
