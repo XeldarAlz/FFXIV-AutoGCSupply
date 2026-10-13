@@ -114,6 +114,34 @@ public sealed class RewardWindowCheckTests
     }
 
     [Fact]
+    public void DescribesAWindowForAnotherItemWithBothNamesAndTheSealRange()
+    {
+        var shown = new RewardWindowSample(true, "\uE03C Spru\u00ADce Lumber ", HighSeals);
+
+        var mismatch = RewardWindowCheck.Mismatch(RewardWindowVerdict.OtherItem, shown, MapleLumber, highQualityRow, NoSealsYet, RankCap);
+
+        Assert.Equal(new RewardWindowMismatch(RewardWindowVerdict.OtherItem, "Spruce Lumber", HighSeals, MapleLumber, HighSeals, 1_500), mismatch);
+    }
+
+    [Fact]
+    public void DescribesOtherSealsWithTheFloorTheCapLeaves()
+    {
+        var shown = new RewardWindowSample(true, MapleLumber, 100);
+
+        var mismatch = RewardWindowCheck.Mismatch(RewardWindowVerdict.OtherSeals, shown, MapleLumber, highQualityRow, RankCap - 200, RankCap);
+
+        Assert.Equal(new RewardWindowMismatch(RewardWindowVerdict.OtherSeals, MapleLumber, 100, MapleLumber, 200, 1_500), mismatch);
+    }
+
+    [Fact]
+    public void DescribesAnUnreadableWindowWithoutShownValues()
+    {
+        var mismatch = RewardWindowCheck.Mismatch(RewardWindowVerdict.Unreadable, RewardWindowSample.Unreadable, MapleLumber, normalQualityRow, NoSealsYet, SealCapRule.UnknownCap);
+
+        Assert.Equal(new RewardWindowMismatch(RewardWindowVerdict.Unreadable, string.Empty, 0, MapleLumber, NormalSeals, 750), mismatch);
+    }
+
+    [Fact]
     public void CannotJudgeAWindowItCouldNotRead()
     {
         Assert.Equal(RewardWindowVerdict.Unreadable, RewardWindowCheck.Judge(RewardWindowSample.Unreadable, MapleLumber, highQualityRow, NoSealsYet, SealCapRule.UnknownCap));

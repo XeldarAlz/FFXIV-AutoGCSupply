@@ -125,12 +125,13 @@ internal sealed partial class HandInDriver
             return Halt.None;
         }
 
+        var mismatch = RewardWindowCheck.Mismatch(verdict, shown, expectedName, target, sealsBefore, sealCap);
         var detail = verdict == RewardWindowVerdict.Unreadable
             ? $"the reward window for {HandInReads.Describe(target)} could not be read"
-            : $"the reward window shows '{shown.ItemName}' for {shown.Seals} seals where {HandInReads.Describe(target)} expects '{expectedName}' for {RewardWindowCheck.LowestSeals(target.SealReward, sealsBefore, sealCap)} to {RewardWindowCheck.HighestSeals(target.SealReward)} seals";
+            : $"the reward window shows '{mismatch.ShownItemName}' for {mismatch.ShownSeals} seals where {HandInReads.Describe(target)} expects '{mismatch.ExpectedItemName}' for {mismatch.LowestSeals} to {mismatch.HighestSeals} seals";
         Warn($"Hand-in: {detail} ({verdict}); cancelling it");
         await OfficerWindows.CloseReward(cancelled);
-        return new Halt(HandInPauseReason.RewardWindowMismatch, detail);
+        return new Halt(HandInPauseReason.RewardWindowMismatch, detail) { RewardWindow = mismatch };
     }
 
     private async Task<Halt> PressDeliver(HandInTarget target)

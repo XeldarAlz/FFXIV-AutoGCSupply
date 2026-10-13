@@ -25,6 +25,15 @@ internal static class RewardWindowCheck
         return SealsFit(shown.Seals, target.SealReward, sealsBefore, sealCap) ? RewardWindowVerdict.Matches : RewardWindowVerdict.OtherSeals;
     }
 
+    public static RewardWindowMismatch Mismatch(RewardWindowVerdict verdict, in RewardWindowSample shown, string expectedItemName, in HandInTarget target, int sealsBefore, int sealCap)
+        => new(
+            verdict,
+            PromptText.Normalize(shown.ItemName),
+            shown.Seals,
+            PromptText.Normalize(expectedItemName),
+            LowestSeals(target.SealReward, sealsBefore, sealCap),
+            HighestSeals(target.SealReward));
+
     public static bool SealsFit(int shownSeals, int expectedSeals, int sealsBefore, int sealCap)
     {
         var lowest = LowestSeals(expectedSeals, sealsBefore, sealCap);
