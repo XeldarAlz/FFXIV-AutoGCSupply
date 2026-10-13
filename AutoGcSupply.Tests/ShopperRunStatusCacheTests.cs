@@ -44,7 +44,7 @@ public sealed class ShopperRunStatusCacheTests
     }
 
     [Fact]
-    public void SameRevisionKeepsTheViewItWasFirstReadWith()
+    public void SameStampKeepsTheViewItWasFirstReadWith()
     {
         var cache = new ShopperRunStatusCache();
         cache.Read(RunId, ShopperFixtures.RunStatus);
@@ -52,6 +52,60 @@ public sealed class ShopperRunStatusCacheTests
         var view = cache.Read(RunId, Edit(root => root["status"] = "Changed without a new revision"));
 
         Assert.Equal("Searching the listings of Darksteel Ore", view.Status);
+    }
+
+    [Fact]
+    public void ATerminalResultUnderTheSameRevisionIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, ShopperFixtures.RunStatus);
+
+        var view = cache.Read(RunId, Edit(root =>
+        {
+            root["terminal"] = true;
+            root["outcome"] = "Completed";
+        }));
+
+        Assert.True(view.Terminal);
+        Assert.Equal(ShopperRunOutcome.Completed, view.Outcome);
+    }
+
+    [Fact]
+    public void APauseUnderTheSameRevisionIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, ShopperFixtures.RunStatus);
+
+        var view = cache.Read(RunId, Edit(root =>
+        {
+            root["paused"] = true;
+            root["pauseReason"] = "InContent";
+        }));
+
+        Assert.True(view.Paused);
+        Assert.Equal(ShopperPauseReason.InContent, view.PauseReason);
+    }
+
+    [Fact]
+    public void ANewPhaseUnderTheSameRevisionIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, ShopperFixtures.RunStatus);
+
+        var view = cache.Read(RunId, Edit(root => root["phase"] = "Finishing"));
+
+        Assert.Equal(ShopperRunPhase.Finishing, view.Phase);
+    }
+
+    [Fact]
+    public void NeedingThePlayerUnderTheSameRevisionIsReadAgain()
+    {
+        var cache = new ShopperRunStatusCache();
+        cache.Read(RunId, ShopperFixtures.RunStatus);
+
+        var view = cache.Read(RunId, Edit(root => root["needsPlayer"] = true));
+
+        Assert.True(view.NeedsPlayer);
     }
 
     [Fact]
