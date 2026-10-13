@@ -355,6 +355,8 @@
   "changelog.new": "Novo",
   "changelog.changes.one": "{0} mudança",
   "changelog.changes.other": "{0} mudanças",
+  "changelog.r1002.1": "Corrigido: a viagem até o oficial de pessoal nunca começava após as compras, porque a janela do quadro do mercado deixada aberta prendia o personagem e a execução terminava como se precisasse de você. Agora as janelas são fechadas antes da viagem",
+  "changelog.r1002.2": "A viagem espera o personagem ficar livre antes de começar, e o registro informa o que o prende em vez de reportá-lo como em terra",
   "changelog.r1001.1": "As entregas não pausam mais em cada linha quando a janela de entrega tem um layout diferente do esperado; cada entrega continua confirmada pelo seu inventário",
   "changelog.r1000.1": "Página Hoje: os 8 pedidos de suprimento e os 3 de provisão do dia com item, quantidade, estoque, custo, EXP, selos e gil por 1 mil EXP",
   "changelog.r1000.2": "Lê os pedidos abrindo por um instante a janela de temporizadores, e de novo após o reinício diário às 20:00 UTC",

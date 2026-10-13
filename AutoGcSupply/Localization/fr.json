@@ -355,6 +355,8 @@
   "changelog.new": "Nouveau",
   "changelog.changes.one": "{0} changement",
   "changelog.changes.other": "{0} changements",
+  "changelog.r1002.1": "Correction : le trajet vers l'officier du personnel ne démarrait jamais après les achats, car la fenêtre du tableau des ventes restée ouverte immobilisait le personnage et la session se terminait comme si elle avait besoin de vous. Les fenêtres sont désormais fermées avant le trajet",
+  "changelog.r1002.2": "Le trajet attend que le personnage soit libre avant de démarrer, et le journal nomme ce qui le retient au lieu de l'indiquer au sol",
   "changelog.r1001.1": "Les remises ne se mettent plus en pause à chaque ligne quand la fenêtre de remise est disposée autrement que prévu ; chaque remise reste confirmée par votre inventaire",
   "changelog.r1000.1": "Page Aujourd'hui : les 8 demandes d'approvisionnement et les 3 de ravitaillement du jour, avec objet, quantité, stock, coût, EXP, sceaux et gils pour 1 000 EXP",
   "changelog.r1000.2": "Lit les demandes en ouvrant un instant la fenêtre des minuteurs, puis de nouveau après la réinitialisation quotidienne de 20:00 UTC",

@@ -355,6 +355,8 @@
   "changelog.new": "Yeni",
   "changelog.changes.one": "{0} değişiklik",
   "changelog.changes.other": "{0} değişiklik",
+  "changelog.r1002.1": "Düzeltildi: alışverişlerden sonra personel subayına yolculuk hiç başlamıyordu; açık bırakılan pazar panosu penceresi karakteri yerinde tutuyor ve çalıştırma sana ihtiyaç duyuyormuş gibi bitiyordu. Pencereler artık yolculuktan önce kapatılıyor",
+  "changelog.r1002.2": "Yolculuk başlamadan önce karakterin serbest kalmasını bekliyor ve günlük, karakteri yerde diye bildirmek yerine onu neyin tuttuğunu yazıyor",
   "changelog.r1001.1": "Teslim penceresi beklenenden farklı düzenlendiğinde teslimler artık her satırda duraklamıyor; her teslim yine envanterinden doğrulanıyor",
   "changelog.r1000.1": "Bugün sayfası: günün 8 tedarik ve 3 erzak talebi; eşya, miktar, eldeki stok, maliyet, XP, mühür ve 1.000 XP başına gil ile",
   "changelog.r1000.2": "Talepleri Zamanlayıcılar penceresini bir anlığına açarak okur ve 20:00 UTC'deki günlük sıfırlamadan sonra yeniden okur",

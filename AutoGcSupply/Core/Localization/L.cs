@@ -136,6 +136,12 @@ internal static partial class L
         public static readonly LocString New = new("changelog.new", "New");
         public static readonly LocPlural Changes = new("changelog.changes", "{0} change", "{0} changes");
 
+        public static readonly LocString[] Release1002 =
+        [
+            new("changelog.r1002.1", "Fixed the trip to the Personnel Officer never starting after the purchases: the market board window left open held the character in place, and the run ended as needing you. The windows are closed before the trip now"),
+            new("changelog.r1002.2", "Travel waits for the character to be free before it starts, and the log names what holds it instead of reporting the character as grounded"),
+        ];
+
         public static readonly LocString[] Release1001 =
         [
             new("changelog.r1001.1", "Hand-ins no longer pause on every row when the delivery window is laid out differently than expected; each delivery is still confirmed from your bags"),
