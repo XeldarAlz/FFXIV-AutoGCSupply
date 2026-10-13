@@ -186,11 +186,11 @@ public sealed class QualityRuleTests
     }
 
     [Fact]
-    public void ProvisioningBuysHighOnlyWithoutNormalListings()
+    public void ProvisioningNeverBuysHigh()
     {
         var choice = Provisioning(new OwnedCount(0, 0), Item(ItemId, 10, None, PerUnit(10, 400)));
 
-        Assert.Equal(new QualityChoice(RowCoverage.ToBuy, ItemQuality.High, 10, 400, 4_000), choice);
+        Assert.Equal(new QualityChoice(RowCoverage.NoListings, ItemQuality.Normal, 10, 0, 0), choice);
     }
 
     [Theory]
@@ -201,21 +201,21 @@ public sealed class QualityRuleTests
     {
         var onlyNormal = QualityRule.Choose(SupplyMissionKind.Provisioning, policy, 10, default, true, Item(ItemId, 10, PerUnit(10, 100), None));
         var onlyHigh = QualityRule.Choose(SupplyMissionKind.Provisioning, policy, 10, default, true, Item(ItemId, 10, None, PerUnit(10, 100)));
+        var unpriced = QualityRule.Choose(SupplyMissionKind.Provisioning, policy, 10, default, false, default);
 
-        Assert.Equal(ItemQuality.Normal, onlyNormal.Quality);
-        Assert.Equal(RowCoverage.ToBuy, onlyNormal.Coverage);
-        Assert.Equal(ItemQuality.High, onlyHigh.Quality);
-        Assert.Equal(RowCoverage.ToBuy, onlyHigh.Coverage);
+        Assert.Equal(new QualityChoice(RowCoverage.ToBuy, ItemQuality.Normal, 10, 100, 1_000), onlyNormal);
+        Assert.Equal(new QualityChoice(RowCoverage.NoListings, ItemQuality.Normal, 10, 0, 0), onlyHigh);
+        Assert.Equal(new QualityChoice(RowCoverage.Unpriced, ItemQuality.Normal, 10, 0, 0), unpriced);
     }
 
     [Fact]
-    public void ProvisioningUsesOwnedNormalBeforeOwnedHigh()
+    public void ProvisioningCountsOnlyOwnedNormal()
     {
         var both = Provisioning(new OwnedCount(10, 10), Item(ItemId, 10, None, None));
-        var onlyHigh = Provisioning(new OwnedCount(3, 10), Item(ItemId, 10, None, None));
+        var onlyHigh = Provisioning(new OwnedCount(3, 10), Item(ItemId, 10, PerUnit(10, 100), PerUnit(10, 50)));
 
         Assert.Equal(new QualityChoice(RowCoverage.Owned, ItemQuality.Normal, 0, 0, 0), both);
-        Assert.Equal(new QualityChoice(RowCoverage.Owned, ItemQuality.High, 0, 0, 0), onlyHigh);
+        Assert.Equal(new QualityChoice(RowCoverage.ToBuy, ItemQuality.Normal, 7, 100, 700), onlyHigh);
     }
 
     [Fact]
