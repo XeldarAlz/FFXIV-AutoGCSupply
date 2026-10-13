@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="..\AutoGcSupply\Core\Shared\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\AutoGcSupply\Core\Changelog\**\*.cs" Link="Changelog\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\AutoGcSupply\Core\HandIn\Model\**\*.cs" Link="HandIn\Model\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\AutoGcSupply\Core\Localization\L.cs;..\AutoGcSupply\Core\Localization\L.*.cs;..\AutoGcSupply\Core\Localization\LocString.cs" Link="Localization\%(Filename)%(Extension)" />
   </ItemGroup>
 
