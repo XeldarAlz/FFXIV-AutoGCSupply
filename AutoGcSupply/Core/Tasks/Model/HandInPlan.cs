@@ -6,7 +6,7 @@ namespace AutoGcSupply.Core.Tasks.Model;
 
 internal readonly record struct HandInPlan(HandInTarget[] Targets, int[] RowOfTarget)
 {
-    public static HandInPlan Build(ReadOnlySpan<RowDecision> plan, Span<RowProgress> progress, ReadOnlySpan<OwnedCount> ownedByRow, bool purchasesWereDry)
+    public static HandInPlan Build(ReadOnlySpan<RowDecision> plan, Span<RowProgress> progress, ReadOnlySpan<OwnedCount> ownedByRow)
     {
         Span<int> targetRows = stackalloc int[plan.Length];
         var count = 0;
@@ -25,12 +25,10 @@ internal readonly record struct HandInPlan(HandInTarget[] Targets, int[] RowOfTa
                 continue;
             }
 
-            progress[index] = progress[index].State switch
+            if (progress[index].State != RowRunState.NotBought)
             {
-                RowRunState.NotBought or RowRunState.WouldDeliver => progress[index],
-                RowRunState.Bought when purchasesWereDry => progress[index].With(RowRunState.WouldDeliver, RowNote.WouldHandIn),
-                _ => progress[index].With(RowRunState.Skipped, RowNote.NotInBags),
-            };
+                progress[index] = progress[index].With(RowRunState.Skipped, RowNote.NotInBags);
+            }
         }
 
         var targets = new HandInTarget[count];

@@ -3,7 +3,6 @@ using AutoGcSupply.Core.HandIn.Model;
 using AutoGcSupply.Core.Inventory;
 using AutoGcSupply.Core.Inventory.Model;
 using AutoGcSupply.Core.Localization;
-using AutoGcSupply.Core.Shopper;
 using AutoGcSupply.Core.Tasks.Model;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
@@ -29,7 +28,7 @@ internal sealed partial class GcRunTask
             }
         }
 
-        var plan = HandInPlan.Build(session.Plan, session.Progress, owned, session.ShopperDryRun);
+        var plan = HandInPlan.Build(session.Plan, session.Progress, owned);
         session.PublishRows();
         Diag($"Run: the bags cover {plan.Targets.Length} row(s) to hand in.");
         return plan;
@@ -37,18 +36,9 @@ internal sealed partial class GcRunTask
 
     private async Task<bool> HandIn(HandInPlan plan)
     {
-        var shopperDryRunNow = ShopperProbe.Read() switch
-        {
-            ShopperState.Missing => session.StartedDry,
-            ShopperState.Available => AutoShopperApi.Instance.DryRun(whenUnknown: true),
-            _ => true,
-        };
-        var dryRun = shopperDryRunNow || session.ShopperDryRun;
-        session.DryRun = dryRun;
-        session.Tracker.SetDryRun(dryRun);
         session.DidWork = true;
         session.HandInStarted = true;
-        var driver = new HandInDriver(new HandInRequest(plan.Targets, session.Authorization.SealCapPolicy, dryRun));
+        var driver = new HandInDriver(new HandInRequest(plan.Targets, session.Authorization.SealCapPolicy));
         var seenRevision = -1;
         IFramework.OnUpdateDelegate mirror = _ =>
         {
@@ -87,7 +77,7 @@ internal sealed partial class GcRunTask
 
         ShowHandInStep(driver, plan);
         var result = driver.Result;
-        var verdict = RunOutcomeRule.AfterHandIn(result, session.Progress, dryRun);
+        var verdict = RunOutcomeRule.AfterHandIn(result, session.Progress);
         switch (verdict.End)
         {
             case RunEnd.NeedsPlayer:

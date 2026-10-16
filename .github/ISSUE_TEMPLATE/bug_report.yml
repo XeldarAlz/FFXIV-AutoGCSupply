@@ -74,21 +74,8 @@ body:
     id: shopper-version
     attributes:
       label: Auto Shopper version
-      description: Shown in `/xlplugins` next to "Auto Shopper". Buying needs 1.1.0.0 or later. Write "not installed" when you run hand-in only.
-      placeholder: "1.1.0.0"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: dry-run
-    attributes:
-      label: Was Auto Shopper's dry run on?
-      description: The Dry run tile next to Automate shows Auto Shopper's switch. While it is on, a run buys nothing and hands nothing in. Without Auto Shopper there is no dry run, and a hand-in-only run delivers for real.
-      options:
-        - Yes, it was a dry run (nothing bought or handed in)
-        - No, it bought or handed in for real
-        - Auto Shopper is not installed or is too old (hand-in only, for real)
-        - Not sure
+      description: Shown in `/xlplugins` next to "Auto Shopper". Buying needs 1.2.0.0 or later. Write "not installed" when you run hand-in only.
+      placeholder: "1.2.0.0"
     validations:
       required: true
 

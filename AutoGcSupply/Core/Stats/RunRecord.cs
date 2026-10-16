@@ -7,7 +7,6 @@ internal sealed record RunRecord(
     DateTime StartedAtUtc,
     DateTime EndedAtUtc,
     RunEnd End,
-    bool DryRun,
     uint WorldId,
     int Delivered,
     int Planned,

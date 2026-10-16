@@ -22,7 +22,7 @@ Load the built plugin via `/xlsettings` -> **Experimental** -> **Dev Plugin Loca
 - `AutoGcSupply/Core/Requests/`: reading the day's requests from the game, the Timers window pass, and the supply day with its 20:00 UTC reset.
 - `AutoGcSupply/Core/Character/` and `AutoGcSupply/Core/Inventory/`: Grand Company, rank, seals and class levels, and the bag counts by quality.
 - `AutoGcSupply/Core/Value/`: the decision for each row (quality, what to buy, its price cap, experience, seals, gil per 1,000 experience).
-- `AutoGcSupply/Core/Shopper/`: the client for Auto Shopper's Buying API v1 (quotes, runs, run status, stop, dry run) and its JSON model.
+- `AutoGcSupply/Core/Shopper/`: the client for Auto Shopper's Buying API v1 (quotes, runs, run status, stop) and its JSON model.
 - `AutoGcSupply/Core/HandIn/`: the supply list reader and the hand-in driver, with the officer's menu, row matching, prompts, the reward window check and the delivery check.
 - `AutoGcSupply/Core/Tasks/`: the run controller and the run itself, the Today and run models, Start's refusal reasons, and the shared movement helpers (teleport, aethernet, walking, landing).
 - `AutoGcSupply/Core/Travel/` and `AutoGcSupply/Core/Ipc/`: zone and aetheryte data, and the vnavmesh bridge.
@@ -41,7 +41,7 @@ Keep logic small and direct. This plugin has one job.
 ## Before you open a PR
 
 1. `dotnet build -c Release` cleanly, and `dotnet test -c Release` passes.
-2. Test in game: at least one dry run of a request or two, with Auto Shopper 1.1.0.0 or later installed and its dry run on, from Automate to the supply list, and one supervised real hand-in of a single request when your change touches the run, the buying or the hand-in. Watch that hand-in the whole way and attach its Console lines. When you change how items are bought, make it a request that buys one cheap item under a small run spend cap. Grand Company headquarters and their officers differ between the three cities, so a fix that works for one Grand Company may not work for another.
+2. Test in game: at least one supervised run of a single request, with Auto Shopper 1.2.0.0 or later installed, from Automate to the delivery. Watch it the whole way and attach its Console lines. When you change how items are bought, make it a request that buys one cheap item under a small run spend cap. Grand Company headquarters and their officers differ between the three cities, so a fix that works for one Grand Company may not work for another.
 3. Keep the diff focused. One concern per PR.
 4. Match the existing style. No heavy abstractions "for later."
 5. Every string a user sees goes through `Core/Localization/L*.cs` and all nine catalogs under `AutoGcSupply/Localization/`, with the same keys in the same order. CI checks the keys and rejects em dashes.

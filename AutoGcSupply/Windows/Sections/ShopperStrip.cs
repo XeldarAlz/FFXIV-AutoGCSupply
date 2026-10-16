@@ -59,20 +59,10 @@ internal static class ShopperStrip
 
         if (today.Shopper == ShopperState.Available)
         {
-            var chip = Loc.T(today.ShopperDryRun ? L.Requests.DryRunOn : L.Requests.DryRunOff);
-            var chipWidth = Badge.Width(chip);
-            Place(chipWidth);
-            Badge.DrawLeft(drawList, chip, today.ShopperDryRun ? Styling.AccentBlue : Styling.AccentAmber, x, midY);
-            if (Hit.HoveringRect(new Vector2(x, midY - height * 0.5f), new Vector2(x + chipWidth, midY + height * 0.5f)))
-            {
-                Tooltip.Show(Loc.T(today.ShopperDryRun ? L.Requests.DryRunOnHelp : L.Requests.DryRunOffHelp));
-            }
-
-            x += chipWidth + gap;
-            var change = Loc.T(L.Requests.ChangeInShopper);
-            var buttonWidth = PillButton.Width(change, FontAwesomeIcon.ExternalLinkAlt);
+            var open = Loc.T(L.Running.OpenShopper);
+            var buttonWidth = PillButton.Width(open, FontAwesomeIcon.ExternalLinkAlt);
             Place(buttonWidth);
-            if (Pill("##agcs_shopper_change", change, Styling.AccentGlow, PillButton.Emphasis.Ghost, FontAwesomeIcon.ExternalLinkAlt, x, midY, null, right - x))
+            if (Pill("##agcs_shopper_open", open, Styling.AccentGlow, PillButton.Emphasis.Ghost, FontAwesomeIcon.ExternalLinkAlt, x, midY, null, right - x))
             {
                 controller.OpenAutoShopper();
             }

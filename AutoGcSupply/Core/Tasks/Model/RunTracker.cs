@@ -10,7 +10,6 @@ internal sealed class RunTracker
     private RunStep step = RunStep.Idle;
     private RunStep lastStep = RunStep.Idle;
     private string status = string.Empty;
-    private bool dryRun;
     private string shopperStatus = string.Empty;
     private bool shopperPaused;
     private long confirmedSpend;
@@ -36,7 +35,6 @@ internal sealed class RunTracker
                 Step = step,
                 LastStep = lastStep,
                 Status = status,
-                DryRun = dryRun,
                 ShopperStatus = shopperStatus,
                 ShopperPaused = shopperPaused,
                 ConfirmedSpend = confirmedSpend,
@@ -61,7 +59,6 @@ internal sealed class RunTracker
         step = RunStep.Reading;
         lastStep = RunStep.Reading;
         status = initialStatus;
-        dryRun = false;
         shopperStatus = string.Empty;
         shopperPaused = false;
         confirmedSpend = 0;
@@ -101,17 +98,6 @@ internal sealed class RunTracker
         }
 
         status = nextStatus;
-        Touch();
-    }
-
-    public void SetDryRun(bool nextDryRun)
-    {
-        if (dryRun == nextDryRun)
-        {
-            return;
-        }
-
-        dryRun = nextDryRun;
         Touch();
     }
 

@@ -27,7 +27,6 @@ internal static class HandInMirror
     {
         HandInRowStatus.Delivering => current.With(RowRunState.HandingIn, RowNote.HandingIn),
         HandInRowStatus.Delivered => current.With(RowRunState.Delivered, RowNote.HandedIn) with { SealsLost = result.SealsLost },
-        HandInRowStatus.WouldDeliver => current.With(RowRunState.WouldDeliver, RowNote.WouldHandIn) with { SealsLost = result.SealsLost },
         HandInRowStatus.Skipped => current.With(RowRunState.Skipped, SkipNote(result)),
         HandInRowStatus.Unconfirmed => current.With(RowRunState.Unconfirmed, RowNote.Unconfirmed),
         _ => current.State == RowRunState.HandingIn ? current.With(RowRunState.Waiting, RowNote.InBags) : current,

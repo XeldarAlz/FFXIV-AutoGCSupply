@@ -51,7 +51,7 @@ internal sealed partial class GcRunController
             settings.PriceTolerancePercent,
             configuration.SealCapPolicy,
             decisions);
-        var active = new GcRunSession(authorization, tracker, labels) { StartedDry = model.ShopperDryRun };
+        var active = new GcRunSession(authorization, tracker, labels);
         session = active;
         PauseReason = PauseReason.None;
         tracker.Begin(new RunRow[authorization.Rows.Length], Loc.T(L.Run.StatusReading));
@@ -290,13 +290,13 @@ internal sealed partial class GcRunController
         active.PublishRows();
         var authorization = active.Authorization;
         var authorized = authorization.Rows.AsSpan();
-        var summary = RunOutcomeRule.Summarize(authorized, active.Progress, active.GilSpent, active.ShopperDryRun, DateTime.UtcNow - authorization.StartedAtUtc, active.DryRun);
+        var summary = RunOutcomeRule.Summarize(authorized, active.Progress, active.GilSpent, DateTime.UtcNow - authorization.StartedAtUtc);
         tracker.Finish(active.End, summary, RunText.Ended(active.End, summary, active.Failure));
-        Record(active, RunOutcomeRule.ForHistory(authorized, active.Progress, summary));
+        Record(active, summary);
         todayDirty = true;
         lastPollMs = 0;
         RunLog.Info(
-            $"Run {authorization.RunId} ended {active.End}{(summary.DryRun ? " (dry run)" : string.Empty)}: {summary.Delivered}/{summary.Planned} delivered, " +
+            $"Run {authorization.RunId} ended {active.End}: {summary.Delivered}/{summary.Planned} delivered, " +
             $"{summary.Experience} XP, {summary.Seals} seals, {summary.SealsLost} lost to the cap, {summary.GilSpent} gil spent in {summary.Duration:hh\\:mm\\:ss}.");
     }
 
@@ -314,7 +314,6 @@ internal sealed partial class GcRunController
             authorization.StartedAtUtc,
             DateTime.UtcNow,
             active.End,
-            summary.DryRun,
             authorization.WorldId,
             summary.Delivered,
             summary.Planned,

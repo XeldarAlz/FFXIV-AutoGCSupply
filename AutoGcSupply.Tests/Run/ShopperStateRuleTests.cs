@@ -7,29 +7,29 @@ public sealed class ShopperStateRuleTests
     [Fact]
     public void TheContractVersionWithEveryGateIsAvailable()
     {
-        Assert.Equal(ShopperState.Available, ShopperStateRule.Classify(installed: true, gatesPresent: true, apiVersion: 1));
+        Assert.Equal(ShopperState.Available, ShopperStateRule.Classify(installed: true, gatesMatch: true, apiVersion: 1));
     }
 
     [Theory]
     [InlineData(true, 0)]
     [InlineData(false, 1)]
-    public void AnInstalledAutoShopperWithoutTheApiIsOutdated(bool gatesPresent, int apiVersion)
+    public void AnInstalledAutoShopperWithoutTheApiIsOutdated(bool gatesMatch, int apiVersion)
     {
-        Assert.Equal(ShopperState.Outdated, ShopperStateRule.Classify(installed: true, gatesPresent, apiVersion));
+        Assert.Equal(ShopperState.Outdated, ShopperStateRule.Classify(installed: true, gatesMatch, apiVersion));
     }
 
     [Theory]
     [InlineData(true, true)]
     [InlineData(true, false)]
     [InlineData(false, false)]
-    public void ANewerApiAsksForAnUpdateOfThisPlugin(bool installed, bool gatesPresent)
+    public void ANewerApiAsksForAnUpdateOfThisPlugin(bool installed, bool gatesMatch)
     {
-        Assert.Equal(ShopperState.Newer, ShopperStateRule.Classify(installed, gatesPresent, apiVersion: 2));
+        Assert.Equal(ShopperState.Newer, ShopperStateRule.Classify(installed, gatesMatch, apiVersion: 2));
     }
 
     [Fact]
     public void NothingInstalledAndNoAnswerIsMissing()
     {
-        Assert.Equal(ShopperState.Missing, ShopperStateRule.Classify(installed: false, gatesPresent: false, apiVersion: 0));
+        Assert.Equal(ShopperState.Missing, ShopperStateRule.Classify(installed: false, gatesMatch: false, apiVersion: 0));
     }
 }

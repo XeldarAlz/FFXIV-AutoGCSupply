@@ -136,6 +136,13 @@ internal static partial class L
         public static readonly LocString New = new("changelog.new", "New");
         public static readonly LocPlural Changes = new("changelog.changes", "{0} change", "{0} changes");
 
+        public static readonly LocString[] Release1004 =
+        [
+            new("changelog.r1004.1", "Fixed Automate staying off with Auto Shopper 1.2.0.0 or later and asking you to update it; Auto Shopper 1.2.0.0 or later is now required"),
+            new("changelog.r1004.2", "Dry run is gone, as it is in Auto Shopper: Automate always buys and hands in for real, up to the run spend cap, so check the cap before your next run"),
+            new("changelog.r1004.3", "History drops the rows of past dry runs, which handed nothing in"),
+        ];
+
         public static readonly LocString[] Release1003 =
         [
             new("changelog.r1003.1", "Narrow Today windows now stack request details and wrap controls and status text to keep labels readable"),

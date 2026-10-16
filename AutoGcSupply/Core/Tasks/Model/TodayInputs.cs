@@ -28,8 +28,6 @@ internal readonly record struct TodayInputs
 
     public required ShopperState Shopper { get; init; }
 
-    public required bool ShopperDryRun { get; init; }
-
     public required long SpendCap { get; init; }
 
     public required bool SetupReady { get; init; }

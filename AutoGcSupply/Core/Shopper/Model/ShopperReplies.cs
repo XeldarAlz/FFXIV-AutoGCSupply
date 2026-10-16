@@ -153,7 +153,6 @@ internal static class ShopperReplies
 
         if (reply is not
             {
-                DryRun: bool dryRun,
                 Revision: long revision,
                 Paused: bool paused,
                 Terminal: bool terminal,
@@ -178,7 +177,6 @@ internal static class ShopperReplies
             RunId = reply.RunId ?? string.Empty,
             Known = true,
             CallerRunId = reply.CallerRunId ?? string.Empty,
-            DryRun = dryRun,
             Phase = ShopperNames<ShopperRunPhase>.ParseOr(reply.Phase, ShopperRunPhase.Unknown),
             State = ShopperNames<ShopperRunState>.ParseOr(reply.State, ShopperRunState.Unknown),
             Status = reply.Status ?? string.Empty,

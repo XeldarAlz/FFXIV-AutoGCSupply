@@ -19,9 +19,7 @@ internal static partial class L
         public static readonly LocString StatusFinishing = new("run.status.finishing", "Wrapping up");
         public static readonly LocString StatusPausedInContent = new("run.status.pausedInContent", "Paused while you are in a duty");
         public static readonly LocString StatusCompleted = new("run.status.completed", "Every selected request is handed in");
-        public static readonly LocString StatusCompletedDry = new("run.status.completedDry", "Dry run finished: every selected request would be handed in");
         public static readonly LocString StatusPartial = new("run.status.partial", "{0} of {1} requests handed in");
-        public static readonly LocString StatusPartialDry = new("run.status.partialDry", "Dry run finished: {0} of {1} requests would be handed in");
         public static readonly LocString StatusStopped = new("run.status.stopped", "Stopped");
         public static readonly LocString StatusNeedsPlayer = new("run.status.needsPlayer", "Waiting for you");
         public static readonly LocString FailedNotLoaded = new("run.failed.notLoaded", "Today's requests could not be read. Open the Timers window once, then press Refresh.");
@@ -52,7 +50,6 @@ internal static partial class L
         public static readonly LocString RowNotOffered = new("run.row.notOffered", "The supply list did not offer it");
         public static readonly LocString RowHandingIn = new("run.row.handingIn", "Handing in");
         public static readonly LocString RowHandedIn = new("run.row.handedIn", "Handed in");
-        public static readonly LocString RowWouldHandIn = new("run.row.wouldHandIn", "Would be handed in (dry run)");
         public static readonly LocString RowUnconfirmed = new("run.row.unconfirmed", "The hand-in could not be confirmed");
 
         public static readonly LocString NeedsConsent = new("run.needs.consent", "Auto Shopper needs your permission first. Open Auto Shopper, press Allow on its Shop page, then press Automate again.");

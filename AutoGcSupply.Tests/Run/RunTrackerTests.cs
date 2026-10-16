@@ -16,7 +16,6 @@ public sealed class RunTrackerTests
 
         tracker.SetStep(RunStep.Reading, "Reading");
         tracker.SetShopper(string.Empty, 0, false);
-        tracker.SetDryRun(false);
         tracker.SetRow(0, default);
 
         Assert.Same(first, tracker.Current);
@@ -36,7 +35,7 @@ public sealed class RunTrackerTests
         var tracker = new RunTracker();
         tracker.Begin(new RunRow[1], "Reading");
         tracker.NeedPlayer(NeedsPlayerReason.ShopperConsent, "Allow it");
-        var summary = new RunSummary(0, 1, 0, 0, 0, 0, false, TimeSpan.FromSeconds(5), false);
+        var summary = new RunSummary(0, 1, 0, 0, 0, 0, TimeSpan.FromSeconds(5));
 
         tracker.SetStep(RunStep.Buying, "Buying");
         tracker.Finish(RunEnd.NeedsPlayer, summary, "Waiting for you");

@@ -11,7 +11,7 @@ internal readonly record struct RunVerdict(RunEnd End, NeedsPlayerReason Reason)
 
 internal static class RunOutcomeRule
 {
-    public static RunVerdict AfterHandIn(in HandInResult result, ReadOnlySpan<RowProgress> progress, bool dryRun)
+    public static RunVerdict AfterHandIn(in HandInResult result, ReadOnlySpan<RowProgress> progress)
     {
         if (result.PauseReason == HandInPauseReason.DeliveryNotConfirmed || Any(progress, RowRunState.Unconfirmed))
         {
@@ -22,26 +22,26 @@ internal static class RunOutcomeRule
         {
             HandInOutcome.Paused => RunVerdict.NeedsPlayer(NeedsPlayerReason.HandInPaused),
             HandInOutcome.Cancelled => new RunVerdict(RunEnd.Stopped, NeedsPlayerReason.None),
-            _ => Completion(progress, dryRun),
+            _ => Completion(progress),
         };
     }
 
-    public static RunVerdict Completion(ReadOnlySpan<RowProgress> progress, bool dryRun)
+    public static RunVerdict Completion(ReadOnlySpan<RowProgress> progress)
     {
-        var settled = 0;
+        var delivered = 0;
         for (var index = 0; index < progress.Length; index++)
         {
-            if (Counts(progress[index], dryRun))
+            if (progress[index].State == RowRunState.Delivered)
             {
-                settled++;
+                delivered++;
             }
         }
 
-        var end = progress.Length > 0 && settled == progress.Length ? RunEnd.Completed : RunEnd.CompletedPartial;
+        var end = progress.Length > 0 && delivered == progress.Length ? RunEnd.Completed : RunEnd.CompletedPartial;
         return new RunVerdict(end, NeedsPlayerReason.None);
     }
 
-    public static RunSummary Summarize(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, long gilSpent, bool drySpend, TimeSpan duration, bool dryRun)
+    public static RunSummary Summarize(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, long gilSpent, TimeSpan duration)
     {
         var delivered = 0;
         var experience = 0L;
@@ -49,7 +49,7 @@ internal static class RunOutcomeRule
         var sealsLost = 0L;
         for (var index = 0; index < progress.Length; index++)
         {
-            if (!Counts(progress[index], dryRun))
+            if (progress[index].State != RowRunState.Delivered)
             {
                 continue;
             }
@@ -60,27 +60,8 @@ internal static class RunOutcomeRule
             sealsLost = Gil.SaturatingAdd(sealsLost, progress[index].SealsLost);
         }
 
-        return new RunSummary(delivered, authorized.Length, experience, seals, sealsLost, gilSpent, drySpend, duration, dryRun);
+        return new RunSummary(delivered, authorized.Length, experience, seals, sealsLost, gilSpent, duration);
     }
-
-    public static RunSummary ForHistory(ReadOnlySpan<RowDecision> authorized, ReadOnlySpan<RowProgress> progress, in RunSummary shown)
-    {
-        if (!shown.DryRun)
-        {
-            return shown;
-        }
-
-        var realSpend = shown.DrySpend ? 0 : shown.GilSpent;
-        if (realSpend == 0 && !Any(progress, RowRunState.Delivered))
-        {
-            return shown;
-        }
-
-        return Summarize(authorized, progress, realSpend, drySpend: false, shown.Duration, dryRun: false);
-    }
-
-    private static bool Counts(in RowProgress progress, bool dryRun)
-        => progress.State == RowRunState.Delivered || (dryRun && progress.State == RowRunState.WouldDeliver);
 
     private static bool Any(ReadOnlySpan<RowProgress> progress, RowRunState state)
     {

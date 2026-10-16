@@ -41,7 +41,6 @@ internal sealed partial class GcRunController
     private DecisionSettings settings;
     private long spendCap;
     private ShopperState shopper = ShopperState.Missing;
-    private bool shopperDryRun;
     private bool setupReady;
     private int seenQuoteRevision;
     private ShopperQuoteLine[] neededQuote = [];
@@ -211,15 +210,13 @@ internal sealed partial class GcRunController
     private void ReadShopper()
     {
         var shopperNow = ShopperProbe.Read();
-        var dryRunNow = shopperNow == ShopperState.Available && AutoShopperApi.Instance.DryRun(whenUnknown: true);
         var setupReadyNow = ExternalPlugins.AllRequiredInstalled();
-        if (shopperNow == shopper && dryRunNow == shopperDryRun && setupReadyNow == setupReady)
+        if (shopperNow == shopper && setupReadyNow == setupReady)
         {
             return;
         }
 
         shopper = shopperNow;
-        shopperDryRun = dryRunNow;
         setupReady = setupReadyNow;
         todayDirty = true;
     }
@@ -325,7 +322,6 @@ internal sealed partial class GcRunController
             OwnedBySlot = ownedBySlot,
             Settings = settings,
             Shopper = shopper,
-            ShopperDryRun = shopperDryRun,
             SpendCap = spendCap,
             SetupReady = setupReady,
             Running = session is not null,

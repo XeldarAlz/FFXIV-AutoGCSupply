@@ -166,7 +166,7 @@ public sealed class ShopperRunStatusCacheTests
     public void RevisionIsFoundWhateverItsCaseAndPlace()
     {
         var cache = new ShopperRunStatusCache();
-        var json = """{ "lines": [ { "itemId": 5057, "quality": "NormalQuality", "requested": 3, "acquired": 1, "missing": 2, "revision": 1 } ], "REVISION": 7, "Known": true, "dryRun": true, "paused": false, "terminal": false, "needsPlayer": false, "confirmedSpend": 630, "reservedSpend": 0, "SCHEMA": 1 }""";
+        var json = """{ "lines": [ { "itemId": 5057, "quality": "NormalQuality", "requested": 3, "acquired": 1, "missing": 2, "revision": 1 } ], "REVISION": 7, "Known": true, "paused": false, "terminal": false, "needsPlayer": false, "confirmedSpend": 630, "reservedSpend": 0, "SCHEMA": 1 }""";
         var first = cache.Read(RunId, json);
 
         var again = cache.Read(RunId, json);

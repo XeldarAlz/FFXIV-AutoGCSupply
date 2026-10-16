@@ -75,7 +75,6 @@ internal static class RunLabels
         RowRunState.NotBought => Loc.T(L.Running.RowNotBought),
         RowRunState.HandingIn => Loc.T(L.Running.RowHandingIn),
         RowRunState.Delivered => Loc.T(L.Running.RowDelivered),
-        RowRunState.WouldDeliver => Loc.T(L.Running.RowWouldDeliver),
         RowRunState.Skipped => Loc.T(L.Running.RowSkipped),
         _ => Loc.T(L.Running.RowUnconfirmed),
     };
@@ -85,7 +84,6 @@ internal static class RunLabels
         RowRunState.Buying or RowRunState.HandingIn => Styling.AccentBlue,
         RowRunState.Bought => Styling.AccentGlow,
         RowRunState.Delivered => Styling.AccentMint,
-        RowRunState.WouldDeliver => Styling.AccentBlueSoft,
         RowRunState.NotBought or RowRunState.Skipped => Styling.AccentAmber,
         RowRunState.Unconfirmed => Styling.AccentRose,
         _ => Styling.TextDim,
@@ -98,7 +96,6 @@ internal static class RunLabels
         RowRunState.NotBought => FontAwesomeIcon.Ban,
         RowRunState.HandingIn => FontAwesomeIcon.HandHolding,
         RowRunState.Delivered => FontAwesomeIcon.CheckCircle,
-        RowRunState.WouldDeliver => FontAwesomeIcon.Flask,
         RowRunState.Skipped => FontAwesomeIcon.Forward,
         RowRunState.Unconfirmed => FontAwesomeIcon.QuestionCircle,
         _ => FontAwesomeIcon.EllipsisH,
@@ -106,5 +103,5 @@ internal static class RunLabels
 
     public static bool IsActive(RowRunState state) => state is RowRunState.Buying or RowRunState.HandingIn;
 
-    public static bool IsDelivered(RowRunState state) => state is RowRunState.Delivered or RowRunState.WouldDeliver;
+    public static bool IsDelivered(RowRunState state) => state == RowRunState.Delivered;
 }

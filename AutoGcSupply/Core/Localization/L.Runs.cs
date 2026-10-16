@@ -15,8 +15,6 @@ internal static partial class L
         public static readonly LocString Experience = new("runs.experience", "{0} XP");
         public static readonly LocString Seals = new("runs.seals", "{0} seals");
         public static readonly LocString Spent = new("runs.spent", "{0} spent");
-        public static readonly LocString WouldSpend = new("runs.wouldSpend", "{0} would be spent");
-        public static readonly LocString DryRun = new("runs.dryRun", "Dry run");
         public static readonly LocString OutcomeCompleted = new("runs.outcome.completed", "Completed");
         public static readonly LocString OutcomePartial = new("runs.outcome.partial", "Partly done");
         public static readonly LocString OutcomeStopped = new("runs.outcome.stopped", "Stopped");

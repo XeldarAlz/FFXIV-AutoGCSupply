@@ -23,7 +23,7 @@ internal enum NeedsPlayerReason : byte
     DeliveryUnconfirmed,
 }
 
-internal enum RowRunState : byte { Waiting, Buying, Bought, NotBought, HandingIn, Delivered, WouldDeliver, Skipped, Unconfirmed }
+internal enum RowRunState : byte { Waiting, Buying, Bought, NotBought, HandingIn, Delivered, Skipped, Unconfirmed }
 
 internal readonly record struct RunRow(byte ClassJobId, uint ItemId, ItemQuality Quality, int Requested, RowRunState State, string Detail)
 {
@@ -31,7 +31,7 @@ internal readonly record struct RunRow(byte ClassJobId, uint ItemId, ItemQuality
         => new(authorized.Request.ClassJobId, authorized.Request.ItemId, authorized.ChosenQuality, authorized.Request.Requested, progress.State, detail);
 }
 
-internal readonly record struct RunSummary(int Delivered, int Planned, long Experience, long Seals, long SealsLost, long GilSpent, bool DrySpend, TimeSpan Duration, bool DryRun);
+internal readonly record struct RunSummary(int Delivered, int Planned, long Experience, long Seals, long SealsLost, long GilSpent, TimeSpan Duration);
 
 internal sealed class RunModel
 {
@@ -41,7 +41,6 @@ internal sealed class RunModel
         Step = RunStep.Idle,
         LastStep = RunStep.Idle,
         Status = string.Empty,
-        DryRun = false,
         ShopperStatus = string.Empty,
         ShopperPaused = false,
         ConfirmedSpend = 0,
@@ -56,7 +55,6 @@ internal sealed class RunModel
     public required RunStep Step { get; init; }
     public required RunStep LastStep { get; init; }
     public required string Status { get; init; }
-    public required bool DryRun { get; init; }
     public required string ShopperStatus { get; init; }
     public required bool ShopperPaused { get; init; }
     public required long ConfirmedSpend { get; init; }

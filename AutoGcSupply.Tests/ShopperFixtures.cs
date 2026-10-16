@@ -82,7 +82,6 @@ internal static class ShopperFixtures
           "runId": "4e1a...",
           "known": true,
           "callerRunId": "0d7f...",
-          "dryRun": true,
           "phase": "Shopping",
           "state": "Searching",
           "status": "Searching the listings of Darksteel Ore",

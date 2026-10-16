@@ -121,7 +121,7 @@ internal sealed partial class GcRunTask(GcRunSession session, QuoteTracker quote
     private void Finish()
     {
         session.Tracker.SetStep(RunStep.Finishing, Loc.T(L.Run.StatusFinishing));
-        var verdict = RunOutcomeRule.Completion(session.Progress, session.DryRun);
+        var verdict = RunOutcomeRule.Completion(session.Progress);
         session.Conclude(verdict.End);
     }
 }

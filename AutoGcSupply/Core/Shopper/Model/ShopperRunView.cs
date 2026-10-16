@@ -18,7 +18,6 @@ internal readonly record struct ShopperRunView
     public string RunId { get; init; }
     public bool Known { get; init; }
     public string CallerRunId { get; init; }
-    public bool DryRun { get; init; }
     public ShopperRunPhase Phase { get; init; }
     public ShopperRunState State { get; init; }
     public string Status { get; init; }

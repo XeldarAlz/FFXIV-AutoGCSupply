@@ -76,29 +76,17 @@ internal static class ActionDock
         var block = today.StartBlock;
         var settling = controller.Settling;
         var enabled = block == StartBlock.None && !settling;
-        var showTile = today.Shopper == ShopperState.Available;
-        var gap = ButtonGap * ImGuiHelpers.GlobalScale;
-        var tileWidth = showTile ? DryRunTile.Width(innerWidth) : 0f;
-        var buttonWidth = showTile ? innerWidth - tileWidth - gap : innerWidth;
         var origin = ImGui.GetCursorScreenPos();
         var reason = settling ? Loc.T(L.Run.StatusClosingList) : RunLabels.BlockReason(block);
-        if (StartButton.Draw(Sublabel(today), enabled, reason, buttonWidth))
+        if (StartButton.Draw(Sublabel(today), enabled, reason, innerWidth))
         {
             controller.Start();
         }
 
-        if (!enabled && Hit.HoveringRect(origin, origin + new Vector2(buttonWidth, height)))
+        if (!enabled && Hit.HoveringRect(origin, origin + new Vector2(innerWidth, height)))
         {
             Tooltip.Show(reason);
         }
-
-        if (!showTile)
-        {
-            return;
-        }
-
-        ImGui.SameLine(0f, gap);
-        DryRunTile.Draw(controller, today.ShopperDryRun, tileWidth, height);
     }
 
     private static string Sublabel(TodayModel today)

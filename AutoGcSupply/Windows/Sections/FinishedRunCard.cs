@@ -66,7 +66,7 @@ internal static class FinishedRunCard
         }
 
         var top = midY - (titleHeight + LineGap * scale + lineHeight) * 0.5f;
-        var title = Loc.T(run.Summary.DryRun ? L.Running.FinishedTitleDry : L.Running.FinishedTitle);
+        var title = Loc.T(L.Running.FinishedTitle);
         float titleWidth;
         using (Fonts.PushHeadline())
         {
@@ -105,7 +105,7 @@ internal static class FinishedRunCard
         }
 
         ImGui.SameLine(0f, gap);
-        StatTile.Draw(Loc.T(run.Summary.DrySpend ? L.Running.TileWouldSpend : L.Running.TileSpent), spent, null, Styling.AccentAmber, tileWidth);
+        StatTile.Draw(Loc.T(L.Running.TileSpent), spent, null, Styling.AccentAmber, tileWidth);
         ImGui.SameLine(0f, gap);
         StatTile.Draw(Loc.T(L.Running.TileTime), duration, null, Styling.AccentBlue, tileWidth);
     }

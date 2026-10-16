@@ -45,7 +45,6 @@ internal sealed class TodayModel
         Rows = [],
         Totals = default,
         Shopper = ShopperState.Missing,
-        ShopperDryRun = false,
         Pricing = PricingState.NotNeeded,
         SpendCap = 0,
         SuggestedSpendCap = 0,
@@ -58,7 +57,6 @@ internal sealed class TodayModel
     public required ImmutableArray<TodayRow> Rows { get; init; }
     public required TodayTotals Totals { get; init; }
     public required ShopperState Shopper { get; init; }
-    public required bool ShopperDryRun { get; init; }
     public required PricingState Pricing { get; init; }
     public required long SpendCap { get; init; }
     public required long SuggestedSpendCap { get; init; }

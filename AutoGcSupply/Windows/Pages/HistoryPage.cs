@@ -99,11 +99,6 @@ internal sealed class HistoryPage
         {
             var record = records[index];
             completedRuns += record.End == RunEnd.Completed ? 1 : 0;
-            if (record.DryRun)
-            {
-                continue;
-            }
-
             experienceSum += record.Experience;
             sealsSum += record.Seals;
             spentSum += record.GilSpent;
@@ -189,11 +184,7 @@ internal sealed class HistoryPage
         TextDraw.At(text.When, new Vector2(textX, top), Styling.TextStrong);
         var badgeMid = top + whenSize.Y * 0.5f;
         var badgeX = textX + whenSize.X + BadgeGap * 2f * scale;
-        badgeX += Badge.DrawLeft(drawList, RunLabels.OutcomeLabel(record.End), RunLabels.OutcomeColor(record.End), badgeX, badgeMid);
-        if (record.DryRun)
-        {
-            Badge.DrawLeft(drawList, Loc.T(L.Runs.DryRun), Styling.AccentBlue, badgeX + BadgeGap * scale, badgeMid);
-        }
+        Badge.DrawLeft(drawList, RunLabels.OutcomeLabel(record.End), RunLabels.OutcomeColor(record.End), badgeX, badgeMid);
 
         using (Fonts.PushCaption())
         {
@@ -213,7 +204,7 @@ internal sealed class HistoryPage
             Loc.T(L.Runs.Delivered, record.Delivered, record.Planned), TextDraw.Separator,
             Loc.T(L.Runs.Experience, record.Experience.ToString("N0", culture)), TextDraw.Separator,
             Loc.T(L.Runs.Seals, record.Seals.ToString("N0", culture)));
-        var spent = Loc.T(record.DryRun ? L.Runs.WouldSpend : L.Runs.Spent, Formatting.Gil(record.GilSpent));
+        var spent = Loc.T(L.Runs.Spent, Formatting.Gil(record.GilSpent));
         return string.Concat(detail, TextDraw.Separator, spent, TextDraw.Separator, Formatting.Elapsed(record.EndedAtUtc - record.StartedAtUtc));
     }
 

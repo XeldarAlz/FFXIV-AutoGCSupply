@@ -14,12 +14,10 @@ internal sealed partial class HandInDriver
 
     private static readonly SupplyListTab[] tabOrder = [SupplyListTab.Supply, SupplyListTab.Provisioning];
 
-    private int projectedSeals;
     private long listSettlesUntil;
 
     private async Task<Halt> WorkTabs()
     {
-        projectedSeals = HandInReads.Seals(grandCompany);
         for (var tabIndex = 0; tabIndex < tabOrder.Length; tabIndex++)
         {
             var tab = tabOrder[tabIndex];
@@ -101,12 +99,6 @@ internal sealed partial class HandInDriver
             {
                 SkipUnmatched(next.List, tab);
                 return Halt.None;
-            }
-
-            if (dryRun)
-            {
-                RecordDryRun(next.Match);
-                continue;
             }
 
             var halt = await DeliverMatch(next.Match);
@@ -196,23 +188,6 @@ internal sealed partial class HandInDriver
             SetRow(targetIndex, rows[targetIndex] with { Status = HandInRowStatus.Skipped, Match = miss.Status });
             Warn($"Hand-in: skipping {HandInReads.Describe(targets[targetIndex])}: {DescribeMiss(miss.Status, stocks[targetIndex])}");
         }
-    }
-
-    private void RecordDryRun(in RowMatch match)
-    {
-        var target = targets[match.TargetIndex];
-        var decision = SealCapRule.Evaluate(projectedSeals, target.SealReward, sealCap, sealCapPolicy);
-        if (decision.Action == SealCapAction.Skip)
-        {
-            SetRow(match.TargetIndex, rows[match.TargetIndex] with { Status = HandInRowStatus.Skipped, SealCap = SealCapAction.Skip });
-            Diag($"Dry run: would skip {HandInReads.Describe(target)} on row {match.RowIndex}, {decision.SealsOverCap} seals over the cap of {sealCap}");
-            return;
-        }
-
-        projectedSeals = SealCapRule.SealsAfter(projectedSeals, target.SealReward, sealCap);
-        var sealsLost = decision.Action == SealCapAction.DeliverWithLoss ? decision.SealsOverCap : 0;
-        SetRow(match.TargetIndex, new HandInRowResult(HandInRowStatus.WouldDeliver, RowMatchStatus.Matched, decision.Action, 0, sealsLost));
-        Diag($"Dry run: would deliver {HandInReads.Describe(target)} from row {match.RowIndex}{(sealsLost > 0 ? $", losing {sealsLost} seals to the cap" : string.Empty)}");
     }
 
     private string DescribeTarget(int targetIndex)

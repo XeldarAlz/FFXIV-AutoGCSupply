@@ -24,7 +24,6 @@ internal sealed partial class HandInDriver : AutoCommon
     private readonly HandInRowResult[] rows;
     private readonly OwnedCount[] stocks;
     private readonly SealCapPolicy sealCapPolicy;
-    private readonly bool dryRun;
     private readonly CancellationToken cancellation;
 
     private PersonnelOfficer officer;
@@ -38,7 +37,6 @@ internal sealed partial class HandInDriver : AutoCommon
         Array.Fill(rows, HandInRowResult.Pending);
         stocks = new OwnedCount[targets.Length];
         sealCapPolicy = request.SealCapPolicy;
-        dryRun = request.DryRun;
         this.cancellation = cancellation;
         cancelled = () => CancelToken.IsCancellationRequested;
     }
@@ -82,7 +80,7 @@ internal sealed partial class HandInDriver : AutoCommon
     private async Task<Halt> Run()
     {
         SkipInvalidTargets();
-        Diag($"Hand-in: {targets.Length} target(s), {(dryRun ? "dry run" : "live")}, seal cap policy {sealCapPolicy}: {DescribeTargets()}");
+        Diag($"Hand-in: {targets.Length} target(s), seal cap policy {sealCapPolicy}: {DescribeTargets()}");
         if (!AnyPending())
         {
             Diag("Hand-in: nothing to hand in");
@@ -133,7 +131,6 @@ internal sealed partial class HandInDriver : AutoCommon
         }
 
         var delivered = 0;
-        var settled = 0;
         var sealsGained = 0;
         var sealsLost = 0;
         for (var targetIndex = 0; targetIndex < rows.Length; targetIndex++)
@@ -145,16 +142,11 @@ internal sealed partial class HandInDriver : AutoCommon
                 sealsGained += row.SealsGained;
                 sealsLost += row.SealsLost;
             }
-
-            if (row.Status is HandInRowStatus.Delivered or HandInRowStatus.WouldDeliver)
-            {
-                settled++;
-            }
         }
 
         var outcome = CancelToken.IsCancellationRequested ? HandInOutcome.Cancelled
             : halt.Stopped ? HandInOutcome.Paused
-            : settled == rows.Length ? HandInOutcome.Completed
+            : delivered == rows.Length ? HandInOutcome.Completed
             : HandInOutcome.Partial;
         Step = HandInStep.Finished;
         CurrentTargetIndex = NoTarget;

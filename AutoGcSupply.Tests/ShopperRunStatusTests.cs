@@ -17,7 +17,6 @@ public sealed class ShopperRunStatusTests
         Assert.Equal("4e1a...", view.RunId);
         Assert.True(view.Known);
         Assert.Equal("0d7f...", view.CallerRunId);
-        Assert.True(view.DryRun);
         Assert.Equal(ShopperRunPhase.Shopping, view.Phase);
         Assert.Equal(ShopperRunState.Searching, view.State);
         Assert.Equal("Searching the listings of Darksteel Ore", view.Status);
@@ -41,7 +40,7 @@ public sealed class ShopperRunStatusTests
     {
         var json = $$"""
             {
-              "schema": 1, "runId": "{{GuidRunId}}", "known": false, "callerRunId": null, "dryRun": false,
+              "schema": 1, "runId": "{{GuidRunId}}", "known": false, "callerRunId": null,
               "phase": "Idle", "state": "Idle", "status": null, "revision": 0, "paused": false, "pauseReason": null,
               "terminal": false, "outcome": null, "needsPlayer": false, "confirmedSpend": 0, "reservedSpend": 0,
               "lines": [], "issues": [], "returnHome": "NotNeeded", "refusal": null
@@ -122,14 +121,12 @@ public sealed class ShopperRunStatusTests
         var view = Parse(root =>
         {
             Terminal(root, "Stopped");
-            root["dryRun"] = false;
             root["needsPlayer"] = true;
         });
 
         Assert.True(view.Terminal);
         Assert.Equal(ShopperRunOutcome.Stopped, view.Outcome);
         Assert.True(view.NeedsPlayer);
-        Assert.False(view.DryRun);
     }
 
     [Fact]
@@ -337,7 +334,6 @@ public sealed class ShopperRunStatusTests
     [Theory]
     [InlineData("revision")]
     [InlineData("known")]
-    [InlineData("dryRun")]
     [InlineData("paused")]
     [InlineData("terminal")]
     [InlineData("needsPlayer")]

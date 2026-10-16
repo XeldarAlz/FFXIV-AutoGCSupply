@@ -37,7 +37,6 @@ internal static class TodayBuilder
             Rows = rows,
             Totals = totals,
             Shopper = inputs.Shopper,
-            ShopperDryRun = shopperAvailable && inputs.ShopperDryRun,
             Pricing = pricing,
             SpendCap = inputs.SpendCap,
             SuggestedSpendCap = SpendCapRule.Suggest(totals.EstimatedSpend),

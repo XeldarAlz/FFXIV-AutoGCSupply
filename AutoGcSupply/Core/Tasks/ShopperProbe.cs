@@ -9,6 +9,6 @@ internal static class ShopperProbe
     public static ShopperState Read()
     {
         var api = AutoShopperApi.Instance;
-        return ShopperStateRule.Classify(ExternalPlugins.IsInstalled(ExternalPlugin.AutoShopper), api.GatesPresent(), api.ApiVersion());
+        return ShopperStateRule.Classify(ExternalPlugins.IsInstalled(ExternalPlugin.AutoShopper), api.GatesMatch(), api.ApiVersion());
     }
 }

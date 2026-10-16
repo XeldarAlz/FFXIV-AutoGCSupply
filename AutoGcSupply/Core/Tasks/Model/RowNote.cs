@@ -27,6 +27,5 @@ internal enum RowNote : byte
     NotOffered,
     HandingIn,
     HandedIn,
-    WouldHandIn,
     Unconfirmed,
 }

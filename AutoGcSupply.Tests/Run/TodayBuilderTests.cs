@@ -141,10 +141,9 @@ public sealed class TodayBuilderTests
     [Fact]
     public void AutoShopperMissingMakesPricingUnavailable()
     {
-        var model = Build(Inputs() with { Shopper = ShopperState.Missing, ShopperDryRun = true });
+        var model = Build(Inputs() with { Shopper = ShopperState.Missing });
 
         Assert.Equal(PricingState.Unavailable, model.Pricing);
-        Assert.False(model.ShopperDryRun);
         Assert.Equal(StartBlock.ShopperNeeded, model.StartBlock);
     }
 
@@ -166,12 +165,6 @@ public sealed class TodayBuilderTests
         Assert.Equal(0, model.Totals.ToBuy);
         Assert.Equal(0, model.Totals.EstimatedSpend);
         Assert.Equal((StartBlock)expected, model.StartBlock);
-    }
-
-    [Fact]
-    public void DryRunMirrorsAnAvailableAutoShopper()
-    {
-        Assert.True(Build(Inputs() with { ShopperDryRun = true }).ShopperDryRun);
     }
 
     [Fact]
@@ -197,7 +190,6 @@ public sealed class TodayBuilderTests
         OwnedBySlot = ImmutableArray.Create(new OwnedCount[SupplyClasses.Count]),
         Settings = new DecisionSettings(false, true, SupplyQualityPolicy.Automatic, 25, ClassMask.None),
         Shopper = ShopperState.Available,
-        ShopperDryRun = false,
         SpendCap = 100_000,
         SetupReady = true,
         Running = false,

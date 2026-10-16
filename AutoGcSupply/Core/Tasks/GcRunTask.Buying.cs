@@ -216,9 +216,6 @@ internal sealed partial class GcRunTask
     {
         lastView = view;
         session.GilSpent = view.ConfirmedSpend;
-        session.DryRun = view.DryRun;
-        session.ShopperDryRun = view.DryRun;
-        session.Tracker.SetDryRun(view.DryRun);
         session.Tracker.SetShopper(view.Status, view.ConfirmedSpend, view.Paused);
         if (!session.StopRequested)
         {

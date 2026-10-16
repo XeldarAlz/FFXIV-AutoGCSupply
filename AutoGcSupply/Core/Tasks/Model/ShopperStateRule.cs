@@ -4,14 +4,14 @@ namespace AutoGcSupply.Core.Tasks.Model;
 
 internal static class ShopperStateRule
 {
-    public static ShopperState Classify(bool installed, bool gatesPresent, int apiVersion)
+    public static ShopperState Classify(bool installed, bool gatesMatch, int apiVersion)
     {
         if (apiVersion > ShopperContract.ApiVersion)
         {
             return ShopperState.Newer;
         }
 
-        if (gatesPresent && apiVersion == ShopperContract.ApiVersion)
+        if (gatesMatch && apiVersion == ShopperContract.ApiVersion)
         {
             return ShopperState.Available;
         }

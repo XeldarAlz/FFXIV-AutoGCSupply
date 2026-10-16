@@ -37,7 +37,6 @@ internal static class RunPanel
     private const float RowClassIconSize = 22f;
     private const float RowItemIconSize = 24f;
     private const float RowStateColumn = 18f;
-    private const float NoteGap = 6f;
     private const float QuantityGap = 6f;
     private const int StepCount = 6;
     private const int FinishingStep = 5;
@@ -78,10 +77,6 @@ internal static class RunPanel
 
         Styling.VSpace(SectionGap);
         DrawStepRail(run, running);
-        if (run.DryRun)
-        {
-            DrawNote(FontAwesomeIcon.Flask, Loc.T(L.Running.DryRunBanner), Styling.AccentBlue, Styling.AccentBlueSoft);
-        }
 
         if (run.NeedsPlayer != NeedsPlayerReason.None)
         {
@@ -138,11 +133,6 @@ internal static class RunPanel
         var statusX = origin.X + radius * 2f + 12f * scale;
         TextDraw.SmallCaps(status, new Vector2(statusX, midY - statusSize.Y * 0.5f), Styling.TextSecondary);
         var statusEnd = statusX + statusSize.X;
-        if (run.DryRun)
-        {
-            statusEnd += HeaderFooterGap * scale * 0.5f;
-            statusEnd += Badge.DrawLeft(drawList, Loc.T(L.Running.DryRunBadge), Styling.AccentBlue, statusEnd, midY);
-        }
 
         if (today.Header.GrandCompany != 0)
         {
@@ -349,30 +339,6 @@ internal static class RunPanel
         drawList.AddCircle(center, radius, Paint.Col(Styling.WithAlpha(Styling.BorderDim, 0.9f)), 0, 1.4f * scale);
     }
 
-    private static void DrawNote(FontAwesomeIcon icon, string text, Vector4 iconColor, Vector4 textColor)
-    {
-        var scale = ImGuiHelpers.GlobalScale;
-        Styling.VSpace(NoteGap);
-        var origin = ImGui.GetCursorScreenPos();
-        var width = ImGui.GetContentRegionAvail().X;
-        var padX = PadX * scale;
-        using (Fonts.PushCaption())
-        {
-            var lineHeight = ImGui.GetTextLineHeight();
-            var iconSize = TextDraw.IconSize(icon);
-            TextDraw.Icon(icon, new Vector2(origin.X + padX, origin.Y + (lineHeight - iconSize.Y) * 0.5f), iconColor);
-            var textX = origin.X + padX + iconSize.X + 8f * scale;
-            var shown = TextDraw.Truncate(text, origin.X + width - textX);
-            TextDraw.At(shown, new Vector2(textX, origin.Y), textColor);
-            if (!ReferenceEquals(shown, text) && Hit.HoveringRect(origin, origin + new Vector2(width, lineHeight)))
-            {
-                Tooltip.Show(text);
-            }
-
-            ImGui.Dummy(new Vector2(width, lineHeight));
-        }
-    }
-
     private static void DrawShopperCard(RunModel run)
     {
         var scale = ImGuiHelpers.GlobalScale;
@@ -389,9 +355,7 @@ internal static class RunPanel
         drawList.AddCircleFilled(iconCenter, iconBox * 0.5f, Paint.Col(Styling.WithAlpha(Styling.AccentBlue, 0.16f)));
         TextDraw.IconCentered(FontAwesomeIcon.ShoppingCart, iconCenter, Styling.AccentBlueSoft);
 
-        var spent = spentText.Get(run.DryRun ? -run.ConfirmedSpend - 1 : run.ConfirmedSpend, static key => key < 0
-            ? Loc.T(L.Running.ShopperWouldSpend, Formatting.Gil(-key - 1))
-            : Loc.T(L.Running.ShopperSpent, Formatting.Gil(key)));
+        var spent = spentText.Get(run.ConfirmedSpend, static key => Loc.T(L.Running.ShopperSpent, Formatting.Gil(key)));
         var spentWidth = TextDraw.Measure(spent).X;
         TextDraw.At(spent, new Vector2(end.X - padX - spentWidth, midY - ImGui.GetTextLineHeight() * 0.5f), Styling.AccentMintSoft);
 

@@ -8,7 +8,6 @@ internal readonly struct RunStatusResponseJson
     public string? RunId { get; init; }
     public bool? Known { get; init; }
     public string? CallerRunId { get; init; }
-    public bool? DryRun { get; init; }
 
     [JsonConverter(typeof(ShopperNameConverter))]
     public string? Phase { get; init; }

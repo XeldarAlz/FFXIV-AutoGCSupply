@@ -8,8 +8,8 @@ namespace AutoGcSupply.Core.Shopper;
 internal sealed class AutoShopperApi
 {
     private const string GatePrefix = "AutoShopper.Api.";
+    private const string RemovedDryRunGate = GatePrefix + "DryRun";
     private const string ApiVersionFailed = GcSupplyConstants.LogPrefix + " Auto Shopper ApiVersion failed";
-    private const string DryRunFailed = GcSupplyConstants.LogPrefix + " Auto Shopper DryRun failed";
     private const string QuoteStartFailed = GcSupplyConstants.LogPrefix + " Auto Shopper QuoteStart failed";
     private const string QuoteResultFailed = GcSupplyConstants.LogPrefix + " Auto Shopper QuoteResult failed";
     private const string StartRunFailed = GcSupplyConstants.LogPrefix + " Auto Shopper StartRun failed";
@@ -19,38 +19,33 @@ internal sealed class AutoShopperApi
     private static AutoShopperApi? instance;
 
     private readonly ICallGateSubscriber<int> apiVersion;
-    private readonly ICallGateSubscriber<bool> dryRun;
     private readonly ICallGateSubscriber<string, bool> stopRun;
+    private readonly ICallGateSubscriber<bool> removedDryRun;
     private readonly JsonGate quoteStart;
     private readonly JsonGate quoteResult;
     private readonly JsonGate startRun;
     private readonly JsonGate runStatus;
     private readonly Func<int> apiVersionCall;
-    private readonly Func<bool> dryRunCall;
     private readonly ShopperRunStatusCache runStatusCache = new();
 
     private AutoShopperApi()
     {
         var pluginInterface = Svc.PluginInterface;
         apiVersion = pluginInterface.GetIpcSubscriber<int>(GatePrefix + "ApiVersion");
-        dryRun = pluginInterface.GetIpcSubscriber<bool>(GatePrefix + "DryRun");
         stopRun = pluginInterface.GetIpcSubscriber<string, bool>(GatePrefix + "StopRun");
+        removedDryRun = pluginInterface.GetIpcSubscriber<bool>(RemovedDryRunGate);
         quoteStart = new JsonGate(pluginInterface.GetIpcSubscriber<string, string>(GatePrefix + "QuoteStart"), QuoteStartFailed);
         quoteResult = new JsonGate(pluginInterface.GetIpcSubscriber<string, string>(GatePrefix + "QuoteResult"), QuoteResultFailed);
         startRun = new JsonGate(pluginInterface.GetIpcSubscriber<string, string>(GatePrefix + "StartRun"), StartRunFailed);
         runStatus = new JsonGate(pluginInterface.GetIpcSubscriber<string, string>(GatePrefix + "RunStatus"), RunStatusFailed);
 
         apiVersionCall = apiVersion.InvokeFunc;
-        dryRunCall = dryRun.InvokeFunc;
     }
 
     public static AutoShopperApi Instance => instance ??= new AutoShopperApi();
 
     public int ApiVersion()
         => IpcGate.Invoke(apiVersion.HasFunction, apiVersionCall, 0, ApiVersionFailed);
-
-    public bool DryRun(bool whenUnknown)
-        => IpcGate.Invoke(dryRun.HasFunction, dryRunCall, whenUnknown, DryRunFailed);
 
     public ShopperAcceptance QuoteStart(ReadOnlySpan<ShopperQuoteLine> lines)
     {
@@ -83,15 +78,15 @@ internal sealed class AutoShopperApi
     public bool StopRun(string runId)
         => IpcGate.Invoke(stopRun.HasFunction, () => stopRun.InvokeFunc(runId), false, StopRunFailed);
 
-    public bool GatesPresent()
+    public bool GatesMatch()
     {
         return apiVersion.HasFunction
-            && dryRun.HasFunction
             && quoteStart.HasFunction
             && quoteResult.HasFunction
             && startRun.HasFunction
             && runStatus.HasFunction
-            && stopRun.HasFunction;
+            && stopRun.HasFunction
+            && !removedDryRun.HasFunction;
     }
 
     private static void WarnUnreadable(ShopperReply reply, string gate)

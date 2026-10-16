@@ -22,7 +22,7 @@ public sealed class HandInPlanTests
         progress[0] = progress[0].With(RowRunState.Bought, RowNote.Bought);
         OwnedCount[] owned = [new(5, 1), new(3, 0), new(9, 4)];
 
-        var handIn = HandInPlan.Build(plan, progress, owned, purchasesWereDry: false);
+        var handIn = HandInPlan.Build(plan, progress, owned);
 
         Assert.Equal(new HandInTarget[]
         {
@@ -43,7 +43,7 @@ public sealed class HandInPlanTests
         ];
         var progress = RunPlanRules.Initial(plan);
 
-        var handIn = HandInPlan.Build(plan, progress, [new(4, 0), new(4, 0)], purchasesWereDry: false);
+        var handIn = HandInPlan.Build(plan, progress, [new(4, 0), new(4, 0)]);
 
         Assert.Single(handIn.Targets);
         Assert.Equal(RowNote.NotInBags, progress[1].Note);
@@ -60,7 +60,7 @@ public sealed class HandInPlanTests
         var progress = RunPlanRules.Initial(plan);
         progress[0] = RowProgress.Of(RowRunState.Delivered, RowNote.HandedIn);
 
-        var handIn = HandInPlan.Build(plan, progress, [new(9, 9), new(99, 0)], purchasesWereDry: false);
+        var handIn = HandInPlan.Build(plan, progress, [new(9, 9), new(99, 0)]);
 
         Assert.Empty(handIn.Targets);
         Assert.Equal(RowRunState.Delivered, progress[0].State);
@@ -68,7 +68,7 @@ public sealed class HandInPlanTests
     }
 
     [Fact]
-    public void RowsNotBoughtKeepTheirReasonAndDryPurchasesWouldBeHandedIn()
+    public void RowsNotBoughtKeepTheirReasonAndBoughtRowsMissingFromTheBagsAreSkipped()
     {
         RowDecision[] plan =
         [
@@ -79,11 +79,11 @@ public sealed class HandInPlanTests
         progress[0] = progress[0].With(RowRunState.NotBought, RowNote.NoStock);
         progress[1] = progress[1].With(RowRunState.Bought, RowNote.Bought);
 
-        var handIn = HandInPlan.Build(plan, progress, [default, default], purchasesWereDry: true);
+        var handIn = HandInPlan.Build(plan, progress, [default, default]);
 
         Assert.Empty(handIn.Targets);
         Assert.Equal(RowProgress.Of(RowRunState.NotBought, RowNote.NoStock), progress[0]);
-        Assert.Equal(RowProgress.Of(RowRunState.WouldDeliver, RowNote.WouldHandIn), progress[1]);
+        Assert.Equal(RowProgress.Of(RowRunState.Skipped, RowNote.NotInBags), progress[1]);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class HandInPlanTests
         var weaver = decisions[SupplyClasses.DisplayIndex(SupplyClasses.Weaver)];
         RowDecision[] plan = [weaver];
 
-        var handIn = HandInPlan.Build(plan, RunPlanRules.Initial(plan), [new(0, 1)], purchasesWereDry: false);
+        var handIn = HandInPlan.Build(plan, RunPlanRules.Initial(plan), [new(0, 1)]);
 
         Assert.Equal(ItemQuality.High, weaver.ChosenQuality);
         Assert.Equal(848, Assert.Single(handIn.Targets).SealReward);

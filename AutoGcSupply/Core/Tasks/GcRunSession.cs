@@ -42,12 +42,6 @@ internal sealed class GcRunSession
 
     public bool HandInStarted { get; set; }
 
-    public bool DryRun { get; set; }
-
-    public bool ShopperDryRun { get; set; }
-
-    public bool StartedDry { get; init; }
-
     public long GilSpent { get; set; }
 
     public RunEnd End { get; private set; } = RunEnd.None;

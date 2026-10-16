@@ -34,7 +34,6 @@ internal static class RunText
         RowNote.NotOffered => Loc.T(L.Run.RowNotOffered),
         RowNote.HandingIn => Loc.T(L.Run.RowHandingIn),
         RowNote.HandedIn => Loc.T(L.Run.RowHandedIn),
-        RowNote.WouldHandIn => Loc.T(L.Run.RowWouldHandIn),
         RowNote.Unconfirmed => Loc.T(L.Run.RowUnconfirmed),
         _ => string.Empty,
     };
@@ -74,8 +73,8 @@ internal static class RunText
 
     public static string Ended(RunEnd end, in RunSummary summary, string failure) => end switch
     {
-        RunEnd.Completed => Loc.T(summary.DryRun ? L.Run.StatusCompletedDry : L.Run.StatusCompleted),
-        RunEnd.CompletedPartial => Loc.T(summary.DryRun ? L.Run.StatusPartialDry : L.Run.StatusPartial, summary.Delivered, summary.Planned),
+        RunEnd.Completed => Loc.T(L.Run.StatusCompleted),
+        RunEnd.CompletedPartial => Loc.T(L.Run.StatusPartial, summary.Delivered, summary.Planned),
         RunEnd.NeedsPlayer => Loc.T(L.Run.StatusNeedsPlayer),
         RunEnd.Failed => failure,
         _ => Loc.T(L.Run.StatusStopped),

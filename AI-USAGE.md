@@ -32,7 +32,7 @@ The human gates, in order, none of them skippable:
 
 1. **The plan comes first.** What to build, and the constraints it has to respect, are written before any agent runs.
 2. **The diff is read.** Output is reviewed before it lands, not after users find the problem.
-3. **It is tested in the game before release.** On a real client, at least one dry run end to end with Auto Shopper's dry run on, plus one supervised real hand-in when the change touches the run, the buying or the hand-in. A clean `dotnet build` and a green `dotnet test` do not replace it.
+3. **It is tested in the game before release.** On a real client, at least one supervised run of a single request end to end, under a small run spend cap when it buys. A clean `dotnet build` and a green `dotnet test` do not replace it.
 4. **Ownership transfers.** Every merged line is the maintainer's to defend, explain, and fix. "The AI did it" is not an answer to why something is written the way it is.
 5. **Feedback is taken on its merits.** AI-assisted work invites sharper review, from users and from any reviewer, and that scrutiny is earned rather than unfair. The answer to a review comment is a fix or a reason, never a defense of the tooling.
 
@@ -40,7 +40,7 @@ The human gates, in order, none of them skippable:
 
 Nothing in this doc lowers a standard. Code produced with AI assistance is held to exactly the bar every other change meets: the CONTRIBUTING.md checklist, the .editorconfig style, one concern per pull request, and `[AGCS]` log lines that make every step of a run auditable. A reviewer cannot tell which lines came from where, and that is the point.
 
-The one thing AI use does change is where the verification effort goes. AI gets Dalamud and FFXIVClientStructs APIs wrong often enough that any call into either is suspect until it has run in game, and the supply list, the officer's windows and the reward window are read straight from game memory. The IPC calls into vnavmesh and into Auto Shopper's Buying API, with the helpers listed in `/gcsupply deps`, deserve the same suspicion: a call that compiles says nothing about whether the other plugin still answers it the same way. The hand-in deserves the most: the officer's menu is chosen by its text, rows are matched by item and class, the reward window is checked before Deliver, the only prompt answered Yes is the game's HQ trade prompt on an HQ row, and every delivery is confirmed by bags and seals. Buying stays with Auto Shopper, whose dry run covers the whole run, so a run can be watched before it spends or hands in anything.
+The one thing AI use does change is where the verification effort goes. AI gets Dalamud and FFXIVClientStructs APIs wrong often enough that any call into either is suspect until it has run in game, and the supply list, the officer's windows and the reward window are read straight from game memory. The IPC calls into vnavmesh and into Auto Shopper's Buying API, with the helpers listed in `/gcsupply deps`, deserve the same suspicion: a call that compiles says nothing about whether the other plugin still answers it the same way. The hand-in deserves the most: the officer's menu is chosen by its text, rows are matched by item and class, the reward window is checked before Deliver, the only prompt answered Yes is the game's HQ trade prompt on an HQ row, and every delivery is confirmed by bags and seals. Buying stays with Auto Shopper, and a test run of one cheap request under a small run spend cap keeps what a mistake can cost small.
 
 ## If you contribute
 
