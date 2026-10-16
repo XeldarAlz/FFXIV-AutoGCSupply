@@ -3,7 +3,7 @@
   "Name": "Auto GC Supply",
   "InternalName": "AutoGcSupply",
   "Punchline": "Grand Company supply and provisioning, delivered for you.",
-  "Description": "Reads the day's Grand Company supply and provisioning requests, buys what is missing through Auto Shopper, then travels to your Personnel Officer and hands in the ones you chose, confirming every delivery.",
+  "Description": "Delivers your Grand Company supply and provisioning requests for you: reads the day's requests, buys what is missing through Auto Shopper, then travels to your Personnel Officer and hands in the ones you chose, confirming every delivery.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/XeldarAlz/FFXIV-AutoGCSupply",
   "IconUrl": "https://raw.githubusercontent.com/XeldarAlz/FFXIV-AutoGCSupply/master/AutoGcSupply/Images/Icon.png",
