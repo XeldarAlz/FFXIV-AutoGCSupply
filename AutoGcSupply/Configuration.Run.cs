@@ -24,12 +24,21 @@ public sealed partial class Configuration
 
     public Dictionary<ulong, ushort> ExcludedClassesByCharacter { get; set; } = [];
 
+    // Lets a finished run hand off to other plugins, like "/li home" or "/ays m" for AutoRetainer; one command per line.
+    public string PostRunCommands { get; set; } = string.Empty;
+
     private bool RepairRunSettings()
     {
         var changed = false;
         if (ExcludedClassesByCharacter is null)
         {
             ExcludedClassesByCharacter = [];
+            changed = true;
+        }
+
+        if (PostRunCommands is null)
+        {
+            PostRunCommands = string.Empty;
             changed = true;
         }
 

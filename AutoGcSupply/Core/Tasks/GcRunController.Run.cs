@@ -1,3 +1,4 @@
+using AutoGcSupply.Core.Game;
 using AutoGcSupply.Core.Ipc;
 using AutoGcSupply.Core.Localization;
 using AutoGcSupply.Core.Shopper;
@@ -234,6 +235,23 @@ internal sealed partial class GcRunController
         }
 
         Settle(active);
+        SendPostRunCommands(active);
+    }
+
+    private void SendPostRunCommands(GcRunSession active)
+    {
+        if (string.IsNullOrWhiteSpace(configuration.PostRunCommands))
+        {
+            return;
+        }
+
+        if (active.End != RunEnd.Completed || active.StopRequested)
+        {
+            RunLog.Info($"Post-run commands skipped: the run ended {active.End}, not with every row delivered.");
+            return;
+        }
+
+        ChatCommands.Dispatch(configuration.PostRunCommands);
     }
 
     private void EndNow(GcRunSession active, string reason)

@@ -34,6 +34,7 @@ internal static class RunSettings
         DrawRequestsGroup(configuration);
         DrawBuyingGroup(configuration);
         DrawHandInGroup(configuration);
+        PostRunSettings.Draw(configuration);
     }
 
     private static void DrawRequestsGroup(Configuration configuration)
