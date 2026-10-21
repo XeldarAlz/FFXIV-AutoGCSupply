@@ -338,6 +338,7 @@
   "changelog.new": "Nouveau",
   "changelog.changes.one": "{0} changement",
   "changelog.changes.other": "{0} changements",
+  "changelog.r1005.1": "Correction : les longues sessions se terminaient par un plantage ou par un bouton Automatiser qui ne répondait plus ; les déplacements n'installent plus de nouveaux hooks du jeu à chaque fois",
   "changelog.r1004.1": "Correction : avec Auto Shopper 1.2.0.0 ou plus récent, Automatiser restait désactivé et demandait de le mettre à jour ; Auto Shopper 1.2.0.0 ou plus récent est désormais requis",
   "changelog.r1004.2": "La simulation disparaît, comme dans Auto Shopper : Automatiser achète et remet toujours pour de vrai, jusqu'au plafond de dépense de la tournée ; vérifiez le plafond avant votre prochaine tournée",
   "changelog.r1004.3": "L'historique retire les lignes des anciennes simulations, qui n'ont rien remis",

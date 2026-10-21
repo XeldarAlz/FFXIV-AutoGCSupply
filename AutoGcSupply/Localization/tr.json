@@ -338,6 +338,7 @@
   "changelog.new": "Yeni",
   "changelog.changes.one": "{0} değişiklik",
   "changelog.changes.other": "{0} değişiklik",
+  "changelog.r1005.1": "Düzeltildi: uzun oturumlar bir çökmeyle ya da çalışmayı bırakan bir Otomatikleştir düğmesiyle bitiyordu; hareket etmek artık her seferinde yeni oyun kancaları kurmuyor",
   "changelog.r1004.1": "Düzeltildi: Auto Shopper 1.2.0.0 veya sonrasıyla Otomatikleştir kapalı kalıyor ve güncelleme istiyordu; artık Auto Shopper 1.2.0.0 veya sonrası gerekiyor",
   "changelog.r1004.2": "Auto Shopper'da olduğu gibi deneme turu kaldırıldı: Otomatikleştir her zaman tur harcama sınırına kadar gerçekten satın alır ve teslim eder, bu yüzden sonraki turdan önce sınırı kontrol edin",
   "changelog.r1004.3": "Geçmiş, hiçbir şey teslim etmeyen eski deneme turlarının satırlarını kaldırır",

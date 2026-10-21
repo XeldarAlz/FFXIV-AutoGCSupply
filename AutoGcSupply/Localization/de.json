@@ -338,6 +338,7 @@
   "changelog.new": "Neu",
   "changelog.changes.one": "{0} Änderung",
   "changelog.changes.other": "{0} Änderungen",
+  "changelog.r1005.1": "Behoben: Lange Sitzungen endeten mit einem Absturz oder einer Automatisieren-Schaltfläche, die nicht mehr reagierte; Bewegungen richten nicht mehr jedes Mal neue Spiel-Hooks ein",
   "changelog.r1004.1": "Behoben: Mit Auto Shopper 1.2.0.0 oder neuer blieb Automatisieren aus und verlangte ein Update; Auto Shopper 1.2.0.0 oder neuer ist jetzt erforderlich",
   "changelog.r1004.2": "Den Probelauf gibt es nicht mehr, wie in Auto Shopper: Automatisieren kauft und gibt immer echt ab, bis zum Ausgabelimit des Laufs. Prüfe das Limit vor deinem nächsten Lauf",
   "changelog.r1004.3": "Der Verlauf entfernt die Einträge früherer Probeläufe, die nichts abgegeben haben",

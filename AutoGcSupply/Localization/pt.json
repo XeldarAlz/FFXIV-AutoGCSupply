@@ -338,6 +338,7 @@
   "changelog.new": "Novo",
   "changelog.changes.one": "{0} mudança",
   "changelog.changes.other": "{0} mudanças",
+  "changelog.r1005.1": "Corrigido: sessões longas terminavam em um travamento ou em um botão Automatizar que parava de funcionar; mover-se não instala mais novos hooks do jogo a cada vez",
   "changelog.r1004.1": "Corrigido: com o Auto Shopper 1.2.0.0 ou posterior, Automatizar ficava desligado e pedia para atualizá-lo; agora é necessário o Auto Shopper 1.2.0.0 ou posterior",
   "changelog.r1004.2": "A simulação deixou de existir, como no Auto Shopper: Automatizar sempre compra e entrega de verdade, até o limite de gastos da rodada, então confira o limite antes da próxima rodada",
   "changelog.r1004.3": "O histórico remove as linhas de simulações anteriores, que não entregaram nada",

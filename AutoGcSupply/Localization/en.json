@@ -338,6 +338,7 @@
   "changelog.new": "New",
   "changelog.changes.one": "{0} change",
   "changelog.changes.other": "{0} changes",
+  "changelog.r1005.1": "Fixed long sessions ending in a crash or an Automate button that stops working; moving around no longer sets up new game hooks each time",
   "changelog.r1004.1": "Fixed Automate staying off with Auto Shopper 1.2.0.0 or later and asking you to update it; Auto Shopper 1.2.0.0 or later is now required",
   "changelog.r1004.2": "Dry run is gone, as it is in Auto Shopper: Automate always buys and hands in for real, up to the run spend cap, so check the cap before your next run",
   "changelog.r1004.3": "History drops the rows of past dry runs, which handed nothing in",

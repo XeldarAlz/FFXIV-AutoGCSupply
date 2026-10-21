@@ -338,6 +338,7 @@
   "changelog.new": "Nuevo",
   "changelog.changes.one": "{0} cambio",
   "changelog.changes.other": "{0} cambios",
+  "changelog.r1005.1": "Corregido: las sesiones largas terminaban en un cierre del juego o en un botón Automatizar que dejaba de funcionar; moverse ya no instala nuevos hooks del juego cada vez",
   "changelog.r1004.1": "Corregido: con Auto Shopper 1.2.0.0 o posterior, Automatizar seguía desactivado y pedía actualizarlo; ahora se requiere Auto Shopper 1.2.0.0 o posterior",
   "changelog.r1004.2": "El simulacro desaparece, como en Auto Shopper: Automatizar siempre compra y entrega de verdad, hasta el límite de gasto de la ronda, así que revisa el límite antes de tu próxima ronda",
   "changelog.r1004.3": "El historial elimina las filas de simulacros anteriores, que no entregaron nada",
